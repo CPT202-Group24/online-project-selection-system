@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Project Selection System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav>
+    <span>Project Selection System</span>
+    <span sec:authentication="name"></span>
+    <form th:action="@{/logout}" method="post" style="display:inline;">
+        <button type="submit" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:14px;">Logout</button>
+    </form>
+</nav>
+<div class="container">
+    <h2>Welcome</h2>
+    <p>System is running. Each module is under development.</p>
+</div>
+</body>
+</html>
