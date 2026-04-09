@@ -16,6 +16,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
 
+// unique constraint prevents a student from applying to the same project twice
 @Entity
 @Table(name = "applications",
         uniqueConstraints = @UniqueConstraint(columnNames = {"student_id", "project_id"}))

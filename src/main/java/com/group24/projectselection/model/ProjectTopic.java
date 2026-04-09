@@ -27,6 +27,7 @@ public class ProjectTopic {
     @JoinColumn(name = "teacher_id", nullable = false)
     private User teacher;
 
+    // category is optional - teacher can publish without assigning one
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
