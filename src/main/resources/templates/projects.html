@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Project List</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            padding: 28px;
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 30px;
+            font-weight: 700;
+        }
+
+        .message {
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .message.success {
+            background: #ecfdf3;
+            color: #067647;
+            border: 1px solid #abefc6;
+        }
+
+        .message.error {
+            background: #fef3f2;
+            color: #b42318;
+            border: 1px solid #fecdca;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .search-form input[type="text"] {
+            width: 260px;
+            padding: 10px 12px;
+            border: 1px solid #d0d5dd;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-form input[type="text"]:focus {
+            border-color: #84a9ff;
+            box-shadow: 0 0 0 3px rgba(132,169,255,0.15);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .btn-disabled {
+            background: #e5e7eb;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        thead {
+            background: #f9fafb;
+        }
+
+        th, td {
+            padding: 14px 12px;
+            text-align: left;
+            vertical-align: top;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+        }
+
+        th {
+            font-weight: 700;
+            color: #374151;
+            white-space: nowrap;
+        }
+
+        td {
+            color: #4b5563;
+        }
+
+        .title-cell {
+            min-width: 180px;
+        }
+
+        .desc-cell {
+            max-width: 260px;
+            line-height: 1.5;
+        }
+
+        .skill-cell {
+            max-width: 220px;
+            line-height: 1.5;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            background: #eef2ff;
+            color: #3730a3;
+        }
+
+        .draft-badge {
+            display: inline-block;
+            margin-left: 8px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            background: #ef4444;
+            color: white;
+        }
+
+        .keyword-tag {
+            display: inline-block;
+            padding: 4px 8px;
+            margin: 2px 4px 2px 0;
+            border-radius: 999px;
+            border: 1px solid #facc15;
+            background: #fef9c3;
+            color: #854d0e;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .keyword-tag.active {
+            background: #ef4444;
+            border-color: #ef4444;
+            color: white;
+        }
+
+        .action-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .action-group form {
+            margin: 0;
+        }
+
+        .empty-message {
+            margin-top: 16px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            background: #fff7ed;
+            color: #c2410c;
+            font-weight: 600;
+            border: 1px solid #fed7aa;
+        }
+
+        .footer-link {
+            margin-top: 20px;
+        }
+
+        .footer-link a {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="page-card">
+        <h1>Project List</h1>
+
+        <div th:if="${successMessage}" class="message success">
+            <span th:text="${successMessage}"></span>
+        </div>
+
+        <div th:if="${errorMessage}" class="message error">
+            <span th:text="${errorMessage}"></span>
+        </div>
+
+        <div class="top-bar">
+            <form method="get" action="/projects" class="search-form">
+                <input type="text" name="keyword" placeholder="Search by keyword" th:value="${keyword}">
+                <button type="submit" class="btn btn-secondary">Search</button>
+            </form>
+
+            <a href="/projects/new" class="btn btn-primary">Create New Project</a>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Teacher ID</th>
+                    <th>Category ID</th>
+                    <th>Description</th>
+                    <th>Required Skills</th>
+                    <th>Keywords</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="project : ${projects}">
+                    <td th:text="${project.id}"></td>
+
+                    <td class="title-cell">
+                        <span th:text="${project.title != null and !project.title.isEmpty() ? project.title : 'Untitled Draft'}"></span>
+                        <span th:if="${project.status.name() == 'draft'}" class="draft-badge">Draft</span>
+                    </td>
+
+                    <td th:text="${project.teacher != null ? project.teacher.id : 'N/A'}"></td>
+                    <td th:text="${project.category != null ? project.category.id : 'N/A'}"></td>
+
+                    <td class="desc-cell" th:text="${project.description}"></td>
+                    <td class="skill-cell" th:text="${project.requiredSkills}"></td>
+
+                    <td>
+                        <span th:if="${project.keywords != null and !project.keywords.isEmpty()}">
+                            <span th:each="kw : ${#strings.arraySplit(project.keywords, ',')}"
+                                  th:text="${#strings.trim(kw)}"
+                                  th:classappend="${keyword != null and #strings.equalsIgnoreCase(#strings.trim(kw), keyword)} ? ' active' : ''"
+                                  class="keyword-tag">
+                            </span>
+                        </span>
+                    </td>
+
+                    <td>
+                        <span class="status-badge" th:text="${project.status}"></span>
+                    </td>
+
+                    <td>
+                        <div class="action-group">
+                            <a th:if="${project.teacher != null and project.teacher.id == currentTeacherId}"
+                               th:href="@{'/projects/' + ${project.id} + '/edit'}"
+                               class="btn btn-secondary">
+                                Edit
+                            </a>
+
+                            <button th:if="${project.teacher != null and project.teacher.id != currentTeacherId}"
+                                    type="button"
+                                    class="btn btn-disabled"
+                                    onclick="alert('You cannot modify this project');">
+                                Edit
+                            </button>
+
+                            <form th:if="${project.teacher != null and project.teacher.id == currentTeacherId and project.status.name() == 'unpublished'}"
+                                  th:action="@{'/projects/' + ${project.id} + '/delete'}"
+                                  method="post"
+                                  onsubmit="return confirm('Confirm Delete?');">
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+
+                            <button th:if="${project.teacher != null and project.teacher.id == currentTeacherId and project.status.name() != 'unpublished'}"
+                                    type="button"
+                                    class="btn btn-disabled"
+                                    onclick="alert('Published project topics cannot be deleted');">
+                                Delete
+                            </button>
+
+                            <button th:if="${project.teacher != null and project.teacher.id != currentTeacherId}"
+                                    type="button"
+                                    class="btn btn-disabled"
+                                    onclick="alert('You cannot modify this project');">
+                                Delete
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p th:if="${projects.isEmpty()}" class="empty-message">
+            There are no related projects
+        </p>
+
+        <div class="footer-link">
+            <a href="/dashboard">Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
