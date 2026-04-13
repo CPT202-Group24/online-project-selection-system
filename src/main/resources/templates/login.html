@@ -12,6 +12,9 @@
     <div th:if="${param.error}" class="alert alert-error">
         Invalid email or password.
     </div>
+    <div th:if="${param.registered}" class="alert alert-info">
+        Registration successful. You can sign in with your university email.
+    </div>
     <div th:if="${param.logout}" class="alert alert-info">
         You have been logged out.
     </div>
