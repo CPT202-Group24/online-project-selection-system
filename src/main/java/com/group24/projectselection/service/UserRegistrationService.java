@@ -12,7 +12,11 @@ import java.util.regex.Pattern;
 @Service
 public class UserRegistrationService {
 
-    private static final Pattern UNIVERSITY_EMAIL =
+    /** Student accounts use the student subdomain. */
+    private static final Pattern STUDENT_EMAIL =
+            Pattern.compile("(?i)^[a-z0-9._%+-]+@student\\.xjtlu\\.edu\\.cn$");
+    /** Staff (e.g. teacher) accounts use the main university domain. */
+    private static final Pattern STAFF_EMAIL =
             Pattern.compile("(?i)^[a-z0-9._%+-]+@xjtlu\\.edu\\.cn$");
 
     private final UserRepository userRepository;
@@ -23,15 +27,22 @@ public class UserRegistrationService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public boolean isValidUniversityEmail(String email) {
-        return StringUtils.hasText(email) && UNIVERSITY_EMAIL.matcher(email.trim()).matches();
+    public boolean isValidEmailForRole(String email, User.Role role) {
+        if (!StringUtils.hasText(email) || role == null) {
+            return false;
+        }
+        String trimmed = email.trim();
+        if (role == User.Role.student) {
+            return STUDENT_EMAIL.matcher(trimmed).matches();
+        }
+        return STAFF_EMAIL.matcher(trimmed).matches();
     }
 
     public boolean isValidRegistrationInput(String name, String email, String password, User.Role role) {
         if (!StringUtils.hasText(name) || !StringUtils.hasText(password)) {
             return false;
         }
-        if (!isValidUniversityEmail(email)) {
+        if (!isValidEmailForRole(email, role)) {
             return false;
         }
         return role != null && role != User.Role.admin;
