@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Category Management - Project Selection System</title>
+    <meta name="_csrf"        th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .page-container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
+            padding: 32px;
+            border-radius: 6px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .page-header h2 { margin: 0; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 32px;
+        }
+        th, td {
+            text-align: left;
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        th { background-color: #f0f0f0; font-weight: bold; }
+        tr:hover td { background-color: #fafafa; }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+        .badge-active   { background: #d4edda; color: #155724; }
+        .badge-inactive { background: #f8d7da; color: #721c24; }
+        .btn-delete {
+            background: none;
+            border: 1px solid #e74c3c;
+            color: #e74c3c;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .btn-delete:hover { background: #e74c3c; color: white; }
+        .form-row {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+        .form-row .form-group { margin-bottom: 0; flex: 1; min-width: 160px; }
+        .form-row button[type="submit"] {
+            width: auto;
+            padding: 8px 20px;
+            margin-top: 0;
+            white-space: nowrap;
+        }
+        #msg { min-height: 36px; }
+        .empty-hint { color: #999; font-size: 14px; text-align: center; padding: 24px 0; }
+    </style>
+</head>
+<body>
+<nav>
+    <span>Project Selection System</span>
+    <span>
+        <a th:href="@{/admin/dashboard}" style="margin-right:16px;">Dashboard</a>
+        <span sec:authentication="name"></span>
+    </span>
+    <form th:action="@{/logout}" method="post" style="display:inline;">
+        <button type="submit" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:14px;">Logout</button>
+    </form>
+</nav>
+
+<div class="page-container">
+    <div class="page-header">
+        <h2>Category Management</h2>
+    </div>
+
+    <div id="msg"></div>
+
+    <!-- Category list -->
+    <table id="category-table">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody id="category-tbody">
+        <tr><td colspan="5" class="empty-hint">Loading...</td></tr>
+        </tbody>
+    </table>
+
+    <!-- Add category form -->
+    <h3 style="margin-bottom:16px;">Add New Category</h3>
+    <form id="add-form" onsubmit="handleAdd(event)">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="cat-name">Name <span style="color:red">*</span></label>
+                <input type="text" id="cat-name" placeholder="e.g. Engineering" required>
+            </div>
+            <div class="form-group">
+                <label for="cat-desc">Description</label>
+                <input type="text" id="cat-desc" placeholder="Optional description">
+            </div>
+            <button type="submit">Add Category</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const csrfToken  = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+    function showMsg(text, type) {
+        const el = document.getElementById('msg');
+        el.innerHTML = `<div class="alert alert-${type}">${text}</div>`;
+        setTimeout(() => { el.innerHTML = ''; }, 4000);
+    }
+
+    function buildHeaders(isJson) {
+        const h = { [csrfHeader]: csrfToken };
+        if (isJson) h['Content-Type'] = 'application/json';
+        return h;
+    }
+
+    async function loadCategories() {
+        try {
+            const res = await fetch('/api/admin/categories', { headers: buildHeaders(false) });
+            const list = await res.json();
+            renderTable(list);
+        } catch (e) {
+            showMsg('Failed to load categories.', 'error');
+        }
+    }
+
+    function renderTable(list) {
+        const tbody = document.getElementById('category-tbody');
+        if (!list || list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="empty-hint">No categories yet. Add one below.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = list.map((c, i) => `
+            <tr id="row-${c.id}">
+                <td>${i + 1}</td>
+                <td><strong>${escHtml(c.name)}</strong></td>
+                <td>${escHtml(c.description || '—')}</td>
+                <td><span class="badge ${c.isActive ? 'badge-active' : 'badge-inactive'}">${c.isActive ? 'Active' : 'Inactive'}</span></td>
+                <td><button class="btn-delete" onclick="handleDelete(${c.id}, '${escHtml(c.name)}')">Delete</button></td>
+            </tr>
+        `).join('');
+    }
+
+    async function handleAdd(e) {
+        e.preventDefault();
+        const name = document.getElementById('cat-name').value.trim();
+        const desc = document.getElementById('cat-desc').value.trim();
+        if (!name) { showMsg('Category name is required.', 'error'); return; }
+
+        try {
+            const res = await fetch('/api/admin/categories', {
+                method: 'POST',
+                headers: buildHeaders(true),
+                body: JSON.stringify({ name, description: desc })
+            });
+            if (res.status === 201) {
+                document.getElementById('add-form').reset();
+                showMsg(`Category "${escHtml(name)}" created successfully.`, 'info');
+                loadCategories();
+            } else {
+                const data = await res.json();
+                showMsg(data.error || 'Failed to create category.', 'error');
+            }
+        } catch (e) {
+            showMsg('Network error. Please try again.', 'error');
+        }
+    }
+
+    async function handleDelete(id, name) {
+        if (!confirm(`Delete category "${name}"? This cannot be undone.`)) return;
+        try {
+            const res = await fetch(`/api/admin/categories/${id}`, {
+                method: 'DELETE',
+                headers: buildHeaders(false)
+            });
+            if (res.status === 204) {
+                showMsg(`Category "${escHtml(name)}" deleted.`, 'info');
+                loadCategories();
+            } else if (res.status === 404) {
+                showMsg('Category not found.', 'error');
+            } else {
+                showMsg('Failed to delete category.', 'error');
+            }
+        } catch (e) {
+            showMsg('Network error. Please try again.', 'error');
+        }
+    }
+
+    function escHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    loadCategories();
+</script>
+</body>
+</html>
