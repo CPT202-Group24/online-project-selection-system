@@ -27,7 +27,9 @@ public class HomeController {
         if (authentication == null || !authentication.isAuthenticated()) {
             return "redirect:/login";
         }
+
         String role = authentication.getAuthorities().iterator().next().getAuthority();
+
         return switch (role) {
             case "admin" -> "redirect:/admin/dashboard";
             case "teacher" -> "redirect:/teacher/dashboard";

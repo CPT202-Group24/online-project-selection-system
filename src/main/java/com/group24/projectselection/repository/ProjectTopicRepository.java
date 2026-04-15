@@ -16,5 +16,5 @@ public interface ProjectTopicRepository extends JpaRepository<ProjectTopic, Long
 
     Optional<ProjectTopic> findByIdAndTeacherId(Long id, Long teacherId);
 
-    List<ProjectTopic> findByKeywordsContainingIgnoreCase(String keyword);
+    //List<ProjectTopic> findByKeywordsContainingIgnoreCase(String keyword);
 }

@@ -56,7 +56,7 @@ public class ProjectTopic {
     private LocalDateTime updatedAt;
 
     public enum TopicStatus {
-        draft, unpublished, available, requested, agreed, closed, archived
+         unpublished, available, requested, agreed, closed, archived
     }
 
     public ProjectTopic() {

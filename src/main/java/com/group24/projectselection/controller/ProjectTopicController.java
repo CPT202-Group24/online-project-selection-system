@@ -5,129 +5,103 @@ import com.group24.projectselection.model.ProjectTopic;
 import com.group24.projectselection.model.User;
 import com.group24.projectselection.repository.ProjectTopicRepository;
 import com.group24.projectselection.repository.UserRepository;
+import com.group24.projectselection.service.ProjectTopicService;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestParam;
+
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 public class ProjectTopicController {
 
     private final ProjectTopicRepository projectTopicRepository;
     private final UserRepository userRepository;
+    private final ProjectTopicService projectTopicService;
 
     public ProjectTopicController(ProjectTopicRepository projectTopicRepository,
-                                  UserRepository userRepository) {
+                                  UserRepository userRepository,
+                                  ProjectTopicService projectTopicService) {
         this.projectTopicRepository = projectTopicRepository;
         this.userRepository = userRepository;
+        this.projectTopicService = projectTopicService;
     }
 
-    @GetMapping("/projects")
-
-    public String listProjects(@RequestParam(value = "keyword", required = false) String keyword,
+    @GetMapping("/teacher/projects")
+    public String listProjects(@RequestParam(value = "view", defaultValue = "my") String view,
+                               Authentication authentication,
                                Model model) {
 
-        List<ProjectTopic> projects;
-        Long currentTeacherId = 1L;
+        User currentUser = getCurrentUser(authentication);
+        Long currentTeacherId = currentUser.getId();
 
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            projects = projectTopicRepository.findByKeywordsContainingIgnoreCase(keyword.trim());
-        } else {
+        List<ProjectTopic> projects;
+
+        if ("all".equalsIgnoreCase(view)) {
             projects = projectTopicRepository.findAll();
+        } else {
+            projects = projectTopicRepository.findByTeacherId(currentTeacherId);
+            view = "my";
         }
 
         model.addAttribute("projects", projects);
         model.addAttribute("currentTeacherId", currentTeacherId);
-        model.addAttribute("keyword", keyword);
+        model.addAttribute("view", view);
 
         return "projects";
     }
-    @GetMapping("/projects/new")
+
+    @GetMapping("/teacher/projects/new")
     public String showCreateForm(Model model) {
         model.addAttribute("projectTopic", new ProjectTopic());
         return "project-form";
     }
 
-    @PostMapping("/projects")
+    @PostMapping("/teacher/projects")
     public String saveProject(@Valid @ModelAttribute("projectTopic") ProjectTopic projectTopic,
                               BindingResult bindingResult,
-                              @RequestParam("action") String action,
+                              Authentication authentication,
                               RedirectAttributes redirectAttributes) {
 
-        Long currentTeacherId = 1L;
+        User currentUser = getCurrentUser(authentication);
+        Long currentTeacherId = currentUser.getId();
 
-        if (bindingResult.hasErrors() && !"draft".equals(action)) {
+        if (bindingResult.hasErrors()) {
             return "project-form";
         }
 
         boolean isEdit = projectTopic.getId() != null;
 
-        if (isEdit) {
-            Optional<ProjectTopic> existingOptional =
-                    projectTopicRepository.findByIdAndTeacherId(projectTopic.getId(), currentTeacherId);
-
-            if (existingOptional.isEmpty()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "You cannot modify this project");
-                return "redirect:/projects";
-            }
-
-            ProjectTopic existingProject = existingOptional.get();
-
-            existingProject.setTitle(projectTopic.getTitle());
-            existingProject.setDescription(projectTopic.getDescription());
-            existingProject.setRequiredSkills(projectTopic.getRequiredSkills());
-            existingProject.setKeywords(projectTopic.getKeywords());
-            existingProject.setMaxStudents(projectTopic.getMaxStudents());
-
-            if ("draft".equals(action)) {
-                existingProject.setStatus(ProjectTopic.TopicStatus.draft);
-            } else {
-                if (existingProject.getStatus() == ProjectTopic.TopicStatus.draft) {
-                    existingProject.setStatus(ProjectTopic.TopicStatus.unpublished);
-                }
-            }
-
-            projectTopicRepository.save(existingProject);
-            if ("draft".equals(action)) {
-                redirectAttributes.addFlashAttribute("successMessage", "Draft saved successfully");
-            } else {
+        try {
+            if (isEdit) {
+                projectTopicService.updateProjectTopic(projectTopic, currentTeacherId);
                 redirectAttributes.addFlashAttribute("successMessage", "Save successfully");
-            }
-        } else {
-            User teacher = userRepository.findById(currentTeacherId).orElseThrow();
-            projectTopic.setTeacher(teacher);
-
-            if ("draft".equals(action)) {
-                projectTopic.setStatus(ProjectTopic.TopicStatus.draft);
             } else {
-                projectTopic.setStatus(ProjectTopic.TopicStatus.unpublished);
-            }
-
-            projectTopicRepository.save(projectTopic);
-            if ("draft".equals(action)) {
-                redirectAttributes.addFlashAttribute("successMessage", "Draft saved successfully");
-            } else {
+                projectTopicService.createProjectTopic(projectTopic, currentUser);
                 redirectAttributes.addFlashAttribute("successMessage", "Create successfully");
             }
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/teacher/projects";
         }
 
-        return "redirect:/projects";
+        return "redirect:/teacher/projects";
     }
 
-    @GetMapping("/projects/{id}/edit")
+    @GetMapping("/teacher/projects/{id}/edit")
     public String showEditForm(@PathVariable Long id,
+                               Authentication authentication,
                                Model model,
                                RedirectAttributes redirectAttributes) {
 
-        Long currentTeacherId = 1L;
+        Long currentTeacherId = getCurrentUser(authentication).getId();
 
         ProjectTopic projectTopic = projectTopicRepository
                 .findByIdAndTeacherId(id, currentTeacherId)
@@ -135,34 +109,20 @@ public class ProjectTopicController {
 
         if (projectTopic == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "You cannot modify this project");
-            return "redirect:/projects";
+            return "redirect:/teacher/projects";
         }
 
         model.addAttribute("projectTopic", projectTopic);
         return "project-form";
     }
-    @PostMapping("/projects/{id}/delete")
-    public String deleteProject(@PathVariable Long id,
-                                RedirectAttributes redirectAttributes) {
 
-        Long currentTeacherId = 1L;
-
-        ProjectTopic projectTopic = projectTopicRepository
-                .findByIdAndTeacherId(id, currentTeacherId)
-                .orElse(null);
-
-        if (projectTopic == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "You cannot modify this project");
-            return "redirect:/projects";
+    private User getCurrentUser(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("No authenticated user found");
         }
 
-        if (projectTopic.getStatus() != ProjectTopic.TopicStatus.unpublished) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Published project topics cannot be deleted");
-            return "redirect:/projects";
-        }
-
-        projectTopicRepository.delete(projectTopic);
-        redirectAttributes.addFlashAttribute("successMessage", "Delete successfully");
-        return "redirect:/projects";
+        String email = authentication.getName();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalStateException("Current user not found: " + email));
     }
 }
