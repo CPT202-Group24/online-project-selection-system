@@ -7,3 +7,4 @@ target/
 .vscode/settings.json
 .DS_Store
 src/main/resources/application.properties
+/docs
