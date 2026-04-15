@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - Project Selection System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/nav :: sharedNav}"></div>
+
+<div class="container">
+    <h2>Admin Dashboard</h2>
+    <p style="margin-bottom:24px;">Welcome, <span sec:authentication="name"></span>. Select a module to manage.</p>
+    <ul style="list-style:none;padding:0;line-height:2.2;">
+        <li><a th:href="@{/admin/categories}">&#9656; Category Management</a></li>
+    </ul>
+</div>
+</body>
+</html>
