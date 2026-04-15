@@ -3,23 +3,22 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
 <nav th:fragment="sharedNav">
-    <a th:href="@{/dashboard}">Home</a>
-
-    <span sec:authorize="hasAuthority('student')">
-        | <a th:href="@{/student/dashboard}">Student Dashboard</a>
+    <span>Project Selection System</span>
+    <span>
+        <span sec:authorize="hasAuthority('student')">
+            <a th:href="@{/student/dashboard}">Student Dashboard</a>
+        </span>
+        <span sec:authorize="hasAuthority('teacher')">
+            <a th:href="@{/teacher/dashboard}">Teacher Dashboard</a>
+        </span>
+        <span sec:authorize="hasAuthority('admin')">
+            <a th:href="@{/admin/dashboard}">Admin Dashboard</a>
+        </span>
     </span>
-
-    <span sec:authorize="hasAuthority('teacher')">
-        | <a th:href="@{/teacher/dashboard}">Teacher Dashboard</a>
-    </span>
-
-    <span sec:authorize="hasAuthority('admin')">
-        | <a th:href="@{/admin/dashboard}">Admin Dashboard</a>
-    </span>
-
-    <span style="float:right;">
-        <form th:action="@{/logout}" method="post" style="display:inline;">
-            <button type="submit">Logout</button>
+    <span style="display:flex;align-items:center;gap:16px;">
+        <span sec:authentication="name"></span>
+        <form th:action="@{/logout}" method="post" style="display:inline;margin:0;">
+            <button type="submit" style="width:auto;padding:4px 12px;font-size:14px;margin-top:0;">Logout</button>
         </form>
     </span>
 </nav>

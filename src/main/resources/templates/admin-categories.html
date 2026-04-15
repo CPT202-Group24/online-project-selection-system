@@ -72,16 +72,7 @@
     </style>
 </head>
 <body>
-<nav>
-    <span>Project Selection System</span>
-    <span>
-        <a th:href="@{/admin/dashboard}" style="margin-right:16px;">Dashboard</a>
-        <span sec:authentication="name"></span>
-    </span>
-    <form th:action="@{/logout}" method="post" style="display:inline;">
-        <button type="submit" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:14px;">Logout</button>
-    </form>
-</nav>
+<div th:replace="~{fragments/nav :: sharedNav}"></div>
 
 <div class="page-container">
     <div class="page-header">
