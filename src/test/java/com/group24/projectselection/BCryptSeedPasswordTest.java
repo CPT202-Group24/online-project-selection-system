@@ -12,10 +12,14 @@ class BCryptSeedPasswordTest {
             "$2b$10$Sey1a6qg4tueIbitIt/R/eFrGlNEGuCdqBKQiUnWJX0o5TEaLDtsO";
 
     @Test
-    void seededPasswordTest123ShouldMatch() {
+    void correctPasswordTest123ShouldMatchSeededHash() {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-
         assertTrue(encoder.matches("test123", SEEDED_HASH));
+    }
+
+    @Test
+    void wrongPasswordShouldNotMatchSeededHash() {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         assertFalse(encoder.matches("wrong123", SEEDED_HASH));
     }
 }
