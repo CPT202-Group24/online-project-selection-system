@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Teacher Projects - Project Selection System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/nav :: sharedNav}"></div>
+
+<div class="container project-page-container">
+    <h2>Teacher Projects</h2>
+
+    <div class="view-toggle">
+        <a th:href="@{/teacher/projects(view='my')}"
+           th:classappend="${view == 'my'} ? ' active-toggle' : ''">
+            My Projects
+        </a>
+
+        <a th:href="@{/teacher/projects(view='all')}"
+           th:classappend="${view == 'all'} ? ' active-toggle' : ''">
+            All Projects
+        </a>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-info">
+        <span th:text="${successMessage}"></span>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-error">
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <div class="project-toolbar">
+        <a th:href="@{/teacher/projects/new}" class="toolbar-link-btn">Create New Project</a>
+    </div>
+
+    <div class="project-table-wrapper">
+        <table class="project-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Teacher ID</th>
+                <th>Category ID</th>
+                <th>Description</th>
+                <th>Required Skills</th>
+                <th>Keywords</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="project : ${projects}">
+                <td th:text="${project.id}"></td>
+
+                <td class="title-cell">
+                    <span th:text="${project.title != null and !project.title.isEmpty() ? project.title : 'Untitled Project'}"></span>
+                </td>
+
+                <td th:text="${project.teacher != null ? project.teacher.id : 'N/A'}"></td>
+                <td th:text="${project.category != null ? project.category.id : 'N/A'}"></td>
+
+                <td class="desc-cell"
+                    th:text="${project.description != null and #strings.length(project.description) > 20
+                        ? #strings.substring(project.description, 0, 20) + '...'
+                        : project.description}">
+                </td>
+
+                <td class="skill-cell" th:text="${project.requiredSkills}"></td>
+
+                <td>
+                    <span th:if="${project.keywords != null and !project.keywords.isEmpty()}">
+                        <span th:each="kw : ${#strings.arraySplit(project.keywords, ',')}"
+                              th:text="${#strings.trim(kw)}"
+                              class="keyword-tag">
+                        </span>
+                    </span>
+                </td>
+
+                <td>
+                    <span class="status-badge" th:text="${project.status}"></span>
+                </td>
+
+                <td>
+                    <div class="action-group">
+                        <a th:if="${project.teacher != null and project.teacher.id == currentTeacherId}"
+                           th:href="@{'/teacher/projects/' + ${project.id} + '/edit'}"
+                           class="small-action-btn">
+                            Edit
+                        </a>
+
+                        <button th:if="${project.teacher != null and project.teacher.id != currentTeacherId}"
+                                type="button"
+                                class="small-action-btn disabled-btn"
+                                onclick="alert('You cannot modify this project');">
+                            Edit
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p th:if="${projects.isEmpty()}" class="empty-message">
+        There are no related projects
+    </p>
+
+    <p class="back-link-row">
+        <a th:href="@{/teacher/dashboard}">Back to teacher dashboard</a>
+    </p>
+</div>
+
+</body>
+</html>

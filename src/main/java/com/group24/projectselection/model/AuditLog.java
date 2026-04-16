@@ -30,6 +30,7 @@ public class AuditLog {
     @Column(nullable = false, length = 50)
     private String entityType;
 
+    // no FK constraint here - entity_type tells us which table to look in
     @Column(nullable = false)
     private Long entityId;
 
