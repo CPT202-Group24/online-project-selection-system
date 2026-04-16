@@ -2,6 +2,9 @@ package com.group24.projectselection.service;
 
 import com.group24.projectselection.model.Category;
 import com.group24.projectselection.repository.CategoryRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -12,6 +15,9 @@ import java.util.NoSuchElementException;
 @Service
 public class CategoryService {
 
+    private static final int DEFAULT_PAGE_SIZE = 10;
+    private static final int MAX_PAGE_SIZE = 50;
+
     private final CategoryRepository categoryRepository;
 
     public CategoryService(CategoryRepository categoryRepository) {
@@ -20,6 +26,13 @@ public class CategoryService {
 
     public List<Category> findAll() {
         return categoryRepository.findAllByOrderByNameAsc();
+    }
+
+    public Page<Category> findPage(int page, int size) {
+        int safePage = Math.max(page, 0);
+        int safeSize = size <= 0 ? DEFAULT_PAGE_SIZE : Math.min(size, MAX_PAGE_SIZE);
+        PageRequest pageRequest = PageRequest.of(safePage, safeSize, Sort.by("name").ascending());
+        return categoryRepository.findAll(pageRequest);
     }
 
     public long count() {

@@ -18,6 +18,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -58,6 +59,30 @@ class AdminCategoryControllerTest {
                 .andExpect(jsonPath("$.isActive").value(true));
 
         assertThat(categoryRepository.existsByNameIgnoreCase("TestCategory")).isTrue();
+    }
+
+
+    @Test
+    @WithMockUser(username = "admin@test.com", authorities = {"admin"})
+    void listCategories_supportsPagination() throws Exception {
+        for (int i = 1; i <= 7; i++) {
+            Map<String, String> body = Map.of("name", "Category" + i, "description", "D" + i);
+            mockMvc.perform(post("/api/admin/categories")
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(body)))
+                    .andExpect(status().isCreated());
+        }
+
+        mockMvc.perform(get("/api/admin/categories")
+                        .param("page", "0")
+                        .param("size", "5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items.length()").value(5))
+                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.size").value(5))
+                .andExpect(jsonPath("$.totalItems").value(7))
+                .andExpect(jsonPath("$.totalPages").value(2));
     }
 
     /**
