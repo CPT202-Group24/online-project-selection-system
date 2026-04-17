@@ -125,4 +125,28 @@ public class ProjectTopicController {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalStateException("Current user not found: " + email));
     }
+
+    @GetMapping("/student/topics")
+    public String listAvailableTopics(Model model) {
+        List<ProjectTopic> topics = projectTopicRepository.findByStatus(ProjectTopic.TopicStatus.available);
+        model.addAttribute("projects", topics);
+        return "student-topics";
+    }
+
+    @GetMapping("/student/topics/{id}")
+    public String showStudentTopicDetail(@PathVariable Long id,
+                                         Model model,
+                                         RedirectAttributes redirectAttributes) {
+        ProjectTopic topic = projectTopicRepository
+                .findByIdAndStatus(id, ProjectTopic.TopicStatus.available)
+                .orElse(null);
+
+        if (topic == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Topic not found or not available.");
+            return "redirect:/student/topics";
+        }
+
+        model.addAttribute("projectTopic", topic);
+        return "student-topic-detail";
+    }
 }
