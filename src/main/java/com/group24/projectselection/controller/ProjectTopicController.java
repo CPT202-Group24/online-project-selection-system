@@ -6,6 +6,7 @@ import com.group24.projectselection.model.User;
 import com.group24.projectselection.repository.ProjectTopicRepository;
 import com.group24.projectselection.repository.UserRepository;
 import com.group24.projectselection.service.ProjectTopicService;
+import com.group24.projectselection.service.TopicStatusService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,17 +26,21 @@ public class ProjectTopicController {
     private final ProjectTopicRepository projectTopicRepository;
     private final UserRepository userRepository;
     private final ProjectTopicService projectTopicService;
+    private final TopicStatusService topicStatusService;
 
     public ProjectTopicController(ProjectTopicRepository projectTopicRepository,
                                   UserRepository userRepository,
-                                  ProjectTopicService projectTopicService) {
+                                  ProjectTopicService projectTopicService,
+                                  TopicStatusService topicStatusService) {
         this.projectTopicRepository = projectTopicRepository;
         this.userRepository = userRepository;
         this.projectTopicService = projectTopicService;
+        this.topicStatusService = topicStatusService;
     }
 
     @GetMapping("/teacher/projects")
     public String listProjects(@RequestParam(value = "view", defaultValue = "my") String view,
+                               @RequestParam(value = "status", required = false) String status,
                                Authentication authentication,
                                Model model) {
 
@@ -46,6 +51,14 @@ public class ProjectTopicController {
 
         if ("all".equalsIgnoreCase(view)) {
             projects = projectTopicRepository.findAll();
+        } else if (status != null && !status.isBlank()) {
+            try {
+                ProjectTopic.TopicStatus ts = ProjectTopic.TopicStatus.valueOf(status);
+                projects = projectTopicRepository.findByTeacherIdAndStatus(currentTeacherId, ts);
+            } catch (IllegalArgumentException e) {
+                projects = projectTopicRepository.findByTeacherId(currentTeacherId);
+            }
+            view = "my";
         } else {
             projects = projectTopicRepository.findByTeacherId(currentTeacherId);
             view = "my";
@@ -54,6 +67,7 @@ public class ProjectTopicController {
         model.addAttribute("projects", projects);
         model.addAttribute("currentTeacherId", currentTeacherId);
         model.addAttribute("view", view);
+        model.addAttribute("currentStatus", status != null ? status : "");
 
         return "projects";
     }
@@ -92,6 +106,20 @@ public class ProjectTopicController {
             return "redirect:/teacher/projects";
         }
 
+        return "redirect:/teacher/projects";
+    }
+
+    @PostMapping("/teacher/projects/{id}/publish")
+    public String publishTopic(@PathVariable Long id,
+                               Authentication authentication,
+                               RedirectAttributes redirectAttributes) {
+        Long teacherId = getCurrentUser(authentication).getId();
+        try {
+            topicStatusService.publishTopic(id, teacherId);
+            redirectAttributes.addFlashAttribute("successMessage", "Topic published successfully.");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
         return "redirect:/teacher/projects";
     }
 
