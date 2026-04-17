@@ -33,6 +33,15 @@
         <span th:text="${errorMessage}"></span>
     </div>
 
+    <div th:if="${view == 'my'}" class="status-filter">
+        <a th:href="@{/teacher/projects}"
+           th:classappend="${currentStatus == ''} ? ' active-filter' : ''">All</a>
+        <a th:href="@{/teacher/projects(status='unpublished')}"
+           th:classappend="${currentStatus == 'unpublished'} ? ' active-filter' : ''">Unpublished</a>
+        <a th:href="@{/teacher/projects(status='available')}"
+           th:classappend="${currentStatus == 'available'} ? ' active-filter' : ''">Available</a>
+    </div>
+
     <div class="project-toolbar">
         <a th:href="@{/teacher/projects/new}" class="toolbar-link-btn">Create New Project</a>
     </div>
@@ -43,7 +52,7 @@
             <tr>
                 <th>ID</th>
                 <th>Title</th>
-                <th>Teacher ID</th>
+                <th th:if="${view != 'my'}">Teacher ID</th>
                 <th>Category ID</th>
                 <th>Description</th>
                 <th>Required Skills</th>
@@ -60,7 +69,7 @@
                     <span th:text="${project.title != null and !project.title.isEmpty() ? project.title : 'Untitled Project'}"></span>
                 </td>
 
-                <td th:text="${project.teacher != null ? project.teacher.id : 'N/A'}"></td>
+                <td th:if="${view != 'my'}" th:text="${project.teacher != null ? project.teacher.id : 'N/A'}"></td>
                 <td th:text="${project.category != null ? project.category.id : 'N/A'}"></td>
 
                 <td class="desc-cell"
@@ -81,7 +90,10 @@
                 </td>
 
                 <td>
-                    <span class="status-badge" th:text="${project.status}"></span>
+                    <span class="status-badge"
+                          th:classappend="'status-' + ${project.status.name()}"
+                          th:text="${project.status}">
+                    </span>
                 </td>
 
                 <td>
@@ -98,6 +110,14 @@
                                 onclick="alert('You cannot modify this project');">
                             Edit
                         </button>
+
+                        <form th:if="${project.teacher != null
+                                       and project.teacher.id == currentTeacherId
+                                       and project.status.name() == 'unpublished'}"
+                              th:action="@{/teacher/projects/{id}/publish(id=${project.id})}"
+                              method="post">
+                            <button type="submit" class="small-action-btn btn-publish">Publish</button>
+                        </form>
                     </div>
                 </td>
             </tr>
