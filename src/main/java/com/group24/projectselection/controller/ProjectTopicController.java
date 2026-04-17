@@ -1,0 +1,128 @@
+package com.group24.projectselection.controller;
+
+import jakarta.validation.Valid;
+import com.group24.projectselection.model.ProjectTopic;
+import com.group24.projectselection.model.User;
+import com.group24.projectselection.repository.ProjectTopicRepository;
+import com.group24.projectselection.repository.UserRepository;
+import com.group24.projectselection.service.ProjectTopicService;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
+
+@Controller
+public class ProjectTopicController {
+
+    private final ProjectTopicRepository projectTopicRepository;
+    private final UserRepository userRepository;
+    private final ProjectTopicService projectTopicService;
+
+    public ProjectTopicController(ProjectTopicRepository projectTopicRepository,
+                                  UserRepository userRepository,
+                                  ProjectTopicService projectTopicService) {
+        this.projectTopicRepository = projectTopicRepository;
+        this.userRepository = userRepository;
+        this.projectTopicService = projectTopicService;
+    }
+
+    @GetMapping("/teacher/projects")
+    public String listProjects(@RequestParam(value = "view", defaultValue = "my") String view,
+                               Authentication authentication,
+                               Model model) {
+
+        User currentUser = getCurrentUser(authentication);
+        Long currentTeacherId = currentUser.getId();
+
+        List<ProjectTopic> projects;
+
+        if ("all".equalsIgnoreCase(view)) {
+            projects = projectTopicRepository.findAll();
+        } else {
+            projects = projectTopicRepository.findByTeacherId(currentTeacherId);
+            view = "my";
+        }
+
+        model.addAttribute("projects", projects);
+        model.addAttribute("currentTeacherId", currentTeacherId);
+        model.addAttribute("view", view);
+
+        return "projects";
+    }
+
+    @GetMapping("/teacher/projects/new")
+    public String showCreateForm(Model model) {
+        model.addAttribute("projectTopic", new ProjectTopic());
+        return "project-form";
+    }
+
+    @PostMapping("/teacher/projects")
+    public String saveProject(@Valid @ModelAttribute("projectTopic") ProjectTopic projectTopic,
+                              BindingResult bindingResult,
+                              Authentication authentication,
+                              RedirectAttributes redirectAttributes) {
+
+        User currentUser = getCurrentUser(authentication);
+        Long currentTeacherId = currentUser.getId();
+
+        if (bindingResult.hasErrors()) {
+            return "project-form";
+        }
+
+        boolean isEdit = projectTopic.getId() != null;
+
+        try {
+            if (isEdit) {
+                projectTopicService.updateProjectTopic(projectTopic, currentTeacherId);
+                redirectAttributes.addFlashAttribute("successMessage", "Save successfully");
+            } else {
+                projectTopicService.createProjectTopic(projectTopic, currentUser);
+                redirectAttributes.addFlashAttribute("successMessage", "Create successfully");
+            }
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/teacher/projects";
+        }
+
+        return "redirect:/teacher/projects";
+    }
+
+    @GetMapping("/teacher/projects/{id}/edit")
+    public String showEditForm(@PathVariable Long id,
+                               Authentication authentication,
+                               Model model,
+                               RedirectAttributes redirectAttributes) {
+
+        Long currentTeacherId = getCurrentUser(authentication).getId();
+
+        ProjectTopic projectTopic = projectTopicRepository
+                .findByIdAndTeacherId(id, currentTeacherId)
+                .orElse(null);
+
+        if (projectTopic == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "You cannot modify this project");
+            return "redirect:/teacher/projects";
+        }
+
+        model.addAttribute("projectTopic", projectTopic);
+        return "project-form";
+    }
+
+    private User getCurrentUser(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("No authenticated user found");
+        }
+
+        String email = authentication.getName();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalStateException("Current user not found: " + email));
+    }
+}

@@ -1,5 +1,5 @@
 package com.group24.projectselection.model;
-
+import jakarta.validation.constraints.NotBlank;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -32,6 +32,7 @@ public class ProjectTopic {
     @JoinColumn(name = "category_id")
     private Category category;
 
+    @NotBlank(message = "This line cannot be empty")
     @Column(nullable = false)
     private String title;
 
@@ -55,7 +56,7 @@ public class ProjectTopic {
     private LocalDateTime updatedAt;
 
     public enum TopicStatus {
-        unpublished, available, requested, agreed, closed, archived
+         unpublished, available, requested, agreed, closed, archived
     }
 
     public ProjectTopic() {
