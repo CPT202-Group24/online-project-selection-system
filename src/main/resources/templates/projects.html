@@ -40,6 +40,8 @@
            th:classappend="${currentStatus == 'unpublished'} ? ' active-filter' : ''">Unpublished</a>
         <a th:href="@{/teacher/projects(status='available')}"
            th:classappend="${currentStatus == 'available'} ? ' active-filter' : ''">Available</a>
+        <a th:href="@{/teacher/projects(status='closed')}"
+           th:classappend="${currentStatus == 'closed'} ? ' active-filter' : ''">Closed</a>
     </div>
 
     <div class="project-toolbar">
@@ -117,6 +119,15 @@
                               th:action="@{/teacher/projects/{id}/publish(id=${project.id})}"
                               method="post">
                             <button type="submit" class="small-action-btn btn-publish">Publish</button>
+                        </form>
+
+                        <form th:if="${project.teacher != null
+                                       and project.teacher.id == currentTeacherId
+                                       and (project.status.name() == 'available'
+                                            or project.status.name() == 'requested')}"
+                              th:action="@{/teacher/projects/{id}/close(id=${project.id})}"
+                              method="post">
+                            <button type="submit" class="small-action-btn btn-close-topic">Close</button>
                         </form>
                     </div>
                 </td>

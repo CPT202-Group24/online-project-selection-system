@@ -408,3 +408,12 @@ a {
 .notification-table {
     min-width: 760px;
 }
+
+/* close button */
+.btn-close-topic {
+    background-color: #e67e22;
+}
+
+.btn-close-topic:hover {
+    background-color: #d35400;
+}
