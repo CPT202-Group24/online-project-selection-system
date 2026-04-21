@@ -26,4 +26,29 @@ public class TopicStatusServiceImpl implements TopicStatusService {
         topic.setStatus(ProjectTopic.TopicStatus.available);
         return projectTopicRepository.save(topic);
     }
+
+    @Override
+    public ProjectTopic closeTopic(Long topicId, Long teacherId) {
+        ProjectTopic topic = projectTopicRepository
+                .findByIdAndTeacherId(topicId, teacherId)
+                .orElseThrow(() -> new IllegalArgumentException("Topic not found or access denied"));
+
+        // only available/requested topics can be closed
+        ProjectTopic.TopicStatus status = topic.getStatus();
+        if (status == ProjectTopic.TopicStatus.unpublished) {
+            throw new IllegalStateException("Only published topics can be closed");
+        }
+        if (status == ProjectTopic.TopicStatus.closed) {
+            throw new IllegalStateException("Topic is already closed");
+        }
+        if (status == ProjectTopic.TopicStatus.agreed) {
+            throw new IllegalStateException("Topic has an agreed allocation and cannot be closed");
+        }
+        if (status == ProjectTopic.TopicStatus.archived) {
+            throw new IllegalStateException("Cannot modify an archived topic");
+        }
+
+        topic.setStatus(ProjectTopic.TopicStatus.closed);
+        return projectTopicRepository.save(topic);
+    }
 }
