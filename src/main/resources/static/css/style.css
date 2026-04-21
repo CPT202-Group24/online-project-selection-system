@@ -28,6 +28,26 @@ nav a:hover {
     color: white;
 }
 
+.nav-notification-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.notification-badge {
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: #e74c3c;
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 20px;
+    text-align: center;
+}
+
 .container {
     max-width: 600px;
     margin: 60px auto;
@@ -383,4 +403,8 @@ a {
 
 .btn-publish:hover {
     background-color: #219a52;
+}
+
+.notification-table {
+    min-width: 760px;
 }
