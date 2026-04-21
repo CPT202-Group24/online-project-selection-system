@@ -128,6 +128,20 @@ public class ProjectTopicController {
         return "redirect:/teacher/projects";
     }
 
+    @PostMapping("/teacher/projects/{id}/close")
+    public String closeTopic(@PathVariable Long id,
+                             Authentication authentication,
+                             RedirectAttributes redirectAttributes) {
+        Long teacherId = getCurrentUser(authentication).getId();
+        try {
+            topicStatusService.closeTopic(id, teacherId);
+            redirectAttributes.addFlashAttribute("successMessage", "Topic closed successfully.");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/teacher/projects";
+    }
+
     @GetMapping("/teacher/projects/{id}/edit")
     public String showEditForm(@PathVariable Long id,
                                Authentication authentication,
