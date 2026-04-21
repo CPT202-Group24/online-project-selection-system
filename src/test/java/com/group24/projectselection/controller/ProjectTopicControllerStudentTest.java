@@ -43,6 +43,7 @@ class ProjectTopicControllerStudentTest {
     @MockBean
     private CategoryRepository categoryRepository;
 
+
     @Test
     void studentBrowseAvailableTopics_returnsStudentTopicsPage() throws Exception {
         ProjectTopic topic = new ProjectTopic();
