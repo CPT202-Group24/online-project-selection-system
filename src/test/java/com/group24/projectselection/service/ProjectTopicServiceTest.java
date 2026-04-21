@@ -9,10 +9,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -65,5 +65,43 @@ class ProjectTopicServiceTest {
         );
 
         assertEquals("You cannot modify this project", exception.getMessage());
+    }
+
+    @Test
+    void searchAvailableTopics_withKeywordAndCategory_returnsMatchingTopics() {
+        String keyword = "Java";
+        Long categoryId = 1L;
+
+        ProjectTopic topic = new ProjectTopic();
+        topic.setTitle("Java Web Project");
+
+        when(projectTopicRepository.searchTopicsByKeywordAndCategory(
+                ProjectTopic.TopicStatus.available,
+                keyword,
+                categoryId
+        )).thenReturn(List.of(topic));
+
+        List<ProjectTopic> result = projectTopicService.searchAvailableTopics(keyword, categoryId);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Java Web Project", result.get(0).getTitle());
+    }
+
+    @Test
+    void searchAvailableTopics_noMatch_returnsEmptyList() {
+        String keyword = "Python";
+        Long categoryId = 2L;
+
+        when(projectTopicRepository.searchTopicsByKeywordAndCategory(
+                ProjectTopic.TopicStatus.available,
+                keyword,
+                categoryId
+        )).thenReturn(List.of());
+
+        List<ProjectTopic> result = projectTopicService.searchAvailableTopics(keyword, categoryId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 }

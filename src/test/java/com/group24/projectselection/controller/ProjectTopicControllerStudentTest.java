@@ -1,9 +1,12 @@
 package com.group24.projectselection.controller;
 
+import com.group24.projectselection.model.Category;
 import com.group24.projectselection.model.ProjectTopic;
+import com.group24.projectselection.repository.CategoryRepository;
 import com.group24.projectselection.repository.ProjectTopicRepository;
 import com.group24.projectselection.repository.UserRepository;
 import com.group24.projectselection.service.ProjectTopicService;
+import com.group24.projectselection.service.TopicStatusService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -34,6 +37,12 @@ class ProjectTopicControllerStudentTest {
     @MockBean
     private ProjectTopicService projectTopicService;
 
+    @MockBean
+    private TopicStatusService topicStatusService;
+
+    @MockBean
+    private CategoryRepository categoryRepository;
+
     @Test
     void studentBrowseAvailableTopics_returnsStudentTopicsPage() throws Exception {
         ProjectTopic topic = new ProjectTopic();
@@ -45,13 +54,25 @@ class ProjectTopicControllerStudentTest {
         topic.setMaxStudents(10);
         topic.setStatus(ProjectTopic.TopicStatus.available);
 
-        when(projectTopicRepository.findByStatus(ProjectTopic.TopicStatus.available))
-                .thenReturn(List.of(topic));
+        Category category = new Category();
+        category.setId(1L);
+        category.setName("IT");
+        category.setIsActive(true);
 
-        mockMvc.perform(get("/student/topics"))
+        when(projectTopicService.searchAvailableTopics("java", 1L))
+                .thenReturn(List.of(topic));
+        when(categoryRepository.findByIsActiveTrueOrderByNameAsc())
+                .thenReturn(List.of(category));
+
+        mockMvc.perform(get("/student/topics")
+                        .param("keyword", "java")
+                        .param("category", "1"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("student-topics"))
-                .andExpect(model().attributeExists("projects"));
+                .andExpect(model().attributeExists("projects"))
+                .andExpect(model().attributeExists("categories"))
+                .andExpect(model().attribute("keyword", "java"))
+                .andExpect(model().attribute("selectedCategory", 1L));
     }
 
     @Test

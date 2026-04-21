@@ -5,6 +5,8 @@ import com.group24.projectselection.model.User;
 import com.group24.projectselection.repository.ProjectTopicRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class ProjectTopicServiceImpl implements ProjectTopicService {
 
@@ -31,9 +33,19 @@ public class ProjectTopicServiceImpl implements ProjectTopicService {
         existingProject.setDescription(projectTopic.getDescription());
         existingProject.setRequiredSkills(projectTopic.getRequiredSkills());
         existingProject.setKeywords(projectTopic.getKeywords());
+        existingProject.setCategory(projectTopic.getCategory());
         existingProject.setMaxStudents(projectTopic.getMaxStudents());
         existingProject.setStatus(ProjectTopic.TopicStatus.unpublished);
 
         return projectTopicRepository.save(existingProject);
+    }
+
+    @Override
+    public List<ProjectTopic> searchAvailableTopics(String keyword, Long categoryId) {
+        return projectTopicRepository.searchTopicsByKeywordAndCategory(
+                ProjectTopic.TopicStatus.available,
+                keyword,
+                categoryId
+        );
     }
 }

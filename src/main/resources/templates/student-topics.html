@@ -12,6 +12,23 @@
 
 <div class="container project-page-container">
     <h2>Available Topics</h2>
+    <form method="get" th:action="@{/student/topics}">
+        <input type="text"
+               name="keyword"
+               placeholder="Search by keyword"
+               th:value="${keyword}">
+
+        <select name="category">
+            <option value="">All Categories</option>
+            <option th:each="category : ${categories}"
+                    th:value="${category.id}"
+                    th:text="${category.name}"
+                    th:selected="${selectedCategory != null and selectedCategory == category.id}">
+            </option>
+        </select>
+
+        <button type="submit">Search</button>
+    </form>
 
     <div th:if="${successMessage}" class="alert alert-info">
         <span th:text="${successMessage}"></span>
@@ -86,7 +103,7 @@
     </div>
 
     <p th:if="${projects.isEmpty()}" class="empty-message">
-        There are no available topics at the moment.
+        No results found.
     </p>
 
     <p class="back-link-row">

@@ -1,5 +1,6 @@
 package com.group24.projectselection.controller;
 
+import com.group24.projectselection.repository.CategoryRepository;
 import jakarta.validation.Valid;
 import com.group24.projectselection.model.ProjectTopic;
 import com.group24.projectselection.model.User;
@@ -27,15 +28,18 @@ public class ProjectTopicController {
     private final UserRepository userRepository;
     private final ProjectTopicService projectTopicService;
     private final TopicStatusService topicStatusService;
+    private final CategoryRepository categoryRepository;
 
     public ProjectTopicController(ProjectTopicRepository projectTopicRepository,
                                   UserRepository userRepository,
                                   ProjectTopicService projectTopicService,
-                                  TopicStatusService topicStatusService) {
+                                  TopicStatusService topicStatusService,
+                                  CategoryRepository categoryRepository) {
         this.projectTopicRepository = projectTopicRepository;
         this.userRepository = userRepository;
         this.projectTopicService = projectTopicService;
         this.topicStatusService = topicStatusService;
+        this.categoryRepository = categoryRepository;
     }
 
     @GetMapping("/teacher/projects")
@@ -75,6 +79,7 @@ public class ProjectTopicController {
     @GetMapping("/teacher/projects/new")
     public String showCreateForm(Model model) {
         model.addAttribute("projectTopic", new ProjectTopic());
+        model.addAttribute("categories", categoryRepository.findByIsActiveTrueOrderByNameAsc());
         return "project-form";
     }
 
@@ -141,6 +146,7 @@ public class ProjectTopicController {
         }
 
         model.addAttribute("projectTopic", projectTopic);
+        model.addAttribute("categories", categoryRepository.findByIsActiveTrueOrderByNameAsc());
         return "project-form";
     }
 
@@ -155,9 +161,18 @@ public class ProjectTopicController {
     }
 
     @GetMapping("/student/topics")
-    public String listAvailableTopics(Model model) {
-        List<ProjectTopic> topics = projectTopicRepository.findByStatus(ProjectTopic.TopicStatus.available);
+    public String listAvailableTopics(
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "category", required = false) Long categoryId,
+            Model model) {
+
+        List<ProjectTopic> topics = projectTopicService.searchAvailableTopics(keyword, categoryId);
+
         model.addAttribute("projects", topics);
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("selectedCategory", categoryId);
+        model.addAttribute("categories", categoryRepository.findByIsActiveTrueOrderByNameAsc());
+
         return "student-topics";
     }
 
