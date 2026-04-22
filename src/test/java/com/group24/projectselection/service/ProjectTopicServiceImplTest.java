@@ -7,12 +7,9 @@ import com.group24.projectselection.repository.CategoryRepository;
 import com.group24.projectselection.repository.ProjectTopicRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -72,7 +69,6 @@ class ProjectTopicServiceImplTest {
         topic.setKeywords("draft, test");
         topic.setMaxStudents(1);
 
-        // 模拟保存时返回传入对象本身
         when(projectTopicRepository.save(any(ProjectTopic.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 

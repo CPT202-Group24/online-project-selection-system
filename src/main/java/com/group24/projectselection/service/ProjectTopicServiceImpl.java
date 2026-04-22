@@ -76,9 +76,11 @@ public class ProjectTopicServiceImpl implements ProjectTopicService {
         ProjectTopic existingProject = projectTopicRepository
                 .findByIdAndTeacherId(projectTopic.getId(), currentTeacherId)
                 .orElseThrow(() -> new IllegalArgumentException("You cannot modify this project"));
+
         if (existingProject.getStatus() != ProjectTopic.TopicStatus.unpublished) {
             throw new IllegalArgumentException("Only unpublished projects can be edited");
         }
+
         existingProject.setTitle(projectTopic.getTitle());
         existingProject.setDescription(projectTopic.getDescription());
         existingProject.setRequiredSkills(projectTopic.getRequiredSkills());
@@ -89,11 +91,6 @@ public class ProjectTopicServiceImpl implements ProjectTopicService {
         existingProject.setDraft(true);
 
         return projectTopicRepository.save(existingProject);
-    }
-
-    private Category resolveCategory(Category category) {
-        if (category == null || category.getId() == null) return null;
-        return categoryRepository.findById(category.getId()).orElse(null);
     }
 
     @Override
@@ -109,6 +106,14 @@ public class ProjectTopicServiceImpl implements ProjectTopicService {
         if (projectTopic.getCategory() == null || projectTopic.getCategory().getId() == null) {
             throw new IllegalArgumentException("Please select a category before saving.");
         }
+    }
+
+    private Category resolveCategory(Category category) {
+        if (category == null || category.getId() == null) {
+            return null;
+        }
+
+        return categoryRepository.findById(category.getId()).orElse(null);
     }
 
     private String normalizeKeywords(String keywords) {
