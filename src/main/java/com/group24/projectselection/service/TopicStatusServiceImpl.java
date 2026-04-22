@@ -24,6 +24,7 @@ public class TopicStatusServiceImpl implements TopicStatusService {
         }
 
         topic.setStatus(ProjectTopic.TopicStatus.available);
+        topic.setDraft(false);
         return projectTopicRepository.save(topic);
     }
 
