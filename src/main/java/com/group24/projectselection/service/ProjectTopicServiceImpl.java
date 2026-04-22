@@ -1,7 +1,9 @@
 package com.group24.projectselection.service;
 
+import com.group24.projectselection.model.Category;
 import com.group24.projectselection.model.ProjectTopic;
 import com.group24.projectselection.model.User;
+import com.group24.projectselection.repository.CategoryRepository;
 import com.group24.projectselection.repository.ProjectTopicRepository;
 import org.springframework.stereotype.Service;
 
@@ -11,15 +13,19 @@ import java.util.List;
 public class ProjectTopicServiceImpl implements ProjectTopicService {
 
     private final ProjectTopicRepository projectTopicRepository;
+    private final CategoryRepository categoryRepository;
 
-    public ProjectTopicServiceImpl(ProjectTopicRepository projectTopicRepository) {
+    public ProjectTopicServiceImpl(ProjectTopicRepository projectTopicRepository,
+                                   CategoryRepository categoryRepository) {
         this.projectTopicRepository = projectTopicRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     @Override
     public ProjectTopic createProjectTopic(ProjectTopic projectTopic, User currentUser) {
         projectTopic.setTeacher(currentUser);
         projectTopic.setStatus(ProjectTopic.TopicStatus.unpublished);
+        projectTopic.setCategory(resolveCategory(projectTopic.getCategory()));
         return projectTopicRepository.save(projectTopic);
     }
 
@@ -33,11 +39,16 @@ public class ProjectTopicServiceImpl implements ProjectTopicService {
         existingProject.setDescription(projectTopic.getDescription());
         existingProject.setRequiredSkills(projectTopic.getRequiredSkills());
         existingProject.setKeywords(projectTopic.getKeywords());
-        existingProject.setCategory(projectTopic.getCategory());
+        existingProject.setCategory(resolveCategory(projectTopic.getCategory()));
         existingProject.setMaxStudents(projectTopic.getMaxStudents());
         existingProject.setStatus(ProjectTopic.TopicStatus.unpublished);
 
         return projectTopicRepository.save(existingProject);
+    }
+
+    private Category resolveCategory(Category category) {
+        if (category == null || category.getId() == null) return null;
+        return categoryRepository.findById(category.getId()).orElse(null);
     }
 
     @Override
