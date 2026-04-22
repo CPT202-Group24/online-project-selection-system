@@ -61,6 +61,25 @@ class AdminCategoryControllerTest {
         assertThat(categoryRepository.existsByNameIgnoreCase("TestCategory")).isTrue();
     }
 
+    @Test
+    @WithMockUser(username = "admin@test.com", authorities = {"admin"})
+    void createCategory_withDuplicateName_returnsBadRequest() throws Exception {
+        Map<String, String> body = Map.of("name", "DuplicateCategory", "description", "first");
+
+        mockMvc.perform(post("/api/admin/categories")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/api/admin/categories")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("A category with this name already exists."));
+    }
+
 
     @Test
     @WithMockUser(username = "admin@test.com", authorities = {"admin"})
