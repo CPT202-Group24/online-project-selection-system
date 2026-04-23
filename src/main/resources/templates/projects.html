@@ -55,7 +55,7 @@
                 <th>ID</th>
                 <th>Title</th>
                 <th th:if="${view != 'my'}">Teacher ID</th>
-                <th>Category ID</th>
+                <th>Category</th>
                 <th>Description</th>
                 <th>Required Skills</th>
                 <th>Keywords</th>
@@ -69,10 +69,17 @@
 
                 <td class="title-cell">
                     <span th:text="${project.title != null and !project.title.isEmpty() ? project.title : 'Untitled Project'}"></span>
+                    <span th:if="${project.status.name() == 'unpublished' and project.draft}"
+                          class="status-badge status-unpublished">
+                        Draft
+                    </span>
                 </td>
 
-                <td th:if="${view != 'my'}" th:text="${project.teacher != null ? project.teacher.id : 'N/A'}"></td>
-                <td th:text="${project.category != null ? project.category.id : 'N/A'}"></td>
+                <td th:if="${view != 'my'}"
+                    th:text="${project.teacher != null ? project.teacher.id : 'N/A'}">
+                </td>
+
+                <td th:text="${project.category != null ? project.category.name : 'N/A'}"></td>
 
                 <td class="desc-cell"
                     th:text="${project.description != null and #strings.length(project.description) > 20
@@ -80,15 +87,19 @@
                         : project.description}">
                 </td>
 
-                <td class="skill-cell" th:text="${project.requiredSkills}"></td>
+                <td class="skill-cell"
+                    th:text="${project.requiredSkills != null and !project.requiredSkills.isEmpty() ? project.requiredSkills : 'N/A'}">
+                </td>
 
                 <td>
                     <span th:if="${project.keywords != null and !project.keywords.isEmpty()}">
                         <span th:each="kw : ${#strings.arraySplit(project.keywords, ',')}"
+                              th:if="${#strings.trim(kw) != ''}"
                               th:text="${#strings.trim(kw)}"
                               class="keyword-tag">
                         </span>
                     </span>
+                    <span th:if="${project.keywords == null or project.keywords.isEmpty()}">N/A</span>
                 </td>
 
                 <td>
@@ -100,16 +111,20 @@
 
                 <td>
                     <div class="action-group">
-                        <a th:if="${project.teacher != null and project.teacher.id == currentTeacherId}"
+                        <a th:if="${project.teacher != null
+                            and project.teacher.id == currentTeacherId
+                            and project.status.name() == 'unpublished'}"
                            th:href="@{'/teacher/projects/' + ${project.id} + '/edit'}"
                            class="small-action-btn">
                             Edit
                         </a>
 
-                        <button th:if="${project.teacher != null and project.teacher.id != currentTeacherId}"
+                        <button th:if="${project.teacher == null
+                           or project.teacher.id != currentTeacherId
+                           or project.status.name() != 'unpublished'}"
                                 type="button"
                                 class="small-action-btn disabled-btn"
-                                onclick="alert('You cannot modify this project');">
+                                onclick="alert('Only your unpublished projects can be edited');">
                             Edit
                         </button>
 

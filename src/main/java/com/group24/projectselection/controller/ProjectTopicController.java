@@ -1,21 +1,22 @@
 package com.group24.projectselection.controller;
 
-import com.group24.projectselection.repository.CategoryRepository;
-import jakarta.validation.Valid;
+import com.group24.projectselection.model.Category;
 import com.group24.projectselection.model.ProjectTopic;
 import com.group24.projectselection.model.User;
+import com.group24.projectselection.repository.CategoryRepository;
 import com.group24.projectselection.repository.ProjectTopicRepository;
 import com.group24.projectselection.repository.UserRepository;
 import com.group24.projectselection.service.ProjectTopicService;
 import com.group24.projectselection.service.TopicStatusService;
+import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -78,7 +79,10 @@ public class ProjectTopicController {
 
     @GetMapping("/teacher/projects/new")
     public String showCreateForm(Model model) {
-        model.addAttribute("projectTopic", new ProjectTopic());
+        ProjectTopic projectTopic = new ProjectTopic();
+        projectTopic.setCategory(new Category());
+
+        model.addAttribute("projectTopic", projectTopic);
         model.addAttribute("categories", categoryRepository.findByIsActiveTrueOrderByNameAsc());
         return "project-form";
     }
@@ -86,29 +90,52 @@ public class ProjectTopicController {
     @PostMapping("/teacher/projects")
     public String saveProject(@Valid @ModelAttribute("projectTopic") ProjectTopic projectTopic,
                               BindingResult bindingResult,
+                              @RequestParam(value = "submitAction", defaultValue = "save") String submitAction,
                               Authentication authentication,
+                              Model model,
                               RedirectAttributes redirectAttributes) {
 
         User currentUser = getCurrentUser(authentication);
         Long currentTeacherId = currentUser.getId();
+        boolean isDraftAction = "draft".equalsIgnoreCase(submitAction);
+        boolean isEdit = projectTopic.getId() != null;
+
+        if (!isDraftAction && (projectTopic.getCategory() == null || projectTopic.getCategory().getId() == null)) {
+            bindingResult.rejectValue("category", "category.empty", "Please select a category before saving.");
+        }
 
         if (bindingResult.hasErrors()) {
+            if (projectTopic.getCategory() == null) {
+                projectTopic.setCategory(new Category());
+            }
+            model.addAttribute("categories", categoryRepository.findByIsActiveTrueOrderByNameAsc());
             return "project-form";
         }
 
-        boolean isEdit = projectTopic.getId() != null;
-
         try {
-            if (isEdit) {
-                projectTopicService.updateProjectTopic(projectTopic, currentTeacherId);
-                redirectAttributes.addFlashAttribute("successMessage", "Save successfully");
+            if (isDraftAction) {
+                if (isEdit) {
+                    projectTopicService.saveDraftProject(projectTopic, currentTeacherId);
+                } else {
+                    projectTopicService.createDraftProject(projectTopic, currentUser);
+                }
+                redirectAttributes.addFlashAttribute("successMessage", "Draft saved successfully");
             } else {
-                projectTopicService.createProjectTopic(projectTopic, currentUser);
-                redirectAttributes.addFlashAttribute("successMessage", "Create successfully");
+                if (isEdit) {
+                    projectTopicService.updateProjectTopic(projectTopic, currentTeacherId);
+                    redirectAttributes.addFlashAttribute("successMessage", "Save successfully");
+                } else {
+                    projectTopicService.createProjectTopic(projectTopic, currentUser);
+                    redirectAttributes.addFlashAttribute("successMessage", "Create successfully");
+                }
             }
         } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/teacher/projects";
+            if (projectTopic.getCategory() == null) {
+                projectTopic.setCategory(new Category());
+            }
+            model.addAttribute("categories", categoryRepository.findByIsActiveTrueOrderByNameAsc());
+            model.addAttribute("errorMessage", e.getMessage());
+            return "project-form";
         }
 
         return "redirect:/teacher/projects";
@@ -159,26 +186,24 @@ public class ProjectTopicController {
             return "redirect:/teacher/projects";
         }
 
+        if (projectTopic.getStatus() != ProjectTopic.TopicStatus.unpublished) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Only unpublished projects can be edited");
+            return "redirect:/teacher/projects";
+        }
+
+        if (projectTopic.getCategory() == null) {
+            projectTopic.setCategory(new Category());
+        }
+
         model.addAttribute("projectTopic", projectTopic);
         model.addAttribute("categories", categoryRepository.findByIsActiveTrueOrderByNameAsc());
         return "project-form";
     }
 
-    private User getCurrentUser(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("No authenticated user found");
-        }
-
-        String email = authentication.getName();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalStateException("Current user not found: " + email));
-    }
-
     @GetMapping("/student/topics")
-    public String listAvailableTopics(
-            @RequestParam(value = "keyword", required = false) String keyword,
-            @RequestParam(value = "category", required = false) Long categoryId,
-            Model model) {
+    public String listAvailableTopics(@RequestParam(value = "keyword", required = false) String keyword,
+                                      @RequestParam(value = "category", required = false) Long categoryId,
+                                      Model model) {
 
         List<ProjectTopic> topics = projectTopicService.searchAvailableTopics(keyword, categoryId);
 
@@ -205,5 +230,15 @@ public class ProjectTopicController {
 
         model.addAttribute("projectTopic", topic);
         return "student-topic-detail";
+    }
+
+    private User getCurrentUser(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("No authenticated user found");
+        }
+
+        String email = authentication.getName();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalStateException("Current user not found: " + email));
     }
 }

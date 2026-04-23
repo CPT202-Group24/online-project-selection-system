@@ -11,5 +11,9 @@ public interface ProjectTopicService {
 
     ProjectTopic updateProjectTopic(ProjectTopic projectTopic, Long currentTeacherId);
 
+    ProjectTopic createDraftProject(ProjectTopic projectTopic, User currentUser);
+
+    ProjectTopic saveDraftProject(ProjectTopic projectTopic, Long currentTeacherId);
+
     List<ProjectTopic> searchAvailableTopics(String keyword, Long categoryId);
 }
