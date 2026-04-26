@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Teacher Projects - Project Selection System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/nav :: sharedNav}"></div>
+
+<div class="container project-page-container">
+    <h2>Teacher Projects</h2>
+
+    <div class="view-toggle">
+        <a th:href="@{/teacher/projects(view='my')}"
+           th:classappend="${view == 'my'} ? ' active-toggle' : ''">
+            My Projects
+        </a>
+
+        <a th:href="@{/teacher/projects(view='all')}"
+           th:classappend="${view == 'all'} ? ' active-toggle' : ''">
+            All Projects
+        </a>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-info">
+        <span th:text="${successMessage}"></span>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-error">
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <div th:if="${view == 'my'}" class="status-filter">
+        <a th:href="@{/teacher/projects}"
+           th:classappend="${currentStatus == ''} ? ' active-filter' : ''">All</a>
+        <a th:href="@{/teacher/projects(status='unpublished')}"
+           th:classappend="${currentStatus == 'unpublished'} ? ' active-filter' : ''">Unpublished</a>
+        <a th:href="@{/teacher/projects(status='available')}"
+           th:classappend="${currentStatus == 'available'} ? ' active-filter' : ''">Available</a>
+        <a th:href="@{/teacher/projects(status='closed')}"
+           th:classappend="${currentStatus == 'closed'} ? ' active-filter' : ''">Closed</a>
+    </div>
+
+    <div class="project-toolbar">
+        <a th:href="@{/teacher/projects/new}" class="toolbar-link-btn">Create New Project</a>
+    </div>
+
+    <div class="project-table-wrapper">
+        <table class="project-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th th:if="${view != 'my'}">Teacher ID</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Required Skills</th>
+                <th>Keywords</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="project : ${projects}">
+                <td th:text="${project.id}"></td>
+
+                <td class="title-cell">
+                    <span th:text="${project.title != null and !project.title.isEmpty() ? project.title : 'Untitled Project'}"></span>
+                    <span th:if="${project.status.name() == 'unpublished' and project.draft}"
+                          class="status-badge status-unpublished">
+                        Draft
+                    </span>
+                </td>
+
+                <td th:if="${view != 'my'}"
+                    th:text="${project.teacher != null ? project.teacher.id : 'N/A'}">
+                </td>
+
+                <td th:text="${project.category != null ? project.category.name : 'N/A'}"></td>
+
+                <td class="desc-cell"
+                    th:text="${project.description != null and #strings.length(project.description) > 20
+                        ? #strings.substring(project.description, 0, 20) + '...'
+                        : project.description}">
+                </td>
+
+                <td class="skill-cell"
+                    th:text="${project.requiredSkills != null and !project.requiredSkills.isEmpty() ? project.requiredSkills : 'N/A'}">
+                </td>
+
+                <td>
+                    <span th:if="${project.keywords != null and !project.keywords.isEmpty()}">
+                        <span th:each="kw : ${#strings.arraySplit(project.keywords, ',')}"
+                              th:if="${#strings.trim(kw) != ''}"
+                              th:text="${#strings.trim(kw)}"
+                              class="keyword-tag">
+                        </span>
+                    </span>
+                    <span th:if="${project.keywords == null or project.keywords.isEmpty()}">N/A</span>
+                </td>
+
+                <td>
+                    <span class="status-badge"
+                          th:classappend="'status-' + ${project.status.name()}"
+                          th:text="${project.status}">
+                    </span>
+                </td>
+
+                <td>
+                    <div class="action-group">
+                        <a th:if="${project.teacher != null
+                            and project.teacher.id == currentTeacherId
+                            and project.status.name() == 'unpublished'}"
+                           th:href="@{'/teacher/projects/' + ${project.id} + '/edit'}"
+                           class="small-action-btn">
+                            Edit
+                        </a>
+
+                        <button th:if="${project.teacher == null
+                           or project.teacher.id != currentTeacherId
+                           or project.status.name() != 'unpublished'}"
+                                type="button"
+                                class="small-action-btn disabled-btn"
+                                onclick="alert('Only your unpublished projects can be edited');">
+                            Edit
+                        </button>
+
+                        <form th:if="${project.teacher != null
+                                       and project.teacher.id == currentTeacherId
+                                       and project.status.name() == 'unpublished'}"
+                              th:action="@{/teacher/projects/{id}/publish(id=${project.id})}"
+                              method="post">
+                            <button type="submit" class="small-action-btn btn-publish">Publish</button>
+                        </form>
+
+                        <form th:if="${project.teacher != null
+                                       and project.teacher.id == currentTeacherId
+                                       and (project.status.name() == 'available'
+                                            or project.status.name() == 'requested')}"
+                              th:action="@{/teacher/projects/{id}/close(id=${project.id})}"
+                              method="post">
+                            <button type="submit" class="small-action-btn btn-close-topic">Close</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p th:if="${projects.isEmpty()}" class="empty-message">
+        There are no related projects
+    </p>
+
+    <p class="back-link-row">
+        <a th:href="@{/teacher/dashboard}">Back to teacher dashboard</a>
+    </p>
+</div>
+
+</body>
+</html>

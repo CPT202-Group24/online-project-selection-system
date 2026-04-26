@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Available Topics - Project Selection System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/nav :: sharedNav}"></div>
+
+<div class="container project-page-container">
+    <h2>Available Topics</h2>
+    <form method="get" th:action="@{/student/topics}">
+        <input type="text"
+               name="keyword"
+               placeholder="Search by keyword"
+               th:value="${keyword}">
+
+        <select name="category">
+            <option value="">All Categories</option>
+            <option th:each="category : ${categories}"
+                    th:value="${category.id}"
+                    th:text="${category.name}"
+                    th:selected="${selectedCategory != null and selectedCategory == category.id}">
+            </option>
+        </select>
+
+        <button type="submit">Search</button>
+    </form>
+
+    <div th:if="${successMessage}" class="alert alert-info">
+        <span th:text="${successMessage}"></span>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-error">
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <div class="project-table-wrapper" th:if="${!projects.isEmpty()}">
+        <table class="project-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Teacher</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Required Skills</th>
+                <th>Keywords</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="project : ${projects}">
+                <td th:text="${project.id}"></td>
+
+                <td class="title-cell">
+                    <span th:text="${project.title != null and !project.title.isEmpty() ? project.title : 'Untitled'}"></span>
+                </td>
+
+                <td th:text="${project.teacher != null ? project.teacher.name : 'N/A'}"></td>
+
+                <td th:text="${project.category != null ? project.category.name : 'N/A'}"></td>
+
+                <td class="desc-cell"
+                    th:text="${project.description != null and #strings.length(project.description) > 20
+                    ? #strings.substring(project.description, 0, 20) + '...'
+                    : project.description}">
+                </td>
+
+                <td class="skill-cell"
+                    th:text="${project.requiredSkills != null and !project.requiredSkills.isEmpty() ? project.requiredSkills : 'N/A'}">
+                </td>
+
+                <td>
+                    <span th:if="${project.keywords != null and !project.keywords.isEmpty()}">
+                        <span th:each="kw : ${#strings.arraySplit(project.keywords, ',')}"
+                              th:text="${#strings.trim(kw)}"
+                              class="keyword-tag">
+                        </span>
+                    </span>
+                    <span th:if="${project.keywords == null or project.keywords.isEmpty()}">N/A</span>
+                </td>
+
+                <td>
+                    <span class="status-badge" th:text="${project.status}"></span>
+                </td>
+
+                <td>
+                    <div class="action-group">
+                        <a th:href="@{/student/topics/{id}(id=${project.id})}"
+                           class="small-action-btn">
+                            View Details
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p th:if="${projects.isEmpty()}" class="empty-message">
+        No results found.
+    </p>
+
+    <p class="back-link-row">
+        <a th:href="@{/student/dashboard}">Back to student dashboard</a>
+    </p>
+</div>
+
+</body>
+</html>

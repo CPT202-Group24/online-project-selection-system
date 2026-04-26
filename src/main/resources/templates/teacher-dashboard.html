@@ -7,16 +7,16 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<nav>
-    <span>Project Selection System</span>
-    <span sec:authentication="name"></span>
-    <form th:action="@{/logout}" method="post" style="display:inline;">
-        <button type="submit" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:14px;">Logout</button>
-    </form>
-</nav>
-<div class="container">
-    <h2>Teacher dashboard</h2>
-    <p>Welcome. Teacher features will appear here as they are implemented.</p>
+<div th:replace="~{fragments/nav :: sharedNav}"></div>
+
+<div class="container form-page-container">
+    <h2>Teacher Dashboard</h2>
+    <p>Welcome. Select a module to manage.</p>
+
+    <div class="project-toolbar" style="margin-top: 24px;">
+        <a th:href="@{/teacher/projects}" class="toolbar-link-btn">Project Management</a>
+    </div>
 </div>
+
 </body>
 </html>

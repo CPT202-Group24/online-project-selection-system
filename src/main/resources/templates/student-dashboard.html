@@ -3,20 +3,21 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Student Dashboard - Project Selection System</title>
+    <title>Student Dashboard</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<nav>
-    <span>Project Selection System</span>
-    <span sec:authentication="name"></span>
-    <form th:action="@{/logout}" method="post" style="display:inline;">
-        <button type="submit" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:14px;">Logout</button>
-    </form>
-</nav>
+
+<div th:replace="~{fragments/nav :: sharedNav}"></div>
+
 <div class="container">
     <h2>Student dashboard</h2>
     <p>Welcome. Student features will appear here as they are implemented.</p>
+
+    <div style="margin-top: 24px;">
+        <a th:href="@{/student/topics}" class="toolbar-link-btn">Browse Available Topics</a>
+    </div>
 </div>
+
 </body>
 </html>

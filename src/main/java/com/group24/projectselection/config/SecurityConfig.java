@@ -28,6 +28,7 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers("/api/admin/**").hasAuthority("admin")
                 .requestMatchers("/admin/**").hasAuthority("admin")
                 .requestMatchers("/teacher/**").hasAnyAuthority("teacher", "admin")
                 .requestMatchers("/student/**").hasAuthority("student")

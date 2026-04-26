@@ -1,5 +1,6 @@
 package com.group24.projectselection.model;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,6 +14,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -27,10 +29,12 @@ public class ProjectTopic {
     @JoinColumn(name = "teacher_id", nullable = false)
     private User teacher;
 
+    // category is optional - teacher can publish without assigning one
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
 
+    @NotBlank(message = "This line cannot be empty")
     @Column(nullable = false)
     private String title;
 
@@ -42,6 +46,9 @@ public class ProjectTopic {
 
     @Column(length = 500)
     private String keywords;
+
+    @Column(name = "is_draft", nullable = false)
+    private boolean isDraft = false;
 
     private Integer maxStudents;
 
@@ -125,6 +132,14 @@ public class ProjectTopic {
 
     public void setKeywords(String keywords) {
         this.keywords = keywords;
+    }
+
+    public boolean isDraft() {
+        return isDraft;
+    }
+
+    public void setDraft(boolean draft) {
+        isDraft = draft;
     }
 
     public Integer getMaxStudents() {

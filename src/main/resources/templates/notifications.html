@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Notifications - Project Selection System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: sharedNav}"></div>
+
+<div class="container project-page-container">
+    <h2>Notifications</h2>
+
+    <div th:if="${#lists.isEmpty(notifications)}" class="empty-message">
+        You have no notifications.
+    </div>
+
+    <div th:if="${not #lists.isEmpty(notifications)}" class="project-table-wrapper">
+        <table class="project-table notification-table">
+            <thead>
+            <tr>
+                <th>Status</th>
+                <th>Message</th>
+                <th>Created At</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="n : ${notifications}">
+                <td>
+                    <span class="status-badge"
+                          th:classappend="${n.isRead} ? ' status-archived' : ' status-requested'"
+                          th:text="${n.isRead} ? 'Read' : 'Unread'">
+                    </span>
+                </td>
+                <td th:text="${n.message}"></td>
+                <td th:text="${n.createdAt != null ? #temporals.format(n.createdAt, 'yyyy-MM-dd HH:mm') : '-'}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

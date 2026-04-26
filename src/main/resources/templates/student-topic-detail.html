@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Topic Detail - Project Selection System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/nav :: sharedNav}"></div>
+
+<div class="container project-page-container">
+    <h2>Topic Detail</h2>
+
+    <div th:if="${errorMessage}" class="alert alert-error">
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <div class="project-table-wrapper">
+        <table class="project-table">
+            <tbody>
+            <tr>
+                <th>ID</th>
+                <td th:text="${projectTopic.id}"></td>
+            </tr>
+            <tr>
+                <th>Title</th>
+                <td th:text="${projectTopic.title != null and !projectTopic.title.isEmpty() ? projectTopic.title : 'Untitled'}"></td>
+            </tr>
+            <tr>
+                <th>Teacher</th>
+                <td th:text="${projectTopic.teacher != null ? projectTopic.teacher.name : 'N/A'}"></td>
+            </tr>
+            <tr>
+                <th>Category</th>
+                <td th:text="${projectTopic.category != null ? projectTopic.category.name : 'N/A'}"></td>
+            </tr>
+            <tr>
+                <th>Description</th>
+                <td th:text="${projectTopic.description != null and !projectTopic.description.isEmpty() ? projectTopic.description : 'N/A'}"></td>
+            </tr>
+            <tr>
+                <th>Required Skills</th>
+                <td th:text="${projectTopic.requiredSkills != null and !projectTopic.requiredSkills.isEmpty() ? projectTopic.requiredSkills : 'N/A'}"></td>
+            </tr>
+            <tr>
+                <th>Keywords</th>
+                <td>
+                    <span th:if="${projectTopic.keywords != null and !projectTopic.keywords.isEmpty()}">
+                        <span th:each="kw : ${#strings.arraySplit(projectTopic.keywords, ',')}"
+                              th:text="${#strings.trim(kw)}"
+                              class="keyword-tag">
+                        </span>
+                    </span>
+                    <span th:if="${projectTopic.keywords == null or projectTopic.keywords.isEmpty()}">N/A</span>
+                </td>
+            </tr>
+            <tr>
+                <th>Max Students</th>
+                <td th:text="${projectTopic.maxStudents != null ? projectTopic.maxStudents : 'N/A'}"></td>
+            </tr>
+            <tr>
+                <th>Status</th>
+                <td>
+                    <span class="status-badge" th:text="${projectTopic.status}"></span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top: 24px;">
+        <button type="button" class="toolbar-link-btn disabled-btn" disabled>
+            Apply (Coming Soon)
+        </button>
+    </div>
+
+    <p class="back-link-row">
+        <a th:href="@{/student/topics}">Back to available topics</a>
+    </p>
+</div>
+
+</body>
+</html>

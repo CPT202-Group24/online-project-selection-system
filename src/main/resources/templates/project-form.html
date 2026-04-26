@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Project Form - Project Selection System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/nav :: sharedNav}"></div>
+
+<div class="container form-page-container">
+    <h2 th:text="${projectTopic.id != null} ? 'Edit Project' : 'Create New Project'"></h2>
+
+    <div th:if="${errorMessage}" class="alert alert-error">
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <form th:action="@{/teacher/projects}" th:object="${projectTopic}" method="post">
+        <input type="hidden" th:field="*{id}">
+
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input id="title" type="text" th:field="*{title}">
+            <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}" class="field-error"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" th:field="*{description}" rows="4"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="requiredSkills">Required Skills</label>
+            <textarea id="requiredSkills" th:field="*{requiredSkills}" rows="3"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="category">Category</label>
+            <select id="category" th:field="*{category.id}">
+                <option value="">-- Select Category --</option>
+                <option th:each="cat : ${categories}"
+                        th:value="${cat.id}"
+                        th:text="${cat.name}">
+                </option>
+            </select>
+            <div class="field-hint">
+                Category is required for normal save, but optional for Save as Draft.
+            </div>
+            <div th:if="${#fields.hasErrors('category')}" th:errors="*{category}" class="field-error"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="keywords">Keywords</label>
+            <input id="keywords" type="text" th:field="*{keywords}">
+            <div class="field-hint">Example: AI, Java, Spring</div>
+
+            <div th:if="${projectTopic.keywords != null and !projectTopic.keywords.isEmpty()}" class="keyword-preview-row">
+                <span th:each="kw : ${#strings.arraySplit(projectTopic.keywords, ',')}"
+                      th:if="${#strings.trim(kw) != ''}"
+                      th:text="${#strings.trim(kw)}"
+                      class="keyword-tag">
+                </span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="maxStudents">Max Students</label>
+            <input id="maxStudents" type="number" th:field="*{maxStudents}">
+        </div>
+
+        <div class="project-form-actions">
+            <button type="submit"
+                    name="submitAction"
+                    value="save"
+                    class="primary-btn"
+                    th:text="${projectTopic.id != null} ? 'Save Changes' : 'Create Project'">
+            </button>
+
+            <button type="submit"
+                    name="submitAction"
+                    value="draft"
+                    class="secondary-btn">
+                Save as Draft
+            </button>
+        </div>
+    </form>
+
+    <p class="back-link-row">
+        <a th:href="@{/teacher/projects}">Back to Project List</a>
+    </p>
+</div>
+
+</body>
+</html>

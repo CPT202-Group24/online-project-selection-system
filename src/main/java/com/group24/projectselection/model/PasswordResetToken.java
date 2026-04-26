@@ -30,6 +30,7 @@ public class PasswordResetToken {
     @Column(nullable = false)
     private LocalDateTime expiresAt;
 
+    // once used, token cannot be reused even if not expired yet
     @Column(nullable = false)
     private Boolean used = false;
 
