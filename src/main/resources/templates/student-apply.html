@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Apply - Project Selection System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/nav :: sharedNav}"></div>
+
+<div class="container form-page-container">
+    <h2>Apply for Project</h2>
+
+    <div th:if="${errorMessage}" class="alert alert-error">
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <div class="project-table-wrapper" style="margin-bottom: 24px;">
+        <table class="project-table">
+            <tbody>
+            <tr>
+                <th>Title</th>
+                <td th:text="${project.title}"></td>
+            </tr>
+            <tr>
+                <th>Teacher</th>
+                <td th:text="${project.teacher != null ? project.teacher.name : 'N/A'}"></td>
+            </tr>
+            <tr>
+                <th>Description</th>
+                <td th:text="${project.description != null ? project.description : 'N/A'}"></td>
+            </tr>
+            <tr>
+                <th>Required Skills</th>
+                <td th:text="${project.requiredSkills != null ? project.requiredSkills : 'N/A'}"></td>
+            </tr>
+            <tr>
+                <th>Max Students</th>
+                <td th:text="${project.maxStudents != null ? project.maxStudents : 'N/A'}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <form th:action="@{/student/applications/apply/{id}(id=${project.id})}" method="post">
+        <div class="form-group">
+            <label for="personalStatement">Personal Statement</label>
+            <textarea id="personalStatement"
+                      name="personalStatement"
+                      rows="6"
+                      placeholder="Explain why you are interested in this project and what relevant skills or experience you have..."
+                      required></textarea>
+        </div>
+        <div class="project-form-actions">
+            <a th:href="@{/student/topics/{id}(id=${project.id})}" class="toolbar-link-btn">Back</a>
+            <button type="submit" class="half-btn primary-btn">Submit Application</button>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>
