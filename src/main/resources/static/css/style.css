@@ -423,3 +423,28 @@ a {
 .btn-close-topic:hover {
     background-color: #d35400;
 }
+
+/* application status badges — M5 */
+.status-badge.status-pending {
+    background: #fff3e0;
+    color: #e65100;
+    border-color: #ffb74d;
+}
+
+.status-badge.status-accepted {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-color: #81c784;
+}
+
+.status-badge.status-rejected {
+    background: #fdecea;
+    color: #c0392b;
+    border-color: #e74c3c;
+}
+
+.status-badge.status-withdrawn {
+    background: #eceff1;
+    color: #37474f;
+    border-color: #90a4ae;
+}
