@@ -15,5 +15,7 @@ public interface ProjectTopicService {
 
     ProjectTopic saveDraftProject(ProjectTopic projectTopic, Long currentTeacherId);
 
+    void deleteProjectTopic(Long topicId, Long currentTeacherId);
+
     List<ProjectTopic> searchAvailableTopics(String keyword, Long categoryId);
 }

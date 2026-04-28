@@ -94,6 +94,19 @@ public class ProjectTopicServiceImpl implements ProjectTopicService {
     }
 
     @Override
+    public void deleteProjectTopic(Long topicId, Long currentTeacherId) {
+        ProjectTopic existingProject = projectTopicRepository
+                .findByIdAndTeacherId(topicId, currentTeacherId)
+                .orElseThrow(() -> new IllegalArgumentException("You cannot delete this project"));
+
+        if (existingProject.getStatus() != ProjectTopic.TopicStatus.unpublished) {
+            throw new IllegalArgumentException("Only unpublished project topics can be deleted");
+        }
+
+        projectTopicRepository.delete(existingProject);
+    }
+
+    @Override
     public List<ProjectTopic> searchAvailableTopics(String keyword, Long categoryId) {
         return projectTopicRepository.searchTopicsByKeywordAndCategory(
                 ProjectTopic.TopicStatus.available,

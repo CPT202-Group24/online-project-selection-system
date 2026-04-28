@@ -19,7 +19,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.List;
 
 @Controller
@@ -167,6 +170,61 @@ public class ProjectTopicController {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/teacher/projects";
+    }
+
+    @DeleteMapping("/api/topics/{id}")
+    @ResponseBody
+    public ResponseEntity<String> deleteTopicApi(@PathVariable Long id,
+                                                 Authentication authentication) {
+        Long teacherId = getCurrentUser(authentication).getId();
+
+        try {
+            projectTopicService.deleteProjectTopic(id, teacherId);
+            return ResponseEntity.ok("Project topic deleted successfully.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/teacher/projects/{id}/delete")
+    public String deleteTopicFromPage(@PathVariable Long id,
+                                      Authentication authentication,
+                                      RedirectAttributes redirectAttributes) {
+        Long teacherId = getCurrentUser(authentication).getId();
+
+        try {
+            projectTopicService.deleteProjectTopic(id, teacherId);
+            redirectAttributes.addFlashAttribute("successMessage", "Project topic deleted successfully.");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+
+        return "redirect:/teacher/projects";
+    }
+    //Sprint3 -- detailed page
+    @GetMapping("/teacher/topics/{id}")
+    public String showTeacherTopicDetail(@PathVariable Long id,
+                                         Authentication authentication,
+                                         Model model,
+                                         RedirectAttributes redirectAttributes) {
+        Long currentTeacherId = getCurrentUser(authentication).getId();
+
+        ProjectTopic topic = projectTopicRepository
+                .findById(id)
+                .orElse(null);
+
+        if (topic == null) {
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    "Topic not found."
+            );
+            return "redirect:/teacher/projects";
+        }
+
+        model.addAttribute("projectTopic", topic);
+        model.addAttribute("currentTeacherId", currentTeacherId);
+
+        return "teacher-topic-detail";
     }
 
     @GetMapping("/teacher/projects/{id}/edit")

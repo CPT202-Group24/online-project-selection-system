@@ -104,4 +104,68 @@ class ProjectTopicServiceImplTest {
         assertEquals("Please select a category before saving.", exception.getMessage());
         verify(projectTopicRepository, never()).save(any(ProjectTopic.class));
     }
+
+    @Test
+    void deleteProjectTopic_whenUnpublishedAndOwned_deletesTopic() {
+        Long topicId = 1L;
+        Long teacherId = 10L;
+
+        User teacher = new User();
+        teacher.setId(teacherId);
+
+        ProjectTopic topic = new ProjectTopic();
+        topic.setId(topicId);
+        topic.setTeacher(teacher);
+        topic.setStatus(ProjectTopic.TopicStatus.unpublished);
+
+        when(projectTopicRepository.findByIdAndTeacherId(topicId, teacherId))
+                .thenReturn(java.util.Optional.of(topic));
+
+        projectTopicService.deleteProjectTopic(topicId, teacherId);
+
+        verify(projectTopicRepository, times(1)).delete(topic);
+    }
+
+    @Test
+    void deleteProjectTopic_whenTopicIsAvailable_throwsException() {
+        Long topicId = 1L;
+        Long teacherId = 10L;
+
+        User teacher = new User();
+        teacher.setId(teacherId);
+
+        ProjectTopic topic = new ProjectTopic();
+        topic.setId(topicId);
+        topic.setTeacher(teacher);
+        topic.setStatus(ProjectTopic.TopicStatus.available);
+
+        when(projectTopicRepository.findByIdAndTeacherId(topicId, teacherId))
+                .thenReturn(java.util.Optional.of(topic));
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> projectTopicService.deleteProjectTopic(topicId, teacherId)
+        );
+
+        assertEquals("Only unpublished project topics can be deleted", exception.getMessage());
+        verify(projectTopicRepository, never()).delete(any(ProjectTopic.class));
+    }
+
+    @Test
+    void deleteProjectTopic_whenTopicNotOwned_throwsException() {
+        Long topicId = 1L;
+        Long teacherId = 10L;
+
+        when(projectTopicRepository.findByIdAndTeacherId(topicId, teacherId))
+                .thenReturn(java.util.Optional.empty());
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> projectTopicService.deleteProjectTopic(topicId, teacherId)
+        );
+
+        assertEquals("You cannot delete this project", exception.getMessage());
+        verify(projectTopicRepository, never()).delete(any(ProjectTopic.class));
+    }
+
 }
