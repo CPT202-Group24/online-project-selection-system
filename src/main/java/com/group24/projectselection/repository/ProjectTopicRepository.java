@@ -1,10 +1,12 @@
 package com.group24.projectselection.repository;
 
 import com.group24.projectselection.model.ProjectTopic;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,9 +39,10 @@ AND (
     :categoryId IS NULL OR p.category.id = :categoryId
 )
 """)
-    List<ProjectTopic> searchTopicsByKeywordAndCategory(
+    Page<ProjectTopic> searchTopicsByKeywordAndCategory(
             @Param("status") ProjectTopic.TopicStatus status,
             @Param("keyword") String keyword,
-            @Param("categoryId") Long categoryId
+            @Param("categoryId") Long categoryId,
+            Pageable pageable
     );
 }

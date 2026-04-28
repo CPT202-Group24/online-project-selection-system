@@ -10,12 +10,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.verify;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -89,32 +95,122 @@ class ProjectTopicServiceTest {
         topic.setTitle("Java Web Project");
 
         when(projectTopicRepository.searchTopicsByKeywordAndCategory(
-                ProjectTopic.TopicStatus.available,
-                keyword,
-                categoryId
-        )).thenReturn(List.of(topic));
+                eq(ProjectTopic.TopicStatus.available),
+                eq(keyword),
+                eq(categoryId),
+                any(Pageable.class)
+        )).thenReturn(new PageImpl<>(List.of(topic)));
 
-        List<ProjectTopic> result = projectTopicService.searchAvailableTopics(keyword, categoryId);
+        Page<ProjectTopic> result = projectTopicService.searchAvailableTopics(
+                keyword,
+                categoryId,
+                0,
+                10,
+                "newest"
+        );
 
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("Java Web Project", result.get(0).getTitle());
+        assertEquals(1, result.getContent().size());
+        assertEquals("Java Web Project", result.getContent().get(0).getTitle());
     }
 
     @Test
-    void searchAvailableTopics_noMatch_returnsEmptyList() {
+    void searchAvailableTopics_noMatch_returnsEmptyPage() {
         String keyword = "Python";
         Long categoryId = 2L;
 
         when(projectTopicRepository.searchTopicsByKeywordAndCategory(
-                ProjectTopic.TopicStatus.available,
-                keyword,
-                categoryId
-        )).thenReturn(List.of());
+                eq(ProjectTopic.TopicStatus.available),
+                eq(keyword),
+                eq(categoryId),
+                any(Pageable.class)
+        )).thenReturn(new PageImpl<>(List.of()));
 
-        List<ProjectTopic> result = projectTopicService.searchAvailableTopics(keyword, categoryId);
+        Page<ProjectTopic> result = projectTopicService.searchAvailableTopics(
+                keyword,
+                categoryId,
+                0,
+                10,
+                "newest"
+        );
 
         assertNotNull(result);
-        assertTrue(result.isEmpty());
+        assertTrue(result.getContent().isEmpty());
+    }
+    @Test
+    void searchAvailableTopics_withNewestSort_usesIdDescendingPageRequest() {
+        String keyword = "Java";
+        Long categoryId = 1L;
+
+        ProjectTopic topic = new ProjectTopic();
+        topic.setTitle("Java Web Project");
+
+        when(projectTopicRepository.searchTopicsByKeywordAndCategory(
+                eq(ProjectTopic.TopicStatus.available),
+                eq(keyword),
+                eq(categoryId),
+                any(Pageable.class)
+        )).thenReturn(new PageImpl<>(List.of(topic)));
+
+        Page<ProjectTopic> result = projectTopicService.searchAvailableTopics(
+                keyword,
+                categoryId,
+                1,
+                10,
+                "newest"
+        );
+
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+
+        verify(projectTopicRepository).searchTopicsByKeywordAndCategory(
+                eq(ProjectTopic.TopicStatus.available),
+                eq(keyword),
+                eq(categoryId),
+                argThat(pageable ->
+                        pageable.getPageNumber() == 1 &&
+                                pageable.getPageSize() == 10 &&
+                                pageable.getSort().getOrderFor("id") != null &&
+                                pageable.getSort().getOrderFor("id").isDescending()
+                )
+        );
+    }
+    @Test
+    void searchAvailableTopics_withAzSort_usesTitleAscendingPageRequest() {
+        String keyword = "Java";
+        Long categoryId = 1L;
+
+        ProjectTopic topic = new ProjectTopic();
+        topic.setTitle("Algorithms Project");
+
+        when(projectTopicRepository.searchTopicsByKeywordAndCategory(
+                eq(ProjectTopic.TopicStatus.available),
+                eq(keyword),
+                eq(categoryId),
+                any(Pageable.class)
+        )).thenReturn(new PageImpl<>(List.of(topic)));
+
+        Page<ProjectTopic> result = projectTopicService.searchAvailableTopics(
+                keyword,
+                categoryId,
+                0,
+                10,
+                "az"
+        );
+
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+
+        verify(projectTopicRepository).searchTopicsByKeywordAndCategory(
+                eq(ProjectTopic.TopicStatus.available),
+                eq(keyword),
+                eq(categoryId),
+                argThat(pageable ->
+                        pageable.getPageNumber() == 0 &&
+                                pageable.getPageSize() == 10 &&
+                                pageable.getSort().getOrderFor("title") != null &&
+                                pageable.getSort().getOrderFor("title").isAscending()
+                )
+        );
     }
 }

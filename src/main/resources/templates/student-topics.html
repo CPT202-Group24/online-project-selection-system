@@ -27,6 +27,14 @@
             </option>
         </select>
 
+        <select name="sort">
+            <option value="newest" th:selected="${sort == 'newest'}">Newest first</option>
+            <option value="az" th:selected="${sort == 'az'}">A-Z</option>
+        </select>
+
+        <input type="hidden" name="page" value="0">
+        <input type="hidden" name="size" th:value="${size}">
+
         <button type="submit">Search</button>
     </form>
 
@@ -100,6 +108,35 @@
             </tr>
             </tbody>
         </table>
+    </div>
+
+    <div class="pagination" th:if="${totalPages > 1}">
+        <a th:if="${currentPage > 0}"
+           th:href="@{/student/topics(
+           page=${currentPage - 1},
+           size=${size},
+           sort=${sort},
+           keyword=${keyword},
+           category=${selectedCategory}
+       )}">
+            Previous
+        </a>
+
+        <span>
+        Page <span th:text="${currentPage + 1}"></span>
+        of <span th:text="${totalPages}"></span>
+    </span>
+
+        <a th:if="${currentPage + 1 < totalPages}"
+           th:href="@{/student/topics(
+           page=${currentPage + 1},
+           size=${size},
+           sort=${sort},
+           keyword=${keyword},
+           category=${selectedCategory}
+       )}">
+            Next
+        </a>
     </div>
 
     <p th:if="${projects.isEmpty()}" class="empty-message">
