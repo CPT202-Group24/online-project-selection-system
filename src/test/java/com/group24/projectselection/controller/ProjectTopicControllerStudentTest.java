@@ -12,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.test.web.servlet.MockMvc;
+import static org.mockito.ArgumentMatchers.eq;
 
 import java.util.List;
 import java.util.Optional;
@@ -60,8 +62,13 @@ class ProjectTopicControllerStudentTest {
         category.setName("IT");
         category.setIsActive(true);
 
-        when(projectTopicService.searchAvailableTopics("java", 1L))
-                .thenReturn(List.of(topic));
+        when(projectTopicService.searchAvailableTopics(
+                eq("java"),
+                eq(1L),
+                eq(0),
+                eq(10),
+                eq("newest")
+        )).thenReturn(new PageImpl<>(List.of(topic)));
         when(categoryRepository.findByIsActiveTrueOrderByNameAsc())
                 .thenReturn(List.of(category));
 
@@ -94,5 +101,49 @@ class ProjectTopicControllerStudentTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("student-topic-detail"))
                 .andExpect(model().attributeExists("projectTopic"));
+    }
+
+    @Test
+    void studentBrowseAvailableTopics_withPageSizeAndSort_returnsPaginatedModel() throws Exception {
+        ProjectTopic topic = new ProjectTopic();
+        topic.setId(2L);
+        topic.setTitle("Algorithms Project");
+        topic.setDescription("Description");
+        topic.setRequiredSkills("Java");
+        topic.setKeywords("algorithm");
+        topic.setMaxStudents(10);
+        topic.setStatus(ProjectTopic.TopicStatus.available);
+
+        Category category = new Category();
+        category.setId(1L);
+        category.setName("IT");
+        category.setIsActive(true);
+
+        when(projectTopicService.searchAvailableTopics(
+                eq("java"),
+                eq(1L),
+                eq(1),
+                eq(10),
+                eq("az")
+        )).thenReturn(new PageImpl<>(List.of(topic)));
+
+        when(categoryRepository.findByIsActiveTrueOrderByNameAsc())
+                .thenReturn(List.of(category));
+
+        mockMvc.perform(get("/student/topics")
+                        .param("keyword", "java")
+                        .param("category", "1")
+                        .param("page", "1")
+                        .param("size", "10")
+                        .param("sort", "az"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("student-topics"))
+                .andExpect(model().attributeExists("projects"))
+                .andExpect(model().attributeExists("topicPage"))
+                .andExpect(model().attribute("keyword", "java"))
+                .andExpect(model().attribute("selectedCategory", 1L))
+                .andExpect(model().attribute("currentPage", 1))
+                .andExpect(model().attribute("size", 10))
+                .andExpect(model().attribute("sort", "az"));
     }
 }

@@ -580,3 +580,22 @@ a {
         justify-content: flex-start;
     }
 }
+
+.pagination {
+    margin-top: 20px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.pagination a {
+    padding: 6px 12px;
+    background-color: #2c3e50;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+.pagination span {
+    font-weight: 600;
+}

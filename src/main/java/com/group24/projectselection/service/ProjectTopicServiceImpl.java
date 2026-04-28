@@ -5,7 +5,15 @@ import com.group24.projectselection.model.ProjectTopic;
 import com.group24.projectselection.model.User;
 import com.group24.projectselection.repository.CategoryRepository;
 import com.group24.projectselection.repository.ProjectTopicRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.util.Arrays;
 import java.util.List;
@@ -107,11 +115,22 @@ public class ProjectTopicServiceImpl implements ProjectTopicService {
     }
 
     @Override
-    public List<ProjectTopic> searchAvailableTopics(String keyword, Long categoryId) {
+    public Page<ProjectTopic> searchAvailableTopics(String keyword, Long categoryId, int page, int size, String sort) {
+        Sort sortOption;
+
+        if ("az".equalsIgnoreCase(sort)) {
+            sortOption = Sort.by("title").ascending();
+        } else {
+            sortOption = Sort.by("id").descending();
+        }
+
+        Pageable pageable = PageRequest.of(page, size, sortOption);
+
         return projectTopicRepository.searchTopicsByKeywordAndCategory(
                 ProjectTopic.TopicStatus.available,
                 keyword,
-                categoryId
+                categoryId,
+                pageable
         );
     }
 

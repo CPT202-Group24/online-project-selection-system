@@ -2,6 +2,7 @@ package com.group24.projectselection.service;
 
 import com.group24.projectselection.model.ProjectTopic;
 import com.group24.projectselection.model.User;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -17,5 +18,5 @@ public interface ProjectTopicService {
 
     void deleteProjectTopic(Long topicId, Long currentTeacherId);
 
-    List<ProjectTopic> searchAvailableTopics(String keyword, Long categoryId);
+    Page<ProjectTopic> searchAvailableTopics(String keyword, Long categoryId, int page, int size, String sort);
 }

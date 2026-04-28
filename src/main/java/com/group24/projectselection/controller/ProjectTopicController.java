@@ -9,6 +9,7 @@ import com.group24.projectselection.repository.UserRepository;
 import com.group24.projectselection.service.ProjectTopicService;
 import com.group24.projectselection.service.TopicStatusService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -261,11 +262,26 @@ public class ProjectTopicController {
     @GetMapping("/student/topics")
     public String listAvailableTopics(@RequestParam(value = "keyword", required = false) String keyword,
                                       @RequestParam(value = "category", required = false) Long categoryId,
+                                      @RequestParam(value = "page", defaultValue = "0") int page,
+                                      @RequestParam(value = "size", defaultValue = "10") int size,
+                                      @RequestParam(value = "sort", defaultValue = "newest") String sort,
                                       Model model) {
 
-        List<ProjectTopic> topics = projectTopicService.searchAvailableTopics(keyword, categoryId);
+        Page<ProjectTopic> topicPage = projectTopicService.searchAvailableTopics(
+                keyword,
+                categoryId,
+                page,
+                size,
+                sort
+        );
 
-        model.addAttribute("projects", topics);
+        model.addAttribute("projects", topicPage.getContent());
+        model.addAttribute("topicPage", topicPage);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", topicPage.getTotalPages());
+        model.addAttribute("size", size);
+        model.addAttribute("sort", sort);
+
         model.addAttribute("keyword", keyword);
         model.addAttribute("selectedCategory", categoryId);
         model.addAttribute("categories", categoryRepository.findByIsActiveTrueOrderByNameAsc());
