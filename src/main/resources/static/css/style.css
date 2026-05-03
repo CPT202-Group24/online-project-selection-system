@@ -404,11 +404,11 @@ a {
 
 /* publish button */
 .btn-publish {
-    background-color: #27ae60;
+    background-color: #7a9e84 !important;
 }
 
 .btn-publish:hover {
-    background-color: #219a52;
+    background-color: #6a8e74 !important;
 }
 
 .notification-table {
@@ -417,11 +417,29 @@ a {
 
 /* close button */
 .btn-close-topic {
-    background-color: #e67e22;
+    background-color: #c4886a !important;
 }
 
 .btn-close-topic:hover {
-    background-color: #d35400;
+    background-color: #b4785a !important;
+}
+
+/* archive button */
+.btn-archive {
+    background-color: #9688a4 !important;
+}
+
+.btn-archive:hover {
+    background-color: #8678a4 !important;
+}
+
+/* delete button */
+.btn-delete-topic {
+    background-color: #b87272 !important;
+}
+
+.btn-delete-topic:hover {
+    background-color: #a86262 !important;
 }
 
 /* application status badges — M5 */

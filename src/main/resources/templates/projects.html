@@ -42,6 +42,8 @@
            th:classappend="${currentStatus == 'available'} ? ' active-filter' : ''">Available</a>
         <a th:href="@{/teacher/projects(status='closed')}"
            th:classappend="${currentStatus == 'closed'} ? ' active-filter' : ''">Closed</a>
+        <a th:href="@{/teacher/projects(status='archived')}"
+           th:classappend="${currentStatus == 'archived'} ? ' active-filter' : ''">Archived</a>
     </div>
 
     <div class="project-toolbar">
@@ -124,15 +126,6 @@
                             Edit
                         </a>
 
-                        <button th:if="${project.teacher == null
-                           or project.teacher.id != currentTeacherId
-                           or project.status.name() != 'unpublished'}"
-                                type="button"
-                                class="small-action-btn disabled-btn"
-                                onclick="alert('Only your unpublished projects can be edited');">
-                            Edit
-                        </button>
-
                         <form th:if="${project.teacher != null
                                        and project.teacher.id == currentTeacherId
                                        and project.status.name() == 'unpublished'}"
@@ -150,6 +143,13 @@
                             <button type="submit" class="small-action-btn btn-close-topic">Close</button>
                         </form>
                         <form th:if="${project.teacher != null
+                                       and project.teacher.id == currentTeacherId
+                                       and project.status.name() == 'closed'}"
+                              th:action="@{/teacher/projects/{id}/archive(id=${project.id})}"
+                              method="post">
+                            <button type="submit" class="small-action-btn btn-archive">Archive</button>
+                        </form>
+                        <form th:if="${project.teacher != null
                and project.teacher.id == currentTeacherId
                and project.status.name() == 'unpublished'}"
                               th:action="@{/teacher/projects/{id}/delete(id=${project.id})}"
@@ -160,14 +160,6 @@
                             </button>
                         </form>
 
-                        <button th:if="${project.teacher == null
-                       or project.teacher.id != currentTeacherId
-                       or project.status.name() != 'unpublished'}"
-                                type="button"
-                                class="small-action-btn disabled-btn"
-                                onclick="alert('Only your unpublished projects can be deleted');">
-                            Delete
-                        </button>
                     </div>
                 </td>
             </tr>
