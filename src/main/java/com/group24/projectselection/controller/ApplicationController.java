@@ -53,6 +53,12 @@ public class ApplicationController {
                                     @RequestParam String personalStatement,
                                     @AuthenticationPrincipal UserDetails userDetails,
                                     RedirectAttributes redirectAttributes) {
+        if (personalStatement == null || personalStatement.trim().length() < 50) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Personal statement must be at least 50 characters.");
+            return "redirect:/student/applications/apply/" + projectId;
+        }
+
         User student = getCurrentStudent(userDetails);
         try {
             applicationService.submitApplication(student, projectId, personalStatement);
