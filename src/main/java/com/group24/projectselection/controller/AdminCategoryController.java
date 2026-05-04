@@ -1,6 +1,9 @@
 package com.group24.projectselection.controller;
 
 import com.group24.projectselection.model.Category;
+import com.group24.projectselection.model.User;
+import com.group24.projectselection.repository.UserRepository;
+import com.group24.projectselection.service.AuditLogService;
 import com.group24.projectselection.service.CategoryService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.security.core.Authentication;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -21,9 +25,15 @@ import java.util.NoSuchElementException;
 public class AdminCategoryController {
 
     private final CategoryService categoryService;
+    private final UserRepository userRepository;
+    private final AuditLogService auditLogService;
 
-    public AdminCategoryController(CategoryService categoryService) {
+    public AdminCategoryController(CategoryService categoryService,
+                                   UserRepository userRepository,
+                                   AuditLogService auditLogService) {
         this.categoryService = categoryService;
+        this.userRepository = userRepository;
+        this.auditLogService = auditLogService;
     }
 
     /** HTML page route — GET /admin/categories */
@@ -65,9 +75,19 @@ public class AdminCategoryController {
     /** REST: delete a category by id */
     @DeleteMapping("/api/admin/categories/{id}")
     @ResponseBody
-    public ResponseEntity<?> deleteCategory(@PathVariable Long id) {
+    public ResponseEntity<?> deleteCategory(@PathVariable Long id, Authentication authentication) {
         try {
             categoryService.delete(id);
+            if (authentication != null && authentication.isAuthenticated()) {
+                User admin = userRepository.findByEmail(authentication.getName()).orElse(null);
+                if (admin != null) {
+                    auditLogService.log(
+                            admin,
+                            AuditLogService.ACTION_CATEGORY_DELETE,
+                            AuditLogService.ENTITY_CATEGORY,
+                            id);
+                }
+            }
             return ResponseEntity.noContent().build();
         } catch (NoSuchElementException e) {
             return ResponseEntity.notFound().build();

@@ -13,9 +13,11 @@ import java.util.NoSuchElementException;
 public class UserAdminService {
 
     private final UserRepository userRepository;
+    private final AuditLogService auditLogService;
 
-    public UserAdminService(UserRepository userRepository) {
+    public UserAdminService(UserRepository userRepository, AuditLogService auditLogService) {
         this.userRepository = userRepository;
+        this.auditLogService = auditLogService;
     }
 
     public List<UserSummary> listAllUsers() {
@@ -39,7 +41,15 @@ public class UserAdminService {
             user.setStatus(User.UserStatus.active);
         }
 
-        return UserSummary.from(userRepository.save(user));
+        User saved = userRepository.save(user);
+        userRepository.findByEmail(currentAdminEmail)
+                .ifPresent(admin -> auditLogService.log(
+                        admin,
+                        AuditLogService.ACTION_USER_STATUS_TOGGLE,
+                        AuditLogService.ENTITY_USER,
+                        userId));
+
+        return UserSummary.from(saved);
     }
 
     @Transactional
