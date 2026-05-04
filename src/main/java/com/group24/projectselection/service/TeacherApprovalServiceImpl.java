@@ -38,6 +38,31 @@ public class TeacherApprovalServiceImpl implements TeacherApprovalService {
         ProjectTopic project = application.getProject();
 
         if (isAccepted) {
+            Long studentId = application.getStudent().getId();
+
+            List<Application> studentApplications = applicationRepository.findByStudentId(studentId);
+            boolean alreadyAccepted = studentApplications.stream()
+                    .anyMatch(app ->
+                            !app.getId().equals(applicationId)
+                                    && app.getStatus() == Application.ApplicationStatus.accepted
+                    );
+
+            if (alreadyAccepted) {
+                throw new RuntimeException("Student already has an accepted application");
+            }
+
+            List<Application> allApplicationsForProject = applicationRepository.findByProjectId(project.getId());
+
+            if (project.getMaxStudents() != null) {
+                long acceptedCount = allApplicationsForProject.stream()
+                        .filter(app -> app.getStatus() == Application.ApplicationStatus.accepted)
+                        .count();
+
+                if (acceptedCount >= project.getMaxStudents()) {
+                    throw new RuntimeException("Project has reached maximum student capacity");
+                }
+            }
+
             application.setStatus(Application.ApplicationStatus.accepted);
             project.setStatus(ProjectTopic.TopicStatus.agreed);
 

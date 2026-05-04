@@ -65,4 +65,22 @@ class RegistrationControllerTest {
 
         verify(registrationService).register(eq("N"), eq("n@student.xjtlu.edu.cn"), eq("secret"), eq(User.Role.student));
     }
+
+    @Test
+    void duplicateEmail_setsFlashErrorAndDoesNotPersist() throws Exception {
+        when(registrationService.parseRegisterableRole("student")).thenReturn(User.Role.student);
+        when(registrationService.isValidRegistrationInput(any(), any(), any(), any())).thenReturn(true);
+        when(registrationService.emailExists("dup@student.xjtlu.edu.cn")).thenReturn(true);
+
+        mockMvc.perform(post("/register")
+                        .param("name", "Dup User")
+                        .param("email", "dup@student.xjtlu.edu.cn")
+                        .param("password", "secret")
+                        .param("role", "student"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/register"))
+                .andExpect(flash().attribute("errorMessage", "An account with this email already exists."));
+
+        verify(registrationService, never()).register(any(), any(), any(), any());
+    }
 }

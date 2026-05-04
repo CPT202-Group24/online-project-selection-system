@@ -39,6 +39,7 @@ CREATE TABLE project_topics (
     status ENUM('unpublished','available','requested','agreed','closed','archived') NOT NULL DEFAULT 'unpublished',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    is_draft TINYINT(1) NOT NULL DEFAULT 0,
     FOREIGN KEY (teacher_id) REFERENCES users(id),
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL,
     INDEX idx_topic_teacher (teacher_id),

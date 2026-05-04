@@ -1,4 +1,5 @@
 package com.group24.projectselection.model;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,6 +14,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -45,6 +47,9 @@ public class ProjectTopic {
     @Column(length = 500)
     private String keywords;
 
+    @Column(name = "is_draft", nullable = false)
+    private boolean isDraft = false;
+
     private Integer maxStudents;
 
     @Enumerated(EnumType.STRING)
@@ -56,7 +61,7 @@ public class ProjectTopic {
     private LocalDateTime updatedAt;
 
     public enum TopicStatus {
-         unpublished, available, requested, agreed, closed, archived
+        unpublished, available, requested, agreed, closed, archived
     }
 
     public ProjectTopic() {
@@ -127,6 +132,14 @@ public class ProjectTopic {
 
     public void setKeywords(String keywords) {
         this.keywords = keywords;
+    }
+
+    public boolean isDraft() {
+        return isDraft;
+    }
+
+    public void setDraft(boolean draft) {
+        isDraft = draft;
     }
 
     public Integer getMaxStudents() {

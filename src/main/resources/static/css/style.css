@@ -28,6 +28,26 @@ nav a:hover {
     color: white;
 }
 
+.nav-notification-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.notification-badge {
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: #e74c3c;
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 20px;
+    text-align: center;
+}
+
 .container {
     max-width: 600px;
     margin: 60px auto;
@@ -95,6 +115,12 @@ button[type="submit"]:hover {
     background-color: #eaf4fb;
     color: #2980b9;
     border: 1px solid #3498db;
+}
+
+.alert-success {
+    background-color: #e8f8ee;
+    color: #1f7a43;
+    border: 1px solid #2ecc71;
 }
 
 a {
@@ -378,9 +404,216 @@ a {
 
 /* publish button */
 .btn-publish {
-    background-color: #27ae60;
+    background-color: #7a9e84 !important;
 }
 
 .btn-publish:hover {
-    background-color: #219a52;
+    background-color: #6a8e74 !important;
+}
+
+.notification-table {
+    min-width: 760px;
+}
+
+/* close button */
+.btn-close-topic {
+    background-color: #c4886a !important;
+}
+
+.btn-close-topic:hover {
+    background-color: #b4785a !important;
+}
+
+/* archive button */
+.btn-archive {
+    background-color: #9688a4 !important;
+}
+
+.btn-archive:hover {
+    background-color: #8678a4 !important;
+}
+
+/* delete button */
+.btn-delete-topic {
+    background-color: #b87272 !important;
+}
+
+.btn-delete-topic:hover {
+    background-color: #a86262 !important;
+}
+
+/* application status badges — M5 */
+.status-badge.status-pending {
+    background: #fff3e0;
+    color: #e65100;
+    border-color: #ffb74d;
+}
+
+.status-badge.status-accepted {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-color: #81c784;
+}
+
+.status-badge.status-rejected {
+    background: #fdecea;
+    color: #c0392b;
+    border-color: #e74c3c;
+}
+
+.status-badge.status-withdrawn {
+    background: #eceff1;
+    color: #37474f;
+    border-color: #90a4ae;
+}
+.topic-detail-container {
+    max-width: 980px;
+}
+
+.detail-header-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.detail-header-card h2 {
+    margin: 6px 0 0;
+    color: #2c3e50;
+    font-size: 26px;
+}
+
+.detail-page-label {
+    margin: 0;
+    color: #7f8c8d;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+}
+
+.detail-status-area {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.detail-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 22px 26px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.detail-card h3 {
+    margin: 0 0 18px;
+    color: #2c3e50;
+    font-size: 18px;
+    border-bottom: 1px solid #ecf0f1;
+    padding-bottom: 10px;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 28px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.detail-label {
+    color: #7f8c8d;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.detail-value {
+    color: #2c3e50;
+    font-size: 15px;
+    word-break: break-word;
+}
+
+.detail-text {
+    color: #34495e;
+    line-height: 1.7;
+    margin: 0;
+    white-space: pre-line;
+}
+
+.draft-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: #f1c40f;
+    color: #2c3e50;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.detail-action-bar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+}
+
+.danger-btn {
+    border: none;
+    background: #c0392b;
+    color: #ffffff;
+    padding: 10px 18px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.danger-btn:hover {
+    background: #a93226;
+}
+
+@media (max-width: 768px) {
+    .detail-header-card {
+        flex-direction: column;
+    }
+
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .detail-action-bar {
+        justify-content: flex-start;
+    }
+}
+
+.pagination {
+    margin-top: 20px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.pagination a {
+    padding: 6px 12px;
+    background-color: #2c3e50;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+.pagination span {
+    font-weight: 600;
 }

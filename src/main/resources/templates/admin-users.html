@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>User Management - Project Selection System</title>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .page-container { max-width: 1100px; margin: 30px auto; background: #fff; padding: 24px; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+        .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+        .toolbar input { width: 320px; }
+        .top-actions a { margin-right: 12px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border-bottom: 1px solid #eee; padding: 10px; font-size: 14px; text-align: left; }
+        th { background: #f7f7f7; }
+        .status-active { color: #1b8a3b; font-weight: 600; }
+        .status-disabled { color: #b23b3b; font-weight: 600; }
+        .action-cell { display: flex; gap: 8px; flex-wrap: wrap; }
+        .action-cell button, .action-cell select { width: auto; margin-top: 0; font-size: 13px; padding: 6px 10px; }
+        .action-cell button { background-color: #2c3e50; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+        .action-cell button.warn { background-color: #c0392b; }
+        .muted { color: #999; }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: sharedNav}"></div>
+
+<div class="page-container">
+    <div class="toolbar">
+        <h2>User Account Management</h2>
+        <input id="searchInput" type="text" placeholder="Search by name / email / role..." oninput="renderRows()">
+    </div>
+
+    <div class="top-actions">
+        <a th:href="@{/admin/dashboard}">Back to Dashboard</a>
+    </div>
+
+    <div id="messageBox"></div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Phone</th>
+            <th>Department</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody id="userTableBody">
+        <tr><td colspan="8" class="muted">Loading users...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+    let users = [];
+
+    function headers(isJson = false) {
+        const h = { [csrfHeader]: csrfToken };
+        if (isJson) h['Content-Type'] = 'application/json';
+        return h;
+    }
+
+    function showMessage(text, type = 'info') {
+        const box = document.getElementById('messageBox');
+        box.innerHTML = `<div class="alert alert-${type === 'error' ? 'error' : 'info'}">${text}</div>`;
+        setTimeout(() => box.innerHTML = '', 3500);
+    }
+
+    async function loadUsers() {
+        try {
+            const res = await fetch('/api/admin/users', { headers: headers() });
+            users = await res.json();
+            renderRows();
+        } catch (e) {
+            showMessage('Failed to load users.', 'error');
+        }
+    }
+
+    function renderRows() {
+        const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+        const filtered = users.filter(u => {
+            const txt = `${u.name || ''} ${u.email || ''} ${u.role || ''}`.toLowerCase();
+            return txt.includes(keyword);
+        });
+
+        const tbody = document.getElementById('userTableBody');
+        if (!filtered.length) {
+            tbody.innerHTML = '<tr><td colspan="8" class="muted">No users found.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = filtered.map(u => `
+            <tr>
+                <td>${u.id}</td>
+                <td>${escapeHtml(u.name || '')}</td>
+                <td>${escapeHtml(u.email || '')}</td>
+                <td>${escapeHtml(u.role)}</td>
+                <td class="${u.status === 'active' ? 'status-active' : 'status-disabled'}">${escapeHtml(u.status)}</td>
+                <td>${escapeHtml(u.phone || '-')}</td>
+                <td>${escapeHtml(u.department || '-')}</td>
+                <td class="action-cell">
+                    <button class="${u.status === 'active' ? 'warn' : ''}" onclick="toggleStatus(${u.id}, '${u.name || u.email}', '${u.status}')">
+                        ${u.status === 'active' ? 'Disable' : 'Enable'}
+                    </button>
+                    <select onchange="changeRole(${u.id}, '${u.name || u.email}', this.value)">
+                        ${['student','teacher','admin'].map(r => `<option value="${r}" ${u.role === r ? 'selected' : ''}>${r}</option>`).join('')}
+                    </select>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    async function toggleStatus(id, userLabel, currentStatus) {
+        const action = currentStatus === 'active' ? 'disable' : 'enable';
+        if (!confirm(`Are you sure you want to ${action} ${userLabel}?`)) return;
+
+        try {
+            const res = await fetch(`/api/admin/users/${id}/status`, {
+                method: 'PUT',
+                headers: headers()
+            });
+            const data = res.status === 204 ? null : await res.json();
+            if (!res.ok) {
+                showMessage((data && data.error) || 'Failed to update status.', 'error');
+                await loadUsers();
+                return;
+            }
+            showMessage(`User status updated successfully.`);
+            users = users.map(u => u.id === id ? data : u);
+            renderRows();
+        } catch (e) {
+            showMessage('Network error while updating status.', 'error');
+        }
+    }
+
+    async function changeRole(id, userLabel, newRole) {
+        if (!confirm(`Are you sure you want to change ${userLabel}'s role to ${newRole}?`)) {
+            await loadUsers();
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/admin/users/${id}/role`, {
+                method: 'PUT',
+                headers: headers(true),
+                body: JSON.stringify({ role: newRole })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                showMessage(data.error || 'Failed to update role.', 'error');
+                await loadUsers();
+                return;
+            }
+            showMessage(`Role updated to ${newRole}.`);
+            users = users.map(u => u.id === id ? data : u);
+            renderRows();
+        } catch (e) {
+            showMessage('Network error while updating role.', 'error');
+        }
+    }
+
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    loadUsers();
+</script>
+</body>
+</html>
