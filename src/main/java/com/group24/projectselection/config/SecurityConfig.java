@@ -54,6 +54,9 @@ public class SecurityConfig {
                 .maximumSessions(1)
                 .expiredUrl("/login?expired=true")
             )
+            .exceptionHandling(exception -> exception
+                .accessDeniedPage("/error/403")
+            )
             .headers(headers -> headers
                 .cacheControl(cache -> cache.disable())
                 .addHeaderWriter(new CacheControlHeadersWriter())
