@@ -29,7 +29,6 @@ class TeacherApprovalServiceImplTest {
     @InjectMocks
     private TeacherApprovalServiceImpl teacherApprovalService;
 
-    // 对应 UT-M6-S2-01: 成功同意申请
     @Test
     void testProcessApproval_Accepted_Success() {
         ProjectTopic mockProject = new ProjectTopic();
@@ -56,7 +55,6 @@ class TeacherApprovalServiceImplTest {
         assertEquals(Application.ApplicationStatus.rejected, otherApp.getStatus());
     }
 
-    // 对应 UT-M6-S2-02: 成功拒绝申请
     @Test
     void testProcessApproval_Rejected_Success() {
         ProjectTopic mockProject = new ProjectTopic();
@@ -73,10 +71,9 @@ class TeacherApprovalServiceImplTest {
         teacherApprovalService.processApproval(1L, false);
 
         assertEquals(Application.ApplicationStatus.rejected, mainApp.getStatus());
-        assertEquals(ProjectTopic.TopicStatus.requested, mockProject.getStatus()); // 课题状态保持不变
+        assertEquals(ProjectTopic.TopicStatus.requested, mockProject.getStatus());
     }
 
-    // 对应 UT-M6-S3-01: 报错测试 - 找不到申请单
     @Test
     void testProcessApproval_ApplicationNotFound_ThrowsException() {
         when(applicationRepository.findById(99L)).thenReturn(Optional.empty());
@@ -88,7 +85,6 @@ class TeacherApprovalServiceImplTest {
         assertEquals("Application not found", exception.getMessage());
     }
 
-    // 对应 UT-M6-S3-02: 报错测试 - 申请单状态不是 pending
     @Test
     void testProcessApproval_NotPending_ThrowsException() {
         Application mainApp = new Application();

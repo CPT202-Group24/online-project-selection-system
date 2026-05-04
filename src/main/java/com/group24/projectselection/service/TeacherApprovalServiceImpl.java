@@ -5,19 +5,25 @@ import com.group24.projectselection.model.ProjectTopic;
 import com.group24.projectselection.repository.ApplicationRepository;
 import com.group24.projectselection.repository.ProjectTopicRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TeacherApprovalServiceImpl implements TeacherApprovalService {
 
-    @Autowired
-    private ApplicationRepository applicationRepository;
+    private final ApplicationRepository applicationRepository;
+    private final ProjectTopicRepository projectTopicRepository;
 
     @Autowired
-    private ProjectTopicRepository projectTopicRepository;
+    public TeacherApprovalServiceImpl(ApplicationRepository applicationRepository, ProjectTopicRepository projectTopicRepository) {
+        this.applicationRepository = applicationRepository;
+        this.projectTopicRepository = projectTopicRepository;
+    }
 
     @Override
     @Transactional
@@ -35,8 +41,8 @@ public class TeacherApprovalServiceImpl implements TeacherApprovalService {
             application.setStatus(Application.ApplicationStatus.accepted);
             project.setStatus(ProjectTopic.TopicStatus.agreed);
 
-            List<Application> allApplicationsForProject = applicationRepository.findByProjectId(project.getId());
-            for (Application otherApp : allApplicationsForProject) {
+            List<Application> conflictingApplications = applicationRepository.findByProjectId(project.getId());
+            for (Application otherApp : conflictingApplications) {
                 if (!otherApp.getId().equals(applicationId) && otherApp.getStatus() == Application.ApplicationStatus.pending) {
                     otherApp.setStatus(Application.ApplicationStatus.rejected);
                     applicationRepository.save(otherApp);
@@ -48,5 +54,20 @@ public class TeacherApprovalServiceImpl implements TeacherApprovalService {
 
         applicationRepository.save(application);
         projectTopicRepository.save(project);
+    }
+
+    @Override
+    public List<Application> getAcceptedApplications(Long topicId, Long currentTeacherId) {
+        ProjectTopic topic = projectTopicRepository.findById(topicId)
+                .orElseThrow(() -> new RuntimeException("Topic not found"));
+
+        if (!topic.getTeacher().getId().equals(currentTeacherId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to view this topic.");
+        }
+
+        List<Application> allApplications = applicationRepository.findByProjectId(topicId);
+        return allApplications.stream()
+                .filter(app -> app.getStatus() == Application.ApplicationStatus.accepted)
+                .collect(Collectors.toList());
     }
 }
