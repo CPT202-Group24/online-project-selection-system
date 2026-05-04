@@ -50,8 +50,10 @@
             <textarea id="personalStatement"
                       name="personalStatement"
                       rows="6"
-                      placeholder="Explain why you are interested in this project and what relevant skills or experience you have..."
+                      minlength="50"
+                      placeholder="Explain why you are interested in this project and what relevant skills or experience you have (minimum 50 characters)..."
                       required></textarea>
+            <p class="field-hint">Minimum 50 characters required.</p>
         </div>
         <div class="project-form-actions">
             <a th:href="@{/student/topics/{id}(id=${project.id})}" class="toolbar-link-btn">Back</a>

@@ -173,6 +173,20 @@ public class ProjectTopicController {
         return "redirect:/teacher/projects";
     }
 
+    @PostMapping("/teacher/projects/{id}/archive")
+    public String archiveTopic(@PathVariable Long id,
+                               Authentication authentication,
+                               RedirectAttributes redirectAttributes) {
+        Long teacherId = getCurrentUser(authentication).getId();
+        try {
+            topicStatusService.archiveTopic(id, teacherId);
+            redirectAttributes.addFlashAttribute("successMessage", "Topic archived successfully.");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/teacher/projects";
+    }
+
     @DeleteMapping("/api/topics/{id}")
     @ResponseBody
     public ResponseEntity<String> deleteTopicApi(@PathVariable Long id,

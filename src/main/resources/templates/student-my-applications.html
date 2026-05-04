@@ -32,6 +32,7 @@
                 <th>Project Title</th>
                 <th>Teacher</th>
                 <th>Submitted</th>
+                <th>Last Updated</th>
                 <th>Status</th>
                 <th>Action</th>
             </tr>
@@ -40,7 +41,8 @@
             <tr th:each="app : ${applications}">
                 <td th:text="${app.project.title}"></td>
                 <td th:text="${app.project.teacher.name}"></td>
-                <td th:text="${#temporals.format(app.createdAt, 'yyyy-MM-dd')}"></td>
+                <td th:text="${#temporals.format(app.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+                <td th:text="${#temporals.format(app.updatedAt, 'yyyy-MM-dd HH:mm')}"></td>
                 <td>
                     <span class="status-badge"
                           th:classappend="'status-' + ${app.status.name()}"
