@@ -2,43 +2,48 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Conflict Logs</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <title>Conflict Logs - Project Selection System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<main style="max-width: 1100px; margin: 40px auto; padding: 24px;">
-    <h1>Allocation Conflict Logs</h1>
+<div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-    <p>
-        <a href="/admin/dashboard">Back to Admin Dashboard</a>
-    </p>
+<div class="container project-page-container">
+    <h2>Allocation Conflict Logs</h2>
+    <p class="muted">Review automatic allocation conflicts and blocked approval actions.</p>
 
-    <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Student</th>
-            <th>Project</th>
-            <th>Action Taken</th>
-            <th>Reason</th>
-            <th>Created At</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:if="${#lists.isEmpty(conflictLogs)}">
-            <td colspan="6">No conflict logs found.</td>
-        </tr>
+    <div style="margin:16px 0;">
+        <a th:href="@{/admin/dashboard}" class="secondary-btn">Back to Admin Dashboard</a>
+    </div>
 
-        <tr th:each="log : ${conflictLogs}">
-            <td th:text="${log.id}">1</td>
-            <td th:text="${log.student != null ? log.student.name : 'N/A'}">Student Name</td>
-            <td th:text="${log.project != null ? log.project.title : 'N/A'}">Project Title</td>
-            <td th:text="${log.actionTaken}">AUTO_REJECTED</td>
-            <td th:text="${log.reason}">Reason</td>
-            <td th:text="${log.createdAt}">2026-05-05</td>
-        </tr>
-        </tbody>
-    </table>
-</main>
+    <div th:if="${#lists.isEmpty(conflictLogs)}" class="empty-message">
+        No allocation conflicts have been recorded.
+    </div>
+
+    <div th:if="${not #lists.isEmpty(conflictLogs)}" class="project-table-wrapper">
+        <table class="project-table">
+            <thead>
+            <tr>
+                <th>Time</th>
+                <th>Student</th>
+                <th>Project</th>
+                <th>Action Taken</th>
+                <th>Reason</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="log : ${conflictLogs}">
+                <td th:text="${log.createdAt != null ? #temporals.format(log.createdAt, 'yyyy-MM-dd HH:mm') : '-'}">Time</td>
+                <td th:text="${log.student != null ? log.student.name : 'N/A'}">Student Name</td>
+                <td th:text="${log.project != null ? log.project.title : 'N/A'}">Project Title</td>
+                <td>
+                    <span class="status-badge status-rejected" th:text="${log.actionTaken}">AUTO_REJECTED</span>
+                </td>
+                <td th:text="${log.reason}">Reason</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 </body>
 </html>

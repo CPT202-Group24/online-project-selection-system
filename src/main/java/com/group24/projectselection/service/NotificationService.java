@@ -10,7 +10,9 @@ public interface NotificationService {
 
     List<Notification> listByUser(Long userId);
 
-    void markAsRead(Long notificationId);
-
     Notification createNotification(Long userId, String message);
+
+    void markAsRead(Long notificationId, Long userId);
+
+    void markAllAsRead(Long userId);
 }

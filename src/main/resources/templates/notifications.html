@@ -11,8 +11,22 @@
 <div class="container project-page-container">
     <h2>Notifications</h2>
 
+    <div th:if="${successMessage}" class="alert alert-success">
+        <span th:text="${successMessage}"></span>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-error">
+        <span th:text="${errorMessage}"></span>
+    </div>
+
     <div th:if="${#lists.isEmpty(notifications)}" class="empty-message">
         You have no notifications.
+    </div>
+
+    <div th:if="${not #lists.isEmpty(notifications)}" style="margin-bottom:16px;">
+        <form th:action="@{/notifications/read-all}" method="post" style="display:inline;">
+            <button type="submit" class="primary-btn" style="width:auto;">Mark all as read</button>
+        </form>
     </div>
 
     <div th:if="${not #lists.isEmpty(notifications)}" class="project-table-wrapper">
@@ -22,6 +36,7 @@
                 <th>Status</th>
                 <th>Message</th>
                 <th>Created At</th>
+                <th>Action</th>
             </tr>
             </thead>
             <tbody>
@@ -34,6 +49,15 @@
                 </td>
                 <td th:text="${n.message}"></td>
                 <td th:text="${n.createdAt != null ? #temporals.format(n.createdAt, 'yyyy-MM-dd HH:mm') : '-'}"></td>
+                <td>
+                    <form th:if="${!n.isRead}"
+                          th:action="@{/notifications/{id}/read(id=${n.id})}"
+                          method="post"
+                          style="display:inline;">
+                        <button type="submit" class="secondary-btn" style="width:auto;">Mark as read</button>
+                    </form>
+                    <span th:if="${n.isRead}" class="muted">No action</span>
+                </td>
             </tr>
             </tbody>
         </table>
