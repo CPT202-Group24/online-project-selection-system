@@ -9,6 +9,9 @@
 <div class="container">
     <h2>Login</h2>
 
+    <div th:if="${param.disabled}" class="alert alert-error">
+        Account disabled. Please contact an administrator.
+    </div>
     <div th:if="${param.error}" class="alert alert-error">
         Invalid email or password.
     </div>

@@ -43,10 +43,10 @@
         <thead>
         <tr>
             <th>ID</th>
-            <th>Name</th>
+            <th onclick="sortBy('name')" style="cursor:pointer;user-select:none;">Name <span id="sort-name">↕</span></th>
             <th>Email</th>
-            <th>Role</th>
-            <th>Status</th>
+            <th onclick="sortBy('role')" style="cursor:pointer;user-select:none;">Role <span id="sort-role">↕</span></th>
+            <th onclick="sortBy('status')" style="cursor:pointer;user-select:none;">Status <span id="sort-status">↕</span></th>
             <th>Phone</th>
             <th>Department</th>
             <th>Action</th>
@@ -62,6 +62,8 @@
     const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
     const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
     let users = [];
+    let sortKey = null;
+    let sortAsc = true;
 
     function headers(isJson = false) {
         const h = { [csrfHeader]: csrfToken };
@@ -85,12 +87,36 @@
         }
     }
 
+    function sortBy(key) {
+        if (sortKey === key) {
+            sortAsc = !sortAsc;
+        } else {
+            sortKey = key;
+            sortAsc = true;
+        }
+        ['name', 'role', 'status'].forEach(k => {
+            const el = document.getElementById('sort-' + k);
+            if (el) el.textContent = '↕';
+        });
+        const el = document.getElementById('sort-' + key);
+        if (el) el.textContent = sortAsc ? '↑' : '↓';
+        renderRows();
+    }
+
     function renderRows() {
         const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
-        const filtered = users.filter(u => {
+        let filtered = users.filter(u => {
             const txt = `${u.name || ''} ${u.email || ''} ${u.role || ''}`.toLowerCase();
             return txt.includes(keyword);
         });
+
+        if (sortKey) {
+            filtered = [...filtered].sort((a, b) => {
+                const va = String(a[sortKey] || '').toLowerCase();
+                const vb = String(b[sortKey] || '').toLowerCase();
+                return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+            });
+        }
 
         const tbody = document.getElementById('userTableBody');
         if (!filtered.length) {
