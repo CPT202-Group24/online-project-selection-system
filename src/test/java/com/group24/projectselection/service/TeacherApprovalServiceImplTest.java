@@ -1,9 +1,11 @@
 package com.group24.projectselection.service;
 
 import com.group24.projectselection.model.Application;
+import com.group24.projectselection.model.ConflictLog;
 import com.group24.projectselection.model.ProjectTopic;
 import com.group24.projectselection.model.User;
 import com.group24.projectselection.repository.ApplicationRepository;
+import com.group24.projectselection.repository.ConflictLogRepository;
 import com.group24.projectselection.repository.ProjectTopicRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,13 +29,19 @@ class TeacherApprovalServiceImplTest {
     @Mock
     private ProjectTopicRepository projectTopicRepository;
 
+    @Mock
+    private ConflictLogRepository conflictLogRepository;
+
     @InjectMocks
     private TeacherApprovalServiceImpl teacherApprovalService;
 
     @Test
-    void testProcessApproval_Accepted_Success() {
+    void testProcessApproval_Accepted_NotFull_KeepsOtherPending() {
         User student = new User();
         student.setId(10L);
+
+        User otherStudent = new User();
+        otherStudent.setId(11L);
 
         ProjectTopic mockProject = new ProjectTopic();
         mockProject.setId(100L);
@@ -48,6 +56,45 @@ class TeacherApprovalServiceImplTest {
 
         Application otherApp = new Application();
         otherApp.setId(2L);
+        otherApp.setStudent(otherStudent);
+        otherApp.setProject(mockProject);
+        otherApp.setStatus(Application.ApplicationStatus.pending);
+
+        when(applicationRepository.findById(1L)).thenReturn(Optional.of(mainApp));
+        when(applicationRepository.findByStudentId(10L)).thenReturn(Arrays.asList(mainApp));
+        when(applicationRepository.findByProjectId(100L)).thenReturn(Arrays.asList(mainApp, otherApp));
+
+        teacherApprovalService.processApproval(1L, true);
+
+        assertEquals(Application.ApplicationStatus.accepted, mainApp.getStatus());
+        assertEquals(ProjectTopic.TopicStatus.requested, mockProject.getStatus());
+        assertEquals(Application.ApplicationStatus.pending, otherApp.getStatus());
+
+        verify(conflictLogRepository, never()).save(any(ConflictLog.class));
+    }
+
+    @Test
+    void testProcessApproval_Accepted_ProjectFull_AutoRejectsOtherPending() {
+        User student = new User();
+        student.setId(10L);
+
+        User otherStudent = new User();
+        otherStudent.setId(11L);
+
+        ProjectTopic mockProject = new ProjectTopic();
+        mockProject.setId(100L);
+        mockProject.setStatus(ProjectTopic.TopicStatus.requested);
+        mockProject.setMaxStudents(1);
+
+        Application mainApp = new Application();
+        mainApp.setId(1L);
+        mainApp.setStudent(student);
+        mainApp.setProject(mockProject);
+        mainApp.setStatus(Application.ApplicationStatus.pending);
+
+        Application otherApp = new Application();
+        otherApp.setId(2L);
+        otherApp.setStudent(otherStudent);
         otherApp.setProject(mockProject);
         otherApp.setStatus(Application.ApplicationStatus.pending);
 
@@ -60,6 +107,8 @@ class TeacherApprovalServiceImplTest {
         assertEquals(Application.ApplicationStatus.accepted, mainApp.getStatus());
         assertEquals(ProjectTopic.TopicStatus.agreed, mockProject.getStatus());
         assertEquals(Application.ApplicationStatus.rejected, otherApp.getStatus());
+
+        verify(conflictLogRepository, times(1)).save(any(ConflictLog.class));
     }
 
     @Test
@@ -108,7 +157,7 @@ class TeacherApprovalServiceImplTest {
     }
 
     @Test
-    void testProcessApproval_StudentAlreadyAccepted_ThrowsException() {
+    void testProcessApproval_StudentAlreadyAccepted_ThrowsExceptionAndLogsConflict() {
         User student = new User();
         student.setId(10L);
 
@@ -136,10 +185,11 @@ class TeacherApprovalServiceImplTest {
         });
 
         assertEquals("Student already has an accepted application", exception.getMessage());
+        verify(conflictLogRepository, times(1)).save(any(ConflictLog.class));
     }
 
     @Test
-    void testProcessApproval_ProjectCapacityReached_ThrowsException() {
+    void testProcessApproval_ProjectCapacityReached_ThrowsExceptionAndLogsConflict() {
         User student = new User();
         student.setId(10L);
 
@@ -168,5 +218,6 @@ class TeacherApprovalServiceImplTest {
         });
 
         assertEquals("Project has reached maximum student capacity", exception.getMessage());
+        verify(conflictLogRepository, times(1)).save(any(ConflictLog.class));
     }
 }
