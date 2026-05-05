@@ -1,11 +1,13 @@
 package com.group24.projectselection.controller;
 
-import com.group24.projectselection.service.TeacherApprovalService;
 import com.group24.projectselection.model.Application;
+import com.group24.projectselection.service.TeacherApprovalService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.io.PrintWriter;
 import java.util.List;
 
@@ -21,6 +23,8 @@ public class TeacherApprovalController {
         try {
             teacherApprovalService.processApproval(id, true);
             return ResponseEntity.ok("Application has been APPROVED successfully.");
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body("Error: " + e.getReason());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
@@ -31,6 +35,8 @@ public class TeacherApprovalController {
         try {
             teacherApprovalService.processApproval(id, false);
             return ResponseEntity.ok("Application has been REJECTED.");
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body("Error: " + e.getReason());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }

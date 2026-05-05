@@ -44,9 +44,21 @@ public class ApplicationService {
         }
 
         List<Application> myApplications = applicationRepository.findByStudentId(student.getId());
+
+        for (Application app : myApplications) {
+            boolean hasAcceptedApplication = app.getStatus() == ApplicationStatus.accepted;
+            boolean hasAgreedProject = app.getProject() != null
+                    && app.getProject().getStatus() == ProjectTopic.TopicStatus.agreed;
+
+            if (hasAcceptedApplication || hasAgreedProject) {
+                throw new IllegalStateException("You already have an agreed project.");
+            }
+        }
+
         for (Application app : myApplications) {
             if (app.getProject().getId().equals(projectId)) {
-                if (app.getStatus() == ApplicationStatus.withdrawn) {
+                if (app.getStatus() == ApplicationStatus.withdrawn
+                        || app.getStatus() == ApplicationStatus.rejected) {
                     app.setPersonalStatement(personalStatement);
                     app.setStatus(ApplicationStatus.pending);
                     return applicationRepository.save(app);
@@ -75,6 +87,7 @@ public class ApplicationService {
         if (result.isEmpty()) {
             throw new IllegalStateException("Application not found.");
         }
+
         Application application = result.get();
 
         if (!application.getStudent().getId().equals(student.getId())) {

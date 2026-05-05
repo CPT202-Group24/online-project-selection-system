@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Conflict Logs</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<main style="max-width: 1100px; margin: 40px auto; padding: 24px;">
+    <h1>Allocation Conflict Logs</h1>
+
+    <p>
+        <a href="/admin/dashboard">Back to Admin Dashboard</a>
+    </p>
+
+    <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Student</th>
+            <th>Project</th>
+            <th>Action Taken</th>
+            <th>Reason</th>
+            <th>Created At</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${#lists.isEmpty(conflictLogs)}">
+            <td colspan="6">No conflict logs found.</td>
+        </tr>
+
+        <tr th:each="log : ${conflictLogs}">
+            <td th:text="${log.id}">1</td>
+            <td th:text="${log.student != null ? log.student.name : 'N/A'}">Student Name</td>
+            <td th:text="${log.project != null ? log.project.title : 'N/A'}">Project Title</td>
+            <td th:text="${log.actionTaken}">AUTO_REJECTED</td>
+            <td th:text="${log.reason}">Reason</td>
+            <td th:text="${log.createdAt}">2026-05-05</td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>
