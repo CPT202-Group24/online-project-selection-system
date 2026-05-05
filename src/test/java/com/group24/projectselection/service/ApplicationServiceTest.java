@@ -79,6 +79,64 @@ class ApplicationServiceTest {
     }
 
     @Test
+    void testSubmitApplication_AlreadyHasAgreedProject_ThrowsError() {
+        User student = new User();
+        student.setId(1L);
+
+        ProjectTopic newProject = new ProjectTopic();
+        newProject.setId(10L);
+        newProject.setStatus(ProjectTopic.TopicStatus.available);
+
+        ProjectTopic agreedProject = new ProjectTopic();
+        agreedProject.setId(20L);
+        agreedProject.setStatus(ProjectTopic.TopicStatus.agreed);
+
+        Application acceptedApp = new Application();
+        acceptedApp.setProject(agreedProject);
+        acceptedApp.setStatus(ApplicationStatus.accepted);
+
+        List<Application> existingList = new ArrayList<>();
+        existingList.add(acceptedApp);
+
+        when(projectTopicRepository.findById(10L)).thenReturn(Optional.of(newProject));
+        when(applicationRepository.findByStudentId(1L)).thenReturn(existingList);
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            applicationService.submitApplication(student, 10L, "I want to apply again.");
+        });
+
+        assertEquals("You already have an agreed project.", exception.getMessage());
+    }
+
+    @Test
+    void testSubmitApplication_RejectedApplication_CanReapply() {
+        User student = new User();
+        student.setId(1L);
+
+        ProjectTopic project = new ProjectTopic();
+        project.setId(10L);
+        project.setStatus(ProjectTopic.TopicStatus.available);
+
+        Application rejectedApp = new Application();
+        rejectedApp.setProject(project);
+        rejectedApp.setStatus(ApplicationStatus.rejected);
+        rejectedApp.setPersonalStatement("Old statement");
+
+        List<Application> existingList = new ArrayList<>();
+        existingList.add(rejectedApp);
+
+        when(projectTopicRepository.findById(10L)).thenReturn(Optional.of(project));
+        when(applicationRepository.findByStudentId(1L)).thenReturn(existingList);
+        when(applicationRepository.save(any(Application.class)))
+                .thenAnswer(call -> call.getArgument(0));
+
+        Application result = applicationService.submitApplication(student, 10L, "New statement after rejection");
+
+        assertEquals(ApplicationStatus.pending, result.getStatus());
+        assertEquals("New statement after rejection", result.getPersonalStatement());
+    }
+
+    @Test
     void testWithdrawApplication_Success() {
         User student = new User();
         student.setId(1L);

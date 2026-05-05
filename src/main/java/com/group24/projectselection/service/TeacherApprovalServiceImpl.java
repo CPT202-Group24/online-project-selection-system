@@ -1,8 +1,11 @@
 package com.group24.projectselection.service;
 
 import com.group24.projectselection.model.Application;
+import com.group24.projectselection.model.ConflictLog;
 import com.group24.projectselection.model.ProjectTopic;
+import com.group24.projectselection.model.User;
 import com.group24.projectselection.repository.ApplicationRepository;
+import com.group24.projectselection.repository.ConflictLogRepository;
 import com.group24.projectselection.repository.ProjectTopicRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,15 +21,20 @@ public class TeacherApprovalServiceImpl implements TeacherApprovalService {
 
     private final ApplicationRepository applicationRepository;
     private final ProjectTopicRepository projectTopicRepository;
+    private final ConflictLogRepository conflictLogRepository;
 
     @Autowired
-    public TeacherApprovalServiceImpl(ApplicationRepository applicationRepository, ProjectTopicRepository projectTopicRepository) {
+    public TeacherApprovalServiceImpl(
+            ApplicationRepository applicationRepository,
+            ProjectTopicRepository projectTopicRepository,
+            ConflictLogRepository conflictLogRepository) {
         this.applicationRepository = applicationRepository;
         this.projectTopicRepository = projectTopicRepository;
+        this.conflictLogRepository = conflictLogRepository;
     }
 
     @Override
-    @Transactional
+    @Transactional(noRollbackFor = ResponseStatusException.class)
     public void processApproval(Long applicationId, boolean isAccepted) {
         Application application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new RuntimeException("Application not found"));
@@ -48,29 +56,76 @@ public class TeacherApprovalServiceImpl implements TeacherApprovalService {
                     );
 
             if (alreadyAccepted) {
-                throw new RuntimeException("Student already has an accepted application");
+                saveConflictLog(
+                        application.getStudent(),
+                        project,
+                        "APPROVAL_BLOCKED",
+                        "Student already has an accepted application"
+                );
+
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Student already has an accepted application"
+                );
             }
 
             List<Application> allApplicationsForProject = applicationRepository.findByProjectId(project.getId());
 
-            if (project.getMaxStudents() != null) {
-                long acceptedCount = allApplicationsForProject.stream()
-                        .filter(app -> app.getStatus() == Application.ApplicationStatus.accepted)
-                        .count();
+            long acceptedCountBefore = allApplicationsForProject.stream()
+                    .filter(app -> app.getStatus() == Application.ApplicationStatus.accepted)
+                    .count();
 
-                if (acceptedCount >= project.getMaxStudents()) {
-                    throw new RuntimeException("Project has reached maximum student capacity");
-                }
+            if (project.getMaxStudents() != null && acceptedCountBefore >= project.getMaxStudents()) {
+                saveConflictLog(
+                        application.getStudent(),
+                        project,
+                        "APPROVAL_BLOCKED",
+                        "Project has reached maximum student capacity"
+                );
+
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Project has reached maximum student capacity"
+                );
             }
 
             application.setStatus(Application.ApplicationStatus.accepted);
-            project.setStatus(ProjectTopic.TopicStatus.agreed);
 
-            List<Application> conflictingApplications = applicationRepository.findByProjectId(project.getId());
-            for (Application otherApp : conflictingApplications) {
-                if (!otherApp.getId().equals(applicationId) && otherApp.getStatus() == Application.ApplicationStatus.pending) {
-                    otherApp.setStatus(Application.ApplicationStatus.rejected);
-                    applicationRepository.save(otherApp);
+            for (Application studentApp : studentApplications) {
+                if (!studentApp.getId().equals(applicationId)
+                        && studentApp.getStatus() == Application.ApplicationStatus.pending) {
+                    studentApp.setStatus(Application.ApplicationStatus.rejected);
+                    applicationRepository.save(studentApp);
+
+                    saveConflictLog(
+                            studentApp.getStudent(),
+                            studentApp.getProject(),
+                            "AUTO_REJECTED",
+                            "Student accepted by another project"
+                    );
+                }
+            }
+
+            long acceptedCountAfter = acceptedCountBefore + 1;
+            boolean projectIsFull = project.getMaxStudents() != null
+                    && acceptedCountAfter >= project.getMaxStudents();
+
+            if (projectIsFull) {
+                project.setStatus(ProjectTopic.TopicStatus.agreed);
+
+                for (Application otherApp : allApplicationsForProject) {
+                    if (!otherApp.getId().equals(applicationId)
+                            && otherApp.getStatus() == Application.ApplicationStatus.pending) {
+                        otherApp.setStatus(Application.ApplicationStatus.rejected);
+                        applicationRepository.save(otherApp);
+
+                        saveConflictLog(
+                                otherApp.getStudent(),
+                                project,
+                                "AUTO_REJECTED",
+                                "Project reached maximum student capacity"
+                        );
+                    }
                 }
             }
         } else {
@@ -94,5 +149,19 @@ public class TeacherApprovalServiceImpl implements TeacherApprovalService {
         return allApplications.stream()
                 .filter(app -> app.getStatus() == Application.ApplicationStatus.accepted)
                 .collect(Collectors.toList());
+    }
+
+    private void saveConflictLog(User student, ProjectTopic project, String actionTaken, String reason) {
+        if (student == null || project == null) {
+            return;
+        }
+
+        ConflictLog conflictLog = new ConflictLog();
+        conflictLog.setStudent(student);
+        conflictLog.setProject(project);
+        conflictLog.setActionTaken(actionTaken);
+        conflictLog.setReason(reason);
+
+        conflictLogRepository.save(conflictLog);
     }
 }
