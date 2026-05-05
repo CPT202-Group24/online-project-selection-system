@@ -20,6 +20,9 @@ class UserAdminServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private AuditLogService auditLogService;
+
     @InjectMocks
     private UserAdminService userAdminService;
 
@@ -34,6 +37,10 @@ class UserAdminServiceTest {
 
         when(userRepository.findById(1001L)).thenReturn(Optional.of(target));
         when(userRepository.save(target)).thenReturn(target);
+        User admin = new User();
+        admin.setId(99L);
+        admin.setEmail("admin@test.com");
+        when(userRepository.findByEmail("admin@test.com")).thenReturn(Optional.of(admin));
 
         UserAdminService.UserSummary result = userAdminService.toggleStatus(1001L, "admin@test.com");
 

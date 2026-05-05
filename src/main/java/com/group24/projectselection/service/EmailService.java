@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
+import java.util.Optional;
+
 @Service
 public class EmailService {
 
@@ -24,12 +26,24 @@ public class EmailService {
     @Value("${spring.mail.username:noreply@xjtlu.edu.cn}")
     private String fromAddress;
 
-    public EmailService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
+    /**
+     * When {@code spring.mail.host} (and related mail props) are not set, Spring Boot
+     * does not register a {@link JavaMailSender} bean. Optional injection keeps the
+     * application context startable for local development without SMTP.
+     */
+    public EmailService(Optional<JavaMailSender> mailSender) {
+        this.mailSender = mailSender.orElse(null);
     }
 
     @Async
     public void sendPasswordResetEmail(String toEmail, String token) {
+        if (mailSender == null) {
+            log.warn("JavaMailSender is not configured (missing spring.mail.*); "
+                    + "skipping password reset email to {} (use reset-password flow manually in dev).",
+                    toEmail);
+            return;
+        }
+
         String resetUrl = baseUrl + "/reset-password?token=" + token;
         String subject = "Password Reset Request";
         String body = """
