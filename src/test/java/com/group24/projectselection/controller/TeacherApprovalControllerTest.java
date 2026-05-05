@@ -36,7 +36,6 @@ class TeacherApprovalControllerTest {
         when(teacherApprovalService.getAcceptedApplications(100L, 10L))
                 .thenReturn(List.of(mockApp));
 
-        // 补全了正确的完整 URL 路径
         mockMvc.perform(get("/api/teacher/applications/topics/100/students")
                         .param("teacherId", "10"))
                 .andExpect(status().isOk());
@@ -47,7 +46,6 @@ class TeacherApprovalControllerTest {
         when(teacherApprovalService.getAcceptedApplications(100L, 99L))
                 .thenThrow(new ResponseStatusException(HttpStatus.FORBIDDEN));
 
-        // 补全了正确的完整 URL 路径
         mockMvc.perform(get("/api/teacher/applications/topics/100/students")
                         .param("teacherId", "99"))
                 .andExpect(status().isForbidden());
