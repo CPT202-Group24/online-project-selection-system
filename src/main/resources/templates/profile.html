@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>My Profile - Project Selection System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/nav :: sharedNav}"></div>
+
+<div class="container">
+    <h2>My Profile</h2>
+
+    <div th:if="${saveSuccess}" class="alert alert-success">
+        Profile updated successfully.
+    </div>
+
+    <form th:action="@{/profile}" th:object="${profileForm}" method="post">
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input id="email" type="email" th:value="${currentEmail}" readonly>
+        </div>
+
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input id="name" type="text" th:field="*{name}">
+            <div class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input id="phone" type="text" th:field="*{phone}">
+            <div class="field-error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="department">Department</label>
+            <input id="department" type="text" th:field="*{department}">
+            <div class="field-error" th:if="${#fields.hasErrors('department')}" th:errors="*{department}"></div>
+        </div>
+
+        <button type="submit">Save</button>
+    </form>
+</div>
+
+</body>
+</html>

@@ -78,4 +78,128 @@ class TopicStatusServiceTest {
 
         assertEquals("Topic not found or access denied", exception.getMessage());
     }
+
+    @Test
+    void closeTopic_availableTopic_statusChangesToClosed() {
+        User teacher = new User();
+        teacher.setId(1L);
+
+        ProjectTopic topic = new ProjectTopic();
+        topic.setId(10L);
+        topic.setTeacher(teacher);
+        topic.setStatus(ProjectTopic.TopicStatus.available);
+
+        when(projectTopicRepository.findByIdAndTeacherId(10L, 1L))
+                .thenReturn(Optional.of(topic));
+        when(projectTopicRepository.save(any(ProjectTopic.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        ProjectTopic result = topicStatusService.closeTopic(10L, 1L);
+
+        assertEquals(ProjectTopic.TopicStatus.closed, result.getStatus());
+    }
+
+    @Test
+    void closeTopic_alreadyClosed_throwsIllegalStateException() {
+        User teacher = new User();
+        teacher.setId(1L);
+
+        ProjectTopic topic = new ProjectTopic();
+        topic.setId(10L);
+        topic.setTeacher(teacher);
+        topic.setStatus(ProjectTopic.TopicStatus.closed);
+
+        when(projectTopicRepository.findByIdAndTeacherId(10L, 1L))
+                .thenReturn(Optional.of(topic));
+
+        IllegalStateException exception = assertThrows(
+                IllegalStateException.class,
+                () -> topicStatusService.closeTopic(10L, 1L)
+        );
+
+        assertEquals("Topic is already closed", exception.getMessage());
+    }
+
+    @Test
+    void closeTopic_unpublishedTopic_throwsIllegalStateException() {
+        User teacher = new User();
+        teacher.setId(1L);
+
+        ProjectTopic topic = new ProjectTopic();
+        topic.setId(10L);
+        topic.setTeacher(teacher);
+        topic.setStatus(ProjectTopic.TopicStatus.unpublished);
+
+        when(projectTopicRepository.findByIdAndTeacherId(10L, 1L))
+                .thenReturn(Optional.of(topic));
+
+        IllegalStateException exception = assertThrows(
+                IllegalStateException.class,
+                () -> topicStatusService.closeTopic(10L, 1L)
+        );
+
+        assertEquals("Only published topics can be closed", exception.getMessage());
+    }
+
+    @Test
+    void archiveTopic_closedTopic_statusChangesToArchived() {
+        User teacher = new User();
+        teacher.setId(1L);
+
+        ProjectTopic topic = new ProjectTopic();
+        topic.setId(10L);
+        topic.setTeacher(teacher);
+        topic.setStatus(ProjectTopic.TopicStatus.closed);
+
+        when(projectTopicRepository.findByIdAndTeacherId(10L, 1L))
+                .thenReturn(Optional.of(topic));
+        when(projectTopicRepository.save(any(ProjectTopic.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        ProjectTopic result = topicStatusService.archiveTopic(10L, 1L);
+
+        assertEquals(ProjectTopic.TopicStatus.archived, result.getStatus());
+    }
+
+    @Test
+    void archiveTopic_alreadyArchived_throwsIllegalStateException() {
+        User teacher = new User();
+        teacher.setId(1L);
+
+        ProjectTopic topic = new ProjectTopic();
+        topic.setId(10L);
+        topic.setTeacher(teacher);
+        topic.setStatus(ProjectTopic.TopicStatus.archived);
+
+        when(projectTopicRepository.findByIdAndTeacherId(10L, 1L))
+                .thenReturn(Optional.of(topic));
+
+        IllegalStateException exception = assertThrows(
+                IllegalStateException.class,
+                () -> topicStatusService.archiveTopic(10L, 1L)
+        );
+
+        assertEquals("Topic is already archived", exception.getMessage());
+    }
+
+    @Test
+    void archiveTopic_notClosed_throwsIllegalStateException() {
+        User teacher = new User();
+        teacher.setId(1L);
+
+        ProjectTopic topic = new ProjectTopic();
+        topic.setId(10L);
+        topic.setTeacher(teacher);
+        topic.setStatus(ProjectTopic.TopicStatus.available);
+
+        when(projectTopicRepository.findByIdAndTeacherId(10L, 1L))
+                .thenReturn(Optional.of(topic));
+
+        IllegalStateException exception = assertThrows(
+                IllegalStateException.class,
+                () -> topicStatusService.archiveTopic(10L, 1L)
+        );
+
+        assertEquals("Topic must be closed before it can be archived", exception.getMessage());
+    }
 }

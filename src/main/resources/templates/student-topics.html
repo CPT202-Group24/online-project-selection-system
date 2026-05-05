@@ -12,6 +12,31 @@
 
 <div class="container project-page-container">
     <h2>Available Topics</h2>
+    <form method="get" th:action="@{/student/topics}">
+        <input type="text"
+               name="keyword"
+               placeholder="Search by keyword"
+               th:value="${keyword}">
+
+        <select name="category">
+            <option value="">All Categories</option>
+            <option th:each="category : ${categories}"
+                    th:value="${category.id}"
+                    th:text="${category.name}"
+                    th:selected="${selectedCategory != null and selectedCategory == category.id}">
+            </option>
+        </select>
+
+        <select name="sort">
+            <option value="newest" th:selected="${sort == 'newest'}">Newest first</option>
+            <option value="az" th:selected="${sort == 'az'}">A-Z</option>
+        </select>
+
+        <input type="hidden" name="page" value="0">
+        <input type="hidden" name="size" th:value="${size}">
+
+        <button type="submit">Search</button>
+    </form>
 
     <div th:if="${successMessage}" class="alert alert-info">
         <span th:text="${successMessage}"></span>
@@ -85,8 +110,37 @@
         </table>
     </div>
 
+    <div class="pagination" th:if="${totalPages > 1}">
+        <a th:if="${currentPage > 0}"
+           th:href="@{/student/topics(
+           page=${currentPage - 1},
+           size=${size},
+           sort=${sort},
+           keyword=${keyword},
+           category=${selectedCategory}
+       )}">
+            Previous
+        </a>
+
+        <span>
+        Page <span th:text="${currentPage + 1}"></span>
+        of <span th:text="${totalPages}"></span>
+    </span>
+
+        <a th:if="${currentPage + 1 < totalPages}"
+           th:href="@{/student/topics(
+           page=${currentPage + 1},
+           size=${size},
+           sort=${sort},
+           keyword=${keyword},
+           category=${selectedCategory}
+       )}">
+            Next
+        </a>
+    </div>
+
     <p th:if="${projects.isEmpty()}" class="empty-message">
-        There are no available topics at the moment.
+        No results found.
     </p>
 
     <p class="back-link-row">

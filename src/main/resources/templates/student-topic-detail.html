@@ -71,9 +71,8 @@
     </div>
 
     <div style="margin-top: 24px;">
-        <button type="button" class="toolbar-link-btn disabled-btn" disabled>
-            Apply (Coming Soon)
-        </button>
+        <a th:href="@{/student/applications/apply/{id}(id=${projectTopic.id})}"
+           class="toolbar-link-btn">Apply</a>
     </div>
 
     <p class="back-link-row">

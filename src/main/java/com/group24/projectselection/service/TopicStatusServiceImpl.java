@@ -24,6 +24,51 @@ public class TopicStatusServiceImpl implements TopicStatusService {
         }
 
         topic.setStatus(ProjectTopic.TopicStatus.available);
+        topic.setDraft(false);
+        return projectTopicRepository.save(topic);
+    }
+
+    @Override
+    public ProjectTopic closeTopic(Long topicId, Long teacherId) {
+        ProjectTopic topic = projectTopicRepository
+                .findByIdAndTeacherId(topicId, teacherId)
+                .orElseThrow(() -> new IllegalArgumentException("Topic not found or access denied"));
+
+        // only available/requested topics can be closed
+        ProjectTopic.TopicStatus status = topic.getStatus();
+        if (status == ProjectTopic.TopicStatus.unpublished) {
+            throw new IllegalStateException("Only published topics can be closed");
+        }
+        if (status == ProjectTopic.TopicStatus.closed) {
+            throw new IllegalStateException("Topic is already closed");
+        }
+        if (status == ProjectTopic.TopicStatus.agreed) {
+            throw new IllegalStateException("Topic has an agreed allocation and cannot be closed");
+        }
+        if (status == ProjectTopic.TopicStatus.archived) {
+            throw new IllegalStateException("Cannot modify an archived topic");
+        }
+
+        topic.setStatus(ProjectTopic.TopicStatus.closed);
+        return projectTopicRepository.save(topic);
+    }
+
+    @Override
+    public ProjectTopic archiveTopic(Long topicId, Long teacherId) {
+        ProjectTopic topic = projectTopicRepository
+                .findByIdAndTeacherId(topicId, teacherId)
+                .orElseThrow(() -> new IllegalArgumentException("Topic not found or access denied"));
+
+        ProjectTopic.TopicStatus status = topic.getStatus();
+        if (status == ProjectTopic.TopicStatus.archived) {
+            throw new IllegalStateException("Topic is already archived");
+        }
+        // only closed topics can be archived
+        if (status != ProjectTopic.TopicStatus.closed) {
+            throw new IllegalStateException("Topic must be closed before it can be archived");
+        }
+
+        topic.setStatus(ProjectTopic.TopicStatus.archived);
         return projectTopicRepository.save(topic);
     }
 }
