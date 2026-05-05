@@ -12,6 +12,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -112,6 +114,46 @@ class TeacherApprovalServiceImplTest {
     }
 
     @Test
+    void testProcessApproval_Accepted_AutoRejectsOtherPendingApplicationsFromSameStudent() {
+        User student = new User();
+        student.setId(10L);
+
+        ProjectTopic acceptedProject = new ProjectTopic();
+        acceptedProject.setId(100L);
+        acceptedProject.setStatus(ProjectTopic.TopicStatus.requested);
+        acceptedProject.setMaxStudents(2);
+
+        ProjectTopic otherProject = new ProjectTopic();
+        otherProject.setId(200L);
+        otherProject.setStatus(ProjectTopic.TopicStatus.available);
+        otherProject.setMaxStudents(2);
+
+        Application mainApp = new Application();
+        mainApp.setId(1L);
+        mainApp.setStudent(student);
+        mainApp.setProject(acceptedProject);
+        mainApp.setStatus(Application.ApplicationStatus.pending);
+
+        Application otherPendingApp = new Application();
+        otherPendingApp.setId(2L);
+        otherPendingApp.setStudent(student);
+        otherPendingApp.setProject(otherProject);
+        otherPendingApp.setStatus(Application.ApplicationStatus.pending);
+
+        when(applicationRepository.findById(1L)).thenReturn(Optional.of(mainApp));
+        when(applicationRepository.findByStudentId(10L)).thenReturn(Arrays.asList(mainApp, otherPendingApp));
+        when(applicationRepository.findByProjectId(100L)).thenReturn(Arrays.asList(mainApp));
+
+        teacherApprovalService.processApproval(1L, true);
+
+        assertEquals(Application.ApplicationStatus.accepted, mainApp.getStatus());
+        assertEquals(Application.ApplicationStatus.rejected, otherPendingApp.getStatus());
+        assertEquals(ProjectTopic.TopicStatus.requested, acceptedProject.getStatus());
+
+        verify(conflictLogRepository, times(1)).save(any(ConflictLog.class));
+    }
+
+    @Test
     void testProcessApproval_Rejected_Success() {
         ProjectTopic mockProject = new ProjectTopic();
         mockProject.setId(100L);
@@ -180,11 +222,12 @@ class TeacherApprovalServiceImplTest {
         when(applicationRepository.findById(1L)).thenReturn(Optional.of(mainApp));
         when(applicationRepository.findByStudentId(10L)).thenReturn(Arrays.asList(mainApp, acceptedApp));
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
             teacherApprovalService.processApproval(1L, true);
         });
 
-        assertEquals("Student already has an accepted application", exception.getMessage());
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+        assertEquals("Student already has an accepted application", exception.getReason());
         verify(conflictLogRepository, times(1)).save(any(ConflictLog.class));
     }
 
@@ -213,11 +256,12 @@ class TeacherApprovalServiceImplTest {
         when(applicationRepository.findByStudentId(10L)).thenReturn(Arrays.asList(mainApp));
         when(applicationRepository.findByProjectId(100L)).thenReturn(Arrays.asList(mainApp, acceptedApp));
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
             teacherApprovalService.processApproval(1L, true);
         });
 
-        assertEquals("Project has reached maximum student capacity", exception.getMessage());
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+        assertEquals("Project has reached maximum student capacity", exception.getReason());
         verify(conflictLogRepository, times(1)).save(any(ConflictLog.class));
     }
 }

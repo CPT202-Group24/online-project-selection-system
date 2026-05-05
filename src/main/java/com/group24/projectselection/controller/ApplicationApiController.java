@@ -1,6 +1,5 @@
 package com.group24.projectselection.controller;
 
-import com.group24.projectselection.model.Application;
 import com.group24.projectselection.model.User;
 import com.group24.projectselection.repository.UserRepository;
 import com.group24.projectselection.service.ApplicationService;
@@ -43,7 +42,8 @@ public class ApplicationApiController {
             applicationService.submitApplication(student, projectId, personalStatement);
             return ResponseEntity.ok("Application submitted successfully.");
         } catch (IllegalStateException e) {
-            if (e.getMessage().contains("already applied")) {
+            if (e.getMessage().contains("already applied")
+                    || e.getMessage().contains("already have an agreed project")) {
                 return ResponseEntity.status(409).body(e.getMessage());
             }
             return ResponseEntity.badRequest().body(e.getMessage());
