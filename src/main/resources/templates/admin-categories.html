@@ -7,81 +7,115 @@
     <meta name="_csrf"        th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <link rel="stylesheet" th:href="@{/css/style.css}">
-    <style>
-        .page-container { max-width: 860px; margin: 40px auto; background: white; padding: 32px; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
-        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-        .page-header h2 { margin: 0; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
-        th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #eee; font-size: 14px; }
-        th { background-color: #f0f0f0; font-weight: bold; }
-        tr:hover td { background-color: #fafafa; }
-        .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
-        .badge-active   { background: #d4edda; color: #155724; }
-        .badge-inactive { background: #f8d7da; color: #721c24; }
-        .btn { border: none; padding: 5px 11px; border-radius: 4px; cursor: pointer; font-size: 13px; }
-        .btn-edit       { background: #3498db; color: #fff; }
-        .btn-deactivate { background: #e67e22; color: #fff; }
-        .btn-activate   { background: #27ae60; color: #fff; }
-        .btn-delete     { background: none; border: 1px solid #e74c3c; color: #e74c3c; }
-        .btn-delete:hover { background: #e74c3c; color: white; }
-        .edit-row td { background: #f9f9f9; }
-        .edit-row input { width: 100%; box-sizing: border-box; padding: 6px 8px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; }
-        .form-row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
-        .form-row .form-group { margin-bottom: 0; flex: 1; min-width: 160px; }
-        .form-row button[type="submit"] { width: auto; padding: 8px 20px; margin-top: 0; white-space: nowrap; }
-        #msg { min-height: 36px; }
-        .pagination { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin: 8px 0 24px; }
-        .pagination button { width: auto; margin: 0; padding: 6px 12px; }
-        .pagination span { font-size: 13px; color: #555; }
-        .action-group { display: flex; gap: 6px; flex-wrap: wrap; }
-    </style>
 </head>
 <body>
+
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="page-container">
-    <div class="page-header">
-        <h2>Category Management</h2>
-        <a th:href="@{/admin/dashboard}">Back to Dashboard</a>
-    </div>
+<div class="page-shell">
+    <div class="modern-card admin-categories-card">
 
-    <div id="msg"></div>
-
-    <table id="category-table">
-        <thead>
-        <tr>
-            <th>#</th>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody id="category-tbody">
-        <tr><td colspan="5" style="color:#999;text-align:center;padding:24px 0;">Loading...</td></tr>
-        </tbody>
-    </table>
-
-    <div class="pagination">
-        <button id="prev-page" type="button" onclick="changePage(-1)">Previous</button>
-        <span id="page-info">Page 1 / 1</span>
-        <button id="next-page" type="button" onclick="changePage(1)">Next</button>
-    </div>
-
-    <h3 style="margin-bottom:16px;">Add New Category</h3>
-    <form id="add-form" onsubmit="handleAdd(event)">
-        <div class="form-row">
-            <div class="form-group">
-                <label for="cat-name">Name <span style="color:red">*</span></label>
-                <input type="text" id="cat-name" placeholder="e.g. Engineering" required>
+        <!-- Page Header -->
+        <div class="modern-page-header">
+            <div class="modern-page-icon">
+                🏷️
             </div>
-            <div class="form-group">
-                <label for="cat-desc">Description</label>
-                <input type="text" id="cat-desc" placeholder="Optional description">
+            <div>
+                <h1 class="modern-page-title">Category Management</h1>
+                <p class="modern-page-subtitle">
+                    Create, edit, activate or deactivate project topic categories
+                </p>
             </div>
-            <button type="submit">Add Category</button>
         </div>
-    </form>
+
+        <!-- Message Area -->
+        <div id="msg"></div>
+
+        <!-- Category Table -->
+        <div class="modern-detail-card">
+            <div class="section-title-row">
+                <h3 class="modern-detail-title">Category List</h3>
+            </div>
+
+            <div class="modern-table-wrapper">
+                <table id="category-table" class="modern-table project-table admin-category-table">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="category-tbody">
+                    <tr>
+                        <td colspan="5" class="muted table-loading-cell">
+                            Loading...
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="modern-pagination admin-category-pagination">
+                <button id="prev-page"
+                        type="button"
+                        class="modern-btn modern-btn-outline table-action-btn"
+                        onclick="changePage(-1)">
+                    Previous
+                </button>
+
+                <span id="page-info">Page 1 / 1</span>
+
+                <button id="next-page"
+                        type="button"
+                        class="modern-btn modern-btn-outline table-action-btn"
+                        onclick="changePage(1)">
+                    Next
+                </button>
+            </div>
+        </div>
+
+        <!-- Add Category Form -->
+        <form id="add-form" onsubmit="handleAdd(event)" class="modern-form">
+            <div class="form-section-card">
+                <h3 class="form-section-title">Add New Category</h3>
+
+                <div class="admin-category-form-row">
+                    <div class="modern-form-group">
+                        <label for="cat-name">Name <span class="required-mark">*</span></label>
+                        <input type="text"
+                               id="cat-name"
+                               class="modern-input"
+                               placeholder="e.g. Engineering"
+                               required>
+                    </div>
+
+                    <div class="modern-form-group">
+                        <label for="cat-desc">Description</label>
+                        <input type="text"
+                               id="cat-desc"
+                               class="modern-input"
+                               placeholder="Optional description">
+                    </div>
+
+                    <button type="submit" class="modern-btn modern-btn-primary">
+                        Add Category
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Bottom Actions -->
+        <div class="page-bottom-actions">
+            <a th:href="@{/admin/dashboard}" class="modern-btn modern-btn-outline">
+                ← Back to Dashboard
+            </a>
+        </div>
+
+    </div>
 </div>
 
 <script>
@@ -109,9 +143,15 @@
         try {
             const res  = await fetch(`/api/admin/categories?page=${page}&size=${pageSize}`, { headers: h(false) });
             const data = await res.json();
+
             currentPage = data.page || 0;
             totalPages  = Math.max(data.totalPages || 1, 1);
-            if (currentPage >= totalPages) { loadCategories(totalPages - 1); return; }
+
+            if (currentPage >= totalPages) {
+                loadCategories(totalPages - 1);
+                return;
+            }
+
             renderTable(data.items || []);
             renderPagination(data.totalItems || 0);
         } catch (e) {
@@ -121,39 +161,72 @@
 
     function renderTable(list) {
         const tbody = document.getElementById('category-tbody');
+
         if (!list || list.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="color:#999;text-align:center;padding:24px 0;">No categories yet. Add one below.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" class="muted table-loading-cell">No categories yet. Add one below.</td></tr>';
             return;
         }
+
         tbody.innerHTML = list.map((c, i) => `
             <tr id="row-${c.id}">
                 <td>${currentPage * pageSize + i + 1}</td>
                 <td><strong>${esc(c.name)}</strong></td>
                 <td>${esc(c.description || '—')}</td>
-                <td><span class="badge ${c.isActive ? 'badge-active' : 'badge-inactive'}">${c.isActive ? 'Active' : 'Inactive'}</span></td>
                 <td>
-                    <div class="action-group">
-                        <button class="btn btn-edit" onclick="showEditRow(${c.id}, '${esc(c.name)}', '${esc(c.description || '')}')">Edit</button>
+                    <span class="category-status-badge ${c.isActive ? 'category-active' : 'category-inactive'}">
+                        ${c.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                </td>
+                <td>
+                    <div class="admin-category-actions">
+                        <button class="modern-btn modern-btn-dark table-action-btn"
+                                onclick="showEditRow(${c.id}, '${esc(c.name)}', '${esc(c.description || '')}')">
+                            Edit
+                        </button>
+
                         ${c.isActive
-                            ? `<button class="btn btn-deactivate" onclick="handleDeactivate(${c.id}, '${esc(c.name)}')">Deactivate</button>`
-                            : `<button class="btn btn-activate"   onclick="handleActivate(${c.id}, '${esc(c.name)}')">Activate</button>`
-                        }
+            ? `<button class="modern-btn table-action-btn admin-warning-btn"
+                                       onclick="handleDeactivate(${c.id}, '${esc(c.name)}')">
+                                   Deactivate
+                               </button>`
+            : `<button class="modern-btn table-action-btn modern-btn-primary"
+                                       onclick="handleActivate(${c.id}, '${esc(c.name)}')">
+                                   Activate
+                               </button>`
+        }
                     </div>
                 </td>
             </tr>
+
             <tr class="edit-row" id="edit-row-${c.id}" style="display:none;">
-                <td colspan="5" style="padding:12px 16px;">
-                    <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
-                        <div style="flex:1;min-width:150px;">
-                            <label style="font-size:13px;font-weight:600;">Name *</label>
-                            <input type="text" id="edit-name-${c.id}" value="${esc(c.name)}" required>
+                <td colspan="5">
+                    <div class="admin-category-edit-row">
+                        <div class="modern-form-group">
+                            <label>Name *</label>
+                            <input type="text"
+                                   id="edit-name-${c.id}"
+                                   value="${esc(c.name)}"
+                                   class="modern-input"
+                                   required>
                         </div>
-                        <div style="flex:2;min-width:200px;">
-                            <label style="font-size:13px;font-weight:600;">Description</label>
-                            <input type="text" id="edit-desc-${c.id}" value="${esc(c.description || '')}">
+
+                        <div class="modern-form-group admin-category-edit-desc">
+                            <label>Description</label>
+                            <input type="text"
+                                   id="edit-desc-${c.id}"
+                                   value="${esc(c.description || '')}"
+                                   class="modern-input">
                         </div>
-                        <button class="btn btn-edit" onclick="submitEdit(${c.id})">Save</button>
-                        <button class="btn" style="background:#aaa;color:#fff;" onclick="hideEditRow(${c.id})">Cancel</button>
+
+                        <button class="modern-btn modern-btn-primary table-action-btn"
+                                onclick="submitEdit(${c.id})">
+                            Save
+                        </button>
+
+                        <button class="modern-btn modern-btn-outline table-action-btn"
+                                onclick="hideEditRow(${c.id})">
+                            Cancel
+                        </button>
                     </div>
                 </td>
             </tr>
@@ -163,6 +236,7 @@
     function renderPagination(totalItems) {
         document.getElementById('page-info').textContent =
             `Page ${currentPage + 1} / ${totalPages} (${totalItems} items)`;
+
         document.getElementById('prev-page').disabled = currentPage <= 0;
         document.getElementById('next-page').disabled = currentPage >= totalPages - 1;
     }
@@ -188,15 +262,21 @@
     async function submitEdit(id) {
         const name = document.getElementById(`edit-name-${id}`).value.trim();
         const desc = document.getElementById(`edit-desc-${id}`).value.trim();
-        if (!name) { showMsg('Category name is required.', 'error'); return; }
+
+        if (!name) {
+            showMsg('Category name is required.', 'error');
+            return;
+        }
+
         try {
             const res = await fetch(`/api/admin/categories/${id}`, {
                 method: 'PUT',
                 headers: h(true),
                 body: JSON.stringify({ name, description: desc })
             });
+
             if (res.ok) {
-                showMsg(`Category updated successfully.`, 'info');
+                showMsg('Category updated successfully.', 'info');
                 loadCategories(currentPage);
             } else {
                 const data = await res.json();
@@ -209,10 +289,13 @@
 
     async function handleDeactivate(id, name) {
         if (!confirm(`Deactivate category "${name}"? It will no longer appear in teacher/student menus, but existing projects will keep the category name.`)) return;
+
         try {
             const res = await fetch(`/api/admin/categories/${id}/deactivate`, {
-                method: 'PUT', headers: h(false)
+                method: 'PUT',
+                headers: h(false)
             });
+
             if (res.ok) {
                 showMsg(`Category "${esc(name)}" deactivated.`, 'info');
                 loadCategories(currentPage);
@@ -226,10 +309,13 @@
 
     async function handleActivate(id, name) {
         if (!confirm(`Re-activate category "${name}"?`)) return;
+
         try {
             const res = await fetch(`/api/admin/categories/${id}/activate`, {
-                method: 'PUT', headers: h(false)
+                method: 'PUT',
+                headers: h(false)
             });
+
             if (res.ok) {
                 showMsg(`Category "${esc(name)}" activated.`, 'info');
                 loadCategories(currentPage);
@@ -243,15 +329,22 @@
 
     async function handleAdd(e) {
         e.preventDefault();
+
         const name = document.getElementById('cat-name').value.trim();
         const desc = document.getElementById('cat-desc').value.trim();
-        if (!name) { showMsg('Category name is required.', 'error'); return; }
+
+        if (!name) {
+            showMsg('Category name is required.', 'error');
+            return;
+        }
+
         try {
             const res = await fetch('/api/admin/categories', {
                 method: 'POST',
                 headers: h(true),
                 body: JSON.stringify({ name, description: desc })
             });
+
             if (res.status === 201) {
                 document.getElementById('add-form').reset();
                 showMsg(`Category "${esc(name)}" created successfully.`, 'info');
@@ -267,11 +360,15 @@
 
     function esc(str) {
         return String(str)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     }
 
     loadCategories();
 </script>
+
 </body>
 </html>

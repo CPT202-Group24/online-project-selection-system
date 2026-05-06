@@ -6,51 +6,76 @@
     <meta name="_csrf"        th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <link rel="stylesheet" th:href="@{/css/style.css}">
-    <style>
-        .page-container { max-width: 1100px; margin: 30px auto; background: #fff; padding: 28px; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,.1); }
-        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
-        .toolbar input { width: 280px; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        th, td { border-bottom: 1px solid #eee; padding: 10px 12px; text-align: left; }
-        th { background: #f7f7f7; }
-        .action-group { display: flex; gap: 6px; flex-wrap: wrap; }
-        .btn { border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; }
-        .btn-archive { background: #e67e22; color: #fff; }
-        .btn-restore { background: #27ae60; color: #fff; }
-        .btn:disabled { background: #ccc !important; cursor: not-allowed; }
-        #msgBox { min-height: 32px; margin-bottom: 10px; }
-    </style>
 </head>
 <body>
+
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="page-container">
-    <div class="toolbar">
-        <h2 style="margin:0;">Project Management (Admin)</h2>
-        <div style="display:flex;gap:12px;align-items:center;">
-            <input id="searchInput" type="text" placeholder="Search by title or teacher..." oninput="renderTable()">
-            <a th:href="@{/admin/dashboard}">Back to Dashboard</a>
+<div class="page-shell">
+    <div class="modern-card admin-projects-card">
+
+        <!-- Page Header -->
+        <div class="modern-page-header">
+            <div class="modern-page-icon">
+                📁
+            </div>
+            <div>
+                <h1 class="modern-page-title">Project Management</h1>
+                <p class="modern-page-subtitle">
+                    Force archive or restore project topics when administrative intervention is required
+                </p>
+            </div>
         </div>
+
+        <!-- Toolbar -->
+        <div class="modern-list-toolbar admin-project-toolbar">
+            <p class="result-summary notification-summary">
+                Admin project list
+            </p>
+
+            <input id="searchInput"
+                   type="text"
+                   class="modern-input admin-project-search"
+                   placeholder="Search by title or teacher..."
+                   oninput="renderTable()">
+        </div>
+
+        <!-- Message Area -->
+        <div id="msgBox"></div>
+
+        <!-- Table -->
+        <div class="modern-table-wrapper">
+            <table class="modern-table project-table admin-project-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Teacher</th>
+                    <th>Category</th>
+                    <th>Max Students</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+
+                <tbody id="projectTbody">
+                <tr>
+                    <td colspan="7" class="muted table-loading-cell">
+                        Loading...
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Bottom Actions -->
+        <div class="page-bottom-actions">
+            <a th:href="@{/admin/dashboard}" class="modern-btn modern-btn-outline">
+                ← Back to Dashboard
+            </a>
+        </div>
+
     </div>
-
-    <div id="msgBox"></div>
-
-    <table>
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Title</th>
-            <th>Teacher</th>
-            <th>Category</th>
-            <th>Max Students</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody id="projectTbody">
-        <tr><td colspan="7" class="muted">Loading...</td></tr>
-        </tbody>
-    </table>
 </div>
 
 <script>
@@ -67,35 +92,50 @@
 
     function esc(s) {
         return String(s == null ? '' : s)
-            .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+            .replace(/&/g,'&amp;')
+            .replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;')
+            .replace(/"/g,'&quot;');
     }
 
     function renderTable() {
         const kw = document.getElementById('searchInput').value.trim().toLowerCase();
+
         const filtered = projects.filter(p =>
-            (p.title + ' ' + p.teacherName).toLowerCase().includes(kw)
+            ((p.title || '') + ' ' + (p.teacherName || '')).toLowerCase().includes(kw)
         );
 
         const tbody = document.getElementById('projectTbody');
+
         if (!filtered.length) {
-            tbody.innerHTML = '<tr><td colspan="7" class="muted">No projects found.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="muted table-loading-cell">No projects found.</td></tr>';
             return;
         }
 
         tbody.innerHTML = filtered.map(p => `
             <tr id="row-${p.id}">
                 <td>${p.id}</td>
-                <td>${esc(p.title)}</td>
+                <td><strong>${esc(p.title)}</strong></td>
                 <td>${esc(p.teacherName)}</td>
                 <td>${esc(p.category)}</td>
                 <td>${esc(p.maxStudents)}</td>
-                <td><span class="status-badge status-${esc(p.status)}">${esc(p.status)}</span></td>
                 <td>
-                    <div class="action-group">
+                    <span class="status-badge status-${esc(p.status)}">
+                        ${esc(p.status)}
+                    </span>
+                </td>
+                <td>
+                    <div class="admin-project-actions">
                         ${p.status !== 'archived'
-                            ? `<button class="btn btn-archive" onclick="doArchive(${p.id})">Archive</button>`
-                            : `<button class="btn btn-restore" onclick="doRestore(${p.id})">Restore</button>`
-                        }
+            ? `<button class="modern-btn table-action-btn admin-warning-btn"
+                                       onclick="doArchive(${p.id})">
+                                   Archive
+                               </button>`
+            : `<button class="modern-btn table-action-btn modern-btn-primary"
+                                       onclick="doRestore(${p.id})">
+                                   Restore
+                               </button>`
+        }
                     </div>
                 </td>
             </tr>
@@ -104,19 +144,25 @@
 
     async function loadProjects() {
         const tbody = document.getElementById('projectTbody');
+
         try {
             const res = await fetch('/api/admin/projects');
-            if (!res.ok) throw new Error('Server error: ' + res.status);
+
+            if (!res.ok) {
+                throw new Error('Server error: ' + res.status);
+            }
+
             projects = await res.json();
             renderTable();
         } catch (e) {
-            tbody.innerHTML = '<tr><td colspan="7" class="muted">Failed to load projects. Please refresh.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="muted table-loading-cell">Failed to load projects. Please refresh.</td></tr>';
         }
     }
 
     async function doArchive(id) {
         const p = projects.find(x => x.id === id);
         if (!p) return;
+
         if (!confirm(`Force-archive project "${p.title}"? It will no longer appear in student search.`)) return;
 
         try {
@@ -124,7 +170,9 @@
                 method: 'POST',
                 headers: { [csrfHeader]: csrfToken }
             });
+
             const data = await res.json();
+
             if (res.ok) {
                 p.status = data.status;
                 showMsg(`Project "${esc(p.title)}" archived successfully.`, 'info');
@@ -140,6 +188,7 @@
     async function doRestore(id) {
         const p = projects.find(x => x.id === id);
         if (!p) return;
+
         if (!confirm(`Restore project "${p.title}" to its previous status?`)) return;
 
         try {
@@ -147,7 +196,9 @@
                 method: 'POST',
                 headers: { [csrfHeader]: csrfToken }
             });
+
             const data = await res.json();
+
             if (res.ok) {
                 p.status = data.status;
                 showMsg(`Project "${esc(p.title)}" restored to status: ${data.status}.`, 'info');
@@ -162,5 +213,6 @@
 
     loadProjects();
 </script>
+
 </body>
 </html>

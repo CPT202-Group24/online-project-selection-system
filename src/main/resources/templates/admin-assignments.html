@@ -6,87 +6,125 @@
     <meta name="_csrf"        th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <link rel="stylesheet" th:href="@{/css/style.css}">
-    <style>
-        .page-container { max-width: 1000px; margin: 36px auto; background: #fff; padding: 32px; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,.1); }
-        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 24px; }
-        @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
-        .panel { border: 1px solid #e0e0e0; border-radius: 6px; padding: 20px; }
-        .panel h3 { margin: 0 0 14px; font-size: 16px; color: #2c3e50; }
-        .student-list { list-style: none; padding: 0; margin: 0; max-height: 340px; overflow-y: auto; border: 1px solid #eee; border-radius: 4px; }
-        .student-list li { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f5f5f5; font-size: 14px; transition: background .15s; }
-        .student-list li:last-child { border-bottom: none; }
-        .student-list li:hover { background: #eaf3fb; }
-        .student-list li.selected { background: #d0e8f8; font-weight: 600; }
-        .student-list li .email { font-size: 12px; color: #888; }
-        .project-select { width: 100%; padding: 10px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 16px; }
-        .assign-btn { width: 100%; padding: 12px; font-size: 15px; font-weight: 600; background: #2980b9; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
-        .assign-btn:disabled { background: #aaa; cursor: not-allowed; }
-        .selected-info { font-size: 13px; color: #555; margin-bottom: 12px; min-height: 20px; }
-        #msgBox { margin-bottom: 16px; min-height: 36px; }
-        .empty-hint { color: #999; font-size: 14px; padding: 18px 0; text-align: center; }
-        .search-box { width: 100%; padding: 8px 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; box-sizing: border-box; }
-    </style>
 </head>
 <body>
+
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="page-container">
-    <div style="display:flex;justify-content:space-between;align-items:center;">
-        <h2 style="margin:0;">Manual Project Assignment</h2>
-        <a th:href="@{/admin/dashboard}">Back to Dashboard</a>
-    </div>
-    <p class="muted" style="margin-top:8px;margin-bottom:0;">
-        Assign an available project directly to a student who has not yet been allocated to any project.
-    </p>
+<div class="page-shell">
+    <div class="modern-card admin-assignments-card">
 
-    <div id="msgBox"></div>
-
-    <div class="two-col">
-        <!-- LEFT: unassigned students -->
-        <div class="panel">
-            <h3>&#9312; Select Student (unassigned)</h3>
-            <input class="search-box" type="text" id="studentSearch"
-                   placeholder="Search by name or email..." oninput="filterStudents()">
-
-            <div th:if="${#lists.isEmpty(unassignedStudents)}" class="empty-hint">
-                All active students already have a project allocation.
+        <!-- Page Header -->
+        <div class="modern-page-header">
+            <div class="modern-page-icon">
+                🧩
             </div>
-
-            <ul class="student-list" id="studentList" th:if="${!#lists.isEmpty(unassignedStudents)}">
-                <li th:each="s : ${unassignedStudents}"
-                    th:id="'s-' + ${s.id}"
-                    th:attr="data-id=${s.id}, data-name=${s.name}, data-email=${s.email}"
-                    onclick="selectStudent(this)">
-                    <span th:text="${s.name}">Name</span>
-                    <span class="email" th:text="${' &lt;' + s.email + '&gt;'}"></span>
-                </li>
-            </ul>
-        </div>
-
-        <!-- RIGHT: project selection + confirm -->
-        <div class="panel">
-            <h3>&#9313; Select Project &amp; Assign</h3>
-
-            <div class="selected-info" id="selectedStudentInfo">No student selected.</div>
-
-            <div th:if="${#lists.isEmpty(assignableProjects)}" class="empty-hint">
-                No available projects with remaining capacity.
-            </div>
-
-            <div th:if="${!#lists.isEmpty(assignableProjects)}">
-                <select class="project-select" id="projectSelect">
-                    <option value="">-- Select a project --</option>
-                    <option th:each="p : ${assignableProjects}"
-                            th:value="${p.id}"
-                            th:text="${p.title + ' (Teacher: ' + (p.teacher != null ? p.teacher.name : 'N/A') + ', Max: ' + (p.maxStudents != null ? p.maxStudents : '∞') + ')'}">
-                    </option>
-                </select>
-
-                <button class="assign-btn" id="assignBtn" onclick="doAssign()" disabled>
-                    Assign Project to Student
-                </button>
+            <div>
+                <h1 class="modern-page-title">Manual Project Assignment</h1>
+                <p class="modern-page-subtitle">
+                    Assign an available project directly to an unallocated student
+                </p>
             </div>
         </div>
+
+        <!-- Notice -->
+        <div class="modern-detail-card assignment-info-card">
+            <h3 class="modern-detail-title">Assignment Rule</h3>
+            <p class="detail-text">
+                Select an active student who has not yet been allocated to any project, then choose an available project
+                with remaining capacity. This operation bypasses the normal application process.
+            </p>
+        </div>
+
+        <!-- Message Area -->
+        <div id="msgBox"></div>
+
+        <!-- Assignment Panels -->
+        <div class="assignment-two-col">
+
+            <!-- Left: Student Selection -->
+            <div class="assignment-panel">
+                <div class="assignment-panel-header">
+                    <div class="assignment-step-icon">1</div>
+                    <div>
+                        <h3>Select Student</h3>
+                        <p>Choose an unassigned active student.</p>
+                    </div>
+                </div>
+
+                <input class="modern-input assignment-search-box"
+                       type="text"
+                       id="studentSearch"
+                       placeholder="Search by name or email..."
+                       oninput="filterStudents()">
+
+                <div th:if="${#lists.isEmpty(unassignedStudents)}" class="modern-empty-mini">
+                    All active students already have a project allocation.
+                </div>
+
+                <ul class="modern-student-list"
+                    id="studentList"
+                    th:if="${!#lists.isEmpty(unassignedStudents)}">
+                    <li th:each="s : ${unassignedStudents}"
+                        th:id="'s-' + ${s.id}"
+                        th:attr="data-id=${s.id}, data-name=${s.name}, data-email=${s.email}"
+                        onclick="selectStudent(this)">
+                        <div class="student-avatar">S</div>
+                        <div>
+                            <span class="student-name" th:text="${s.name}">Name</span>
+                            <span class="student-email" th:text="${'<' + s.email + '>'}"></span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Right: Project Selection -->
+            <div class="assignment-panel">
+                <div class="assignment-panel-header">
+                    <div class="assignment-step-icon">2</div>
+                    <div>
+                        <h3>Select Project &amp; Assign</h3>
+                        <p>Pick a project and confirm the assignment.</p>
+                    </div>
+                </div>
+
+                <div class="selected-student-card" id="selectedStudentInfo">
+                    No student selected.
+                </div>
+
+                <div th:if="${#lists.isEmpty(assignableProjects)}" class="modern-empty-mini">
+                    No available projects with remaining capacity.
+                </div>
+
+                <div th:if="${!#lists.isEmpty(assignableProjects)}" class="assignment-form-area">
+                    <label for="projectSelect">Available Project</label>
+
+                    <select class="modern-select assignment-project-select" id="projectSelect">
+                        <option value="">-- Select a project --</option>
+                        <option th:each="p : ${assignableProjects}"
+                                th:value="${p.id}"
+                                th:text="${p.title + ' (Teacher: ' + (p.teacher != null ? p.teacher.name : 'N/A') + ', Max: ' + (p.maxStudents != null ? p.maxStudents : '∞') + ')'}">
+                        </option>
+                    </select>
+
+                    <button class="modern-btn modern-btn-primary assignment-submit-btn"
+                            id="assignBtn"
+                            onclick="doAssign()"
+                            disabled>
+                        Assign Project to Student
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Bottom Actions -->
+        <div class="page-bottom-actions">
+            <a th:href="@{/admin/dashboard}" class="modern-btn modern-btn-outline">
+                ← Back to Dashboard
+            </a>
+        </div>
+
     </div>
 </div>
 
@@ -104,20 +142,26 @@
     }
 
     function selectStudent(li) {
-        document.querySelectorAll('.student-list li').forEach(el => el.classList.remove('selected'));
+        document.querySelectorAll('.modern-student-list li').forEach(el => el.classList.remove('selected'));
+
         li.classList.add('selected');
+
         selectedStudentId   = li.getAttribute('data-id');
         selectedStudentName = li.getAttribute('data-name');
+
         document.getElementById('selectedStudentInfo').textContent =
             `Selected: ${selectedStudentName} <${li.getAttribute('data-email')}>`;
+
         updateAssignBtn();
     }
 
     function updateAssignBtn() {
         const btn = document.getElementById('assignBtn');
         if (!btn) return;
+
         const projectSelected = document.getElementById('projectSelect') &&
-                                document.getElementById('projectSelect').value;
+            document.getElementById('projectSelect').value;
+
         btn.disabled = !(selectedStudentId && projectSelected);
     }
 
@@ -126,16 +170,25 @@
 
     function filterStudents() {
         const kw = document.getElementById('studentSearch').value.trim().toLowerCase();
-        document.querySelectorAll('.student-list li').forEach(li => {
+
+        document.querySelectorAll('.modern-student-list li').forEach(li => {
             const txt = (li.getAttribute('data-name') + ' ' + li.getAttribute('data-email')).toLowerCase();
             li.style.display = txt.includes(kw) ? '' : 'none';
         });
     }
 
     async function doAssign() {
-        if (!selectedStudentId) { showMsg('Please select a student first.', 'error'); return; }
+        if (!selectedStudentId) {
+            showMsg('Please select a student first.', 'error');
+            return;
+        }
+
         const projectId = document.getElementById('projectSelect').value;
-        if (!projectId)  { showMsg('Please select a project first.', 'error'); return; }
+
+        if (!projectId) {
+            showMsg('Please select a project first.', 'error');
+            return;
+        }
 
         const projectText = document.getElementById('projectSelect')
             .options[document.getElementById('projectSelect').selectedIndex].text;
@@ -155,16 +208,21 @@
                     projectId: Number(projectId)
                 })
             });
+
             const data = await res.json();
+
             if (res.ok) {
                 showMsg(`&#10003; ${data.message}`, 'info');
-                // Remove assigned student from the list
+
                 const li = document.getElementById('s-' + selectedStudentId);
                 if (li) li.remove();
+
                 selectedStudentId   = null;
                 selectedStudentName = '';
+
                 document.getElementById('selectedStudentInfo').textContent = 'No student selected.';
                 document.getElementById('projectSelect').value = '';
+
                 btn.textContent = 'Assign Project to Student';
                 updateAssignBtn();
             } else {
@@ -179,5 +237,6 @@
         }
     }
 </script>
+
 </body>
 </html>

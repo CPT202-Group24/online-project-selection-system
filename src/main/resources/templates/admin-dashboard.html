@@ -7,26 +7,102 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
+
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="container">
-    <h2>Admin Dashboard</h2>
-    <p style="margin-bottom:24px;">Welcome, <span sec:authentication="name"></span>. Select a module to manage.</p>
+<div class="page-shell">
+    <div class="modern-card dashboard-modern-card">
 
-    <div id="stats-section" style="margin-bottom:28px;padding:20px;background:#f9f9f9;border-radius:6px;border:1px solid #eee;">
-        <h3 style="margin-bottom:12px;">System statistics</h3>
-        <div id="stats-content" class="muted">Loading statistics…</div>
+        <!-- Page Header -->
+        <div class="modern-page-header">
+            <div class="modern-page-icon">
+                🛠️
+            </div>
+            <div>
+                <h1 class="modern-page-title">Admin Dashboard</h1>
+                <p class="modern-page-subtitle">
+                    Welcome, <span sec:authentication="name"></span>. Manage users, categories, projects, reports and logs.
+                </p>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="admin-stats-card">
+            <div>
+                <h2>System Statistics</h2>
+                <p>Quick overview of users, project topics and applications in the system.</p>
+            </div>
+
+            <div id="stats-content" class="admin-stats-grid">
+                <div class="admin-stat-item">
+                    <span class="admin-stat-value">...</span>
+                    <span class="admin-stat-label">Loading</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Modules -->
+        <div class="dashboard-card-grid admin-card-grid">
+
+            <a th:href="@{/admin/categories}" class="dashboard-action-card">
+                <div class="dashboard-action-icon">🏷️</div>
+                <div>
+                    <h3>Category Management</h3>
+                    <p>Create, update or disable project topic categories.</p>
+                </div>
+            </a>
+
+            <a th:href="@{/admin/users}" class="dashboard-action-card">
+                <div class="dashboard-action-icon">👥</div>
+                <div>
+                    <h3>User Account Management</h3>
+                    <p>Manage student, teacher and admin accounts.</p>
+                </div>
+            </a>
+
+            <a th:href="@{/admin/projects}" class="dashboard-action-card">
+                <div class="dashboard-action-icon">📁</div>
+                <div>
+                    <h3>Project Management</h3>
+                    <p>Force archive or restore project topics when required.</p>
+                </div>
+            </a>
+
+            <a th:href="@{/admin/violations}" class="dashboard-action-card">
+                <div class="dashboard-action-icon">⚠️</div>
+                <div>
+                    <h3>Rule Violation Report</h3>
+                    <p>Review project selection or allocation rule violations.</p>
+                </div>
+            </a>
+
+            <a th:href="@{/admin/assignments}" class="dashboard-action-card">
+                <div class="dashboard-action-icon">🧩</div>
+                <div>
+                    <h3>Manual Project Assignment</h3>
+                    <p>Manually assign students to project topics when needed.</p>
+                </div>
+            </a>
+
+            <a th:href="@{/admin/audit}" class="dashboard-action-card">
+                <div class="dashboard-action-icon">🧾</div>
+                <div>
+                    <h3>Audit Log</h3>
+                    <p>Check important administrative operations and system logs.</p>
+                </div>
+            </a>
+
+            <a th:href="@{/admin/conflicts}" class="dashboard-action-card">
+                <div class="dashboard-action-icon">🔀</div>
+                <div>
+                    <h3>Allocation Conflict Logs</h3>
+                    <p>Inspect conflicts generated during the allocation process.</p>
+                </div>
+            </a>
+
+        </div>
+
     </div>
-
-    <ul style="list-style:none;padding:0;line-height:2.2;">
-        <li><a th:href="@{/admin/categories}">&#9656; Category Management</a></li>
-        <li><a th:href="@{/admin/users}">&#9656; User Account Management</a></li>
-        <li><a th:href="@{/admin/projects}">&#9656; Project Management (Force Archive / Restore)</a></li>
-        <li><a th:href="@{/admin/violations}">&#9656; Rule Violation Report</a></li>
-        <li><a th:href="@{/admin/assignments}">&#9656; Manual Project Assignment</a></li>
-        <li><a th:href="@{/admin/audit}">&#9656; Audit Log</a></li>
-        <li><a th:href="@{/admin/conflicts}">&#9656; Allocation Conflict Logs</a></li>
-    </ul>
 </div>
 
 <script>
@@ -38,19 +114,27 @@
             })
             .then(function (data) {
                 var el = document.getElementById('stats-content');
-                el.className = '';
+                el.className = 'admin-stats-grid';
                 el.innerHTML =
-                    '<ul style="margin:0;padding-left:20px;line-height:1.9;">' +
-                    '<li><strong>Users</strong>: ' + data.userCount + '</li>' +
-                    '<li><strong>Topics</strong>: ' + data.topicCount + '</li>' +
-                    '<li><strong>Applications</strong>: ' + data.applicationCount + '</li>' +
-                    '</ul>';
+                    '<div class="admin-stat-item">' +
+                    '<span class="admin-stat-value">' + data.userCount + '</span>' +
+                    '<span class="admin-stat-label">Users</span>' +
+                    '</div>' +
+                    '<div class="admin-stat-item">' +
+                    '<span class="admin-stat-value">' + data.topicCount + '</span>' +
+                    '<span class="admin-stat-label">Topics</span>' +
+                    '</div>' +
+                    '<div class="admin-stat-item">' +
+                    '<span class="admin-stat-value">' + data.applicationCount + '</span>' +
+                    '<span class="admin-stat-label">Applications</span>' +
+                    '</div>';
             })
             .catch(function () {
                 document.getElementById('stats-content').innerHTML =
-                    '<span class="muted">Unable to load statistics. Please refresh or sign in as admin.</span>';
+                    '<div class="admin-stat-error">Unable to load statistics. Please refresh or sign in as admin.</div>';
             });
     })();
 </script>
+
 </body>
 </html>
