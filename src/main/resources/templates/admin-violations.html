@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Rule Violation Report - Project Selection System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .page-container { max-width: 900px; margin: 40px auto; background: #fff; padding: 32px; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+        .violation-card { border: 1px solid #f5c6cb; border-radius: 6px; padding: 18px 22px; margin-bottom: 16px; background: #fff5f5; }
+        .violation-card h3 { margin: 0 0 10px; color: #c0392b; font-size: 16px; }
+        .violation-card ul { margin: 0; padding-left: 20px; }
+        .violation-card li { margin-bottom: 6px; font-size: 14px; }
+        .violation-card .project-title { font-weight: 600; }
+        .violation-card .teacher-name { color: #555; }
+        .empty-notice { text-align: center; padding: 40px 0; color: #27ae60; font-size: 16px; }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: sharedNav}"></div>
+
+<div class="page-container">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+        <h2 style="margin:0;">Rule Violation Report</h2>
+        <a th:href="@{/admin/dashboard}">Back to Dashboard</a>
+    </div>
+
+    <p class="muted" style="margin-bottom:20px;">
+        Students listed below hold <strong>2 or more</strong> accepted project allocations, which violates the one-project rule.
+    </p>
+
+    <div th:if="${#lists.isEmpty(violations)}" class="empty-notice">
+        &#10003; No violations found. All students comply with the one-project rule.
+    </div>
+
+    <div th:each="record : ${violations}" class="violation-card">
+        <h3 th:text="${record.student != null ? record.student.name + ' (' + record.student.email + ')' : 'Unknown Student'}">
+            Student Name
+        </h3>
+        <p style="margin:0 0 8px;font-size:13px;color:#888;">
+            Violating accepted projects (<span th:text="${#lists.size(record.violatingApplications)}">0</span>):
+        </p>
+        <ul>
+            <li th:each="app : ${record.violatingApplications}">
+                <span class="project-title"
+                      th:text="${app.project != null ? app.project.title : 'Unknown Project'}">
+                    Project Title
+                </span>
+                <span class="teacher-name"
+                      th:text="${app.project != null and app.project.teacher != null
+                                 ? ' — Supervisor: ' + app.project.teacher.name
+                                 : ''}">
+                </span>
+            </li>
+        </ul>
+    </div>
+</div>
+</body>
+</html>

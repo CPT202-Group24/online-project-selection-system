@@ -6,6 +6,7 @@ import com.group24.projectselection.model.ConflictLog;
 import com.group24.projectselection.model.ProjectTopic;
 import com.group24.projectselection.model.User;
 import com.group24.projectselection.repository.ApplicationRepository;
+import com.group24.projectselection.repository.AuditLogRepository;
 import com.group24.projectselection.repository.CategoryRepository;
 import com.group24.projectselection.repository.ConflictLogRepository;
 import com.group24.projectselection.repository.NotificationRepository;
@@ -71,12 +72,16 @@ class M9EndToEndIntegrationTest {
     @Autowired
     private NotificationRepository notificationRepository;
 
+    @Autowired
+    private AuditLogRepository auditLogRepository;
+
     @BeforeEach
     void cleanData() {
         notificationRepository.deleteAll();
         conflictLogRepository.deleteAll();
         applicationRepository.deleteAll();
         projectTopicRepository.deleteAll();
+        auditLogRepository.deleteAll();
         userRepository.deleteAll();
         categoryRepository.deleteAll();
     }

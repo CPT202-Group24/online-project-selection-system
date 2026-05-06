@@ -8,83 +8,32 @@
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
-        .page-container {
-            max-width: 800px;
-            margin: 40px auto;
-            background: white;
-            padding: 32px;
-            border-radius: 6px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-        }
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
+        .page-container { max-width: 860px; margin: 40px auto; background: white; padding: 32px; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
         .page-header h2 { margin: 0; }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 32px;
-        }
-        th, td {
-            text-align: left;
-            padding: 10px 12px;
-            border-bottom: 1px solid #eee;
-            font-size: 14px;
-        }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+        th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #eee; font-size: 14px; }
         th { background-color: #f0f0f0; font-weight: bold; }
         tr:hover td { background-color: #fafafa; }
-        .badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 12px;
-        }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
         .badge-active   { background: #d4edda; color: #155724; }
         .badge-inactive { background: #f8d7da; color: #721c24; }
-        .btn-delete {
-            background: none;
-            border: 1px solid #e74c3c;
-            color: #e74c3c;
-            padding: 4px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 13px;
-        }
+        .btn { border: none; padding: 5px 11px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+        .btn-edit       { background: #3498db; color: #fff; }
+        .btn-deactivate { background: #e67e22; color: #fff; }
+        .btn-activate   { background: #27ae60; color: #fff; }
+        .btn-delete     { background: none; border: 1px solid #e74c3c; color: #e74c3c; }
         .btn-delete:hover { background: #e74c3c; color: white; }
-        .form-row {
-            display: flex;
-            gap: 12px;
-            align-items: flex-end;
-            flex-wrap: wrap;
-        }
+        .edit-row td { background: #f9f9f9; }
+        .edit-row input { width: 100%; box-sizing: border-box; padding: 6px 8px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; }
+        .form-row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
         .form-row .form-group { margin-bottom: 0; flex: 1; min-width: 160px; }
-        .form-row button[type="submit"] {
-            width: auto;
-            padding: 8px 20px;
-            margin-top: 0;
-            white-space: nowrap;
-        }
+        .form-row button[type="submit"] { width: auto; padding: 8px 20px; margin-top: 0; white-space: nowrap; }
         #msg { min-height: 36px; }
-        .empty-hint { color: #999; font-size: 14px; text-align: center; padding: 24px 0; }
-        .pagination {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            gap: 8px;
-            margin: 8px 0 24px;
-        }
-        .pagination button {
-            width: auto;
-            margin: 0;
-            padding: 6px 12px;
-        }
-        .pagination span {
-            font-size: 13px;
-            color: #555;
-        }
+        .pagination { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin: 8px 0 24px; }
+        .pagination button { width: auto; margin: 0; padding: 6px 12px; }
+        .pagination span { font-size: 13px; color: #555; }
+        .action-group { display: flex; gap: 6px; flex-wrap: wrap; }
     </style>
 </head>
 <body>
@@ -93,11 +42,11 @@
 <div class="page-container">
     <div class="page-header">
         <h2>Category Management</h2>
+        <a th:href="@{/admin/dashboard}">Back to Dashboard</a>
     </div>
 
     <div id="msg"></div>
 
-    <!-- Category list -->
     <table id="category-table">
         <thead>
         <tr>
@@ -105,11 +54,11 @@
             <th>Name</th>
             <th>Description</th>
             <th>Status</th>
-            <th>Action</th>
+            <th>Actions</th>
         </tr>
         </thead>
         <tbody id="category-tbody">
-        <tr><td colspan="5" class="empty-hint">Loading...</td></tr>
+        <tr><td colspan="5" style="color:#999;text-align:center;padding:24px 0;">Loading...</td></tr>
         </tbody>
     </table>
 
@@ -119,7 +68,6 @@
         <button id="next-page" type="button" onclick="changePage(1)">Next</button>
     </div>
 
-    <!-- Add category form -->
     <h3 style="margin-bottom:16px;">Add New Category</h3>
     <form id="add-form" onsubmit="handleAdd(event)">
         <div class="form-row">
@@ -141,8 +89,9 @@
     const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 
     let currentPage = 0;
-    let totalPages = 1;
-    const pageSize = 5;
+    let totalPages  = 1;
+    const pageSize  = 5;
+    let editingId   = null;
 
     function showMsg(text, type) {
         const el = document.getElementById('msg');
@@ -150,24 +99,19 @@
         setTimeout(() => { el.innerHTML = ''; }, 4000);
     }
 
-    function buildHeaders(isJson) {
-        const h = { [csrfHeader]: csrfToken };
-        if (isJson) h['Content-Type'] = 'application/json';
-        return h;
+    function h(isJson) {
+        const hdr = { [csrfHeader]: csrfToken };
+        if (isJson) hdr['Content-Type'] = 'application/json';
+        return hdr;
     }
 
     async function loadCategories(page = currentPage) {
         try {
-            const res = await fetch(`/api/admin/categories?page=${page}&size=${pageSize}`, {
-                headers: buildHeaders(false)
-            });
+            const res  = await fetch(`/api/admin/categories?page=${page}&size=${pageSize}`, { headers: h(false) });
             const data = await res.json();
             currentPage = data.page || 0;
-            totalPages = Math.max(data.totalPages || 1, 1);
-            if (currentPage >= totalPages) {
-                loadCategories(totalPages - 1);
-                return;
-            }
+            totalPages  = Math.max(data.totalPages || 1, 1);
+            if (currentPage >= totalPages) { loadCategories(totalPages - 1); return; }
             renderTable(data.items || []);
             renderPagination(data.totalItems || 0);
         } catch (e) {
@@ -178,16 +122,40 @@
     function renderTable(list) {
         const tbody = document.getElementById('category-tbody');
         if (!list || list.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="empty-hint">No categories yet. Add one below.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" style="color:#999;text-align:center;padding:24px 0;">No categories yet. Add one below.</td></tr>';
             return;
         }
         tbody.innerHTML = list.map((c, i) => `
             <tr id="row-${c.id}">
                 <td>${currentPage * pageSize + i + 1}</td>
-                <td><strong>${escHtml(c.name)}</strong></td>
-                <td>${escHtml(c.description || '—')}</td>
+                <td><strong>${esc(c.name)}</strong></td>
+                <td>${esc(c.description || '—')}</td>
                 <td><span class="badge ${c.isActive ? 'badge-active' : 'badge-inactive'}">${c.isActive ? 'Active' : 'Inactive'}</span></td>
-                <td><button class="btn-delete" onclick="handleDelete(${c.id}, '${escHtml(c.name)}')">Delete</button></td>
+                <td>
+                    <div class="action-group">
+                        <button class="btn btn-edit" onclick="showEditRow(${c.id}, '${esc(c.name)}', '${esc(c.description || '')}')">Edit</button>
+                        ${c.isActive
+                            ? `<button class="btn btn-deactivate" onclick="handleDeactivate(${c.id}, '${esc(c.name)}')">Deactivate</button>`
+                            : `<button class="btn btn-activate"   onclick="handleActivate(${c.id}, '${esc(c.name)}')">Activate</button>`
+                        }
+                    </div>
+                </td>
+            </tr>
+            <tr class="edit-row" id="edit-row-${c.id}" style="display:none;">
+                <td colspan="5" style="padding:12px 16px;">
+                    <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+                        <div style="flex:1;min-width:150px;">
+                            <label style="font-size:13px;font-weight:600;">Name *</label>
+                            <input type="text" id="edit-name-${c.id}" value="${esc(c.name)}" required>
+                        </div>
+                        <div style="flex:2;min-width:200px;">
+                            <label style="font-size:13px;font-weight:600;">Description</label>
+                            <input type="text" id="edit-desc-${c.id}" value="${esc(c.description || '')}">
+                        </div>
+                        <button class="btn btn-edit" onclick="submitEdit(${c.id})">Save</button>
+                        <button class="btn" style="background:#aaa;color:#fff;" onclick="hideEditRow(${c.id})">Cancel</button>
+                    </div>
+                </td>
             </tr>
         `).join('');
     }
@@ -201,10 +169,76 @@
 
     function changePage(delta) {
         const target = currentPage + delta;
-        if (target < 0 || target >= totalPages) {
-            return;
-        }
+        if (target < 0 || target >= totalPages) return;
         loadCategories(target);
+    }
+
+    function showEditRow(id, name, desc) {
+        if (editingId && editingId !== id) hideEditRow(editingId);
+        editingId = id;
+        document.getElementById(`edit-row-${id}`).style.display = 'table-row';
+    }
+
+    function hideEditRow(id) {
+        const row = document.getElementById(`edit-row-${id}`);
+        if (row) row.style.display = 'none';
+        if (editingId === id) editingId = null;
+    }
+
+    async function submitEdit(id) {
+        const name = document.getElementById(`edit-name-${id}`).value.trim();
+        const desc = document.getElementById(`edit-desc-${id}`).value.trim();
+        if (!name) { showMsg('Category name is required.', 'error'); return; }
+        try {
+            const res = await fetch(`/api/admin/categories/${id}`, {
+                method: 'PUT',
+                headers: h(true),
+                body: JSON.stringify({ name, description: desc })
+            });
+            if (res.ok) {
+                showMsg(`Category updated successfully.`, 'info');
+                loadCategories(currentPage);
+            } else {
+                const data = await res.json();
+                showMsg(data.error || 'Failed to update category.', 'error');
+            }
+        } catch (e) {
+            showMsg('Network error. Please try again.', 'error');
+        }
+    }
+
+    async function handleDeactivate(id, name) {
+        if (!confirm(`Deactivate category "${name}"? It will no longer appear in teacher/student menus, but existing projects will keep the category name.`)) return;
+        try {
+            const res = await fetch(`/api/admin/categories/${id}/deactivate`, {
+                method: 'PUT', headers: h(false)
+            });
+            if (res.ok) {
+                showMsg(`Category "${esc(name)}" deactivated.`, 'info');
+                loadCategories(currentPage);
+            } else {
+                showMsg('Failed to deactivate category.', 'error');
+            }
+        } catch (e) {
+            showMsg('Network error. Please try again.', 'error');
+        }
+    }
+
+    async function handleActivate(id, name) {
+        if (!confirm(`Re-activate category "${name}"?`)) return;
+        try {
+            const res = await fetch(`/api/admin/categories/${id}/activate`, {
+                method: 'PUT', headers: h(false)
+            });
+            if (res.ok) {
+                showMsg(`Category "${esc(name)}" activated.`, 'info');
+                loadCategories(currentPage);
+            } else {
+                showMsg('Failed to activate category.', 'error');
+            }
+        } catch (e) {
+            showMsg('Network error. Please try again.', 'error');
+        }
     }
 
     async function handleAdd(e) {
@@ -212,16 +246,15 @@
         const name = document.getElementById('cat-name').value.trim();
         const desc = document.getElementById('cat-desc').value.trim();
         if (!name) { showMsg('Category name is required.', 'error'); return; }
-
         try {
             const res = await fetch('/api/admin/categories', {
                 method: 'POST',
-                headers: buildHeaders(true),
+                headers: h(true),
                 body: JSON.stringify({ name, description: desc })
             });
             if (res.status === 201) {
                 document.getElementById('add-form').reset();
-                showMsg(`Category "${escHtml(name)}" created successfully.`, 'info');
+                showMsg(`Category "${esc(name)}" created successfully.`, 'info');
                 loadCategories(0);
             } else {
                 const data = await res.json();
@@ -232,32 +265,10 @@
         }
     }
 
-    async function handleDelete(id, name) {
-        if (!confirm(`Delete category "${name}"? This cannot be undone.`)) return;
-        try {
-            const res = await fetch(`/api/admin/categories/${id}`, {
-                method: 'DELETE',
-                headers: buildHeaders(false)
-            });
-            if (res.status === 204) {
-                showMsg(`Category "${escHtml(name)}" deleted.`, 'info');
-                loadCategories(currentPage);
-            } else if (res.status === 404) {
-                showMsg('Category not found.', 'error');
-            } else {
-                showMsg('Failed to delete category.', 'error');
-            }
-        } catch (e) {
-            showMsg('Network error. Please try again.', 'error');
-        }
-    }
-
-    function escHtml(str) {
+    function esc(str) {
         return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;');
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
     loadCategories();

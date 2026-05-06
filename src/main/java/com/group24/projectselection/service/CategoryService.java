@@ -55,6 +55,39 @@ public class CategoryService {
     }
 
     @Transactional
+    public Category update(Long id, String name, String description) {
+        if (!StringUtils.hasText(name)) {
+            throw new IllegalArgumentException("Category name must not be blank.");
+        }
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Category not found: " + id));
+        String trimmed = name.trim();
+        if (!trimmed.equalsIgnoreCase(category.getName())
+                && categoryRepository.existsByNameIgnoreCase(trimmed)) {
+            throw new IllegalArgumentException("A category with this name already exists.");
+        }
+        category.setName(trimmed);
+        category.setDescription(StringUtils.hasText(description) ? description.trim() : null);
+        return categoryRepository.save(category);
+    }
+
+    @Transactional
+    public Category deactivate(Long id) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Category not found: " + id));
+        category.setIsActive(false);
+        return categoryRepository.save(category);
+    }
+
+    @Transactional
+    public Category activate(Long id) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Category not found: " + id));
+        category.setIsActive(true);
+        return categoryRepository.save(category);
+    }
+
+    @Transactional
     public void delete(Long id) {
         if (!categoryRepository.existsById(id)) {
             throw new NoSuchElementException("Category not found: " + id);
