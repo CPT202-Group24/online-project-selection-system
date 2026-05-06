@@ -10,142 +10,177 @@
 
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="container project-page-container">
-    <h2>Available Topics</h2>
-    <form method="get" th:action="@{/student/topics}">
-        <input type="text"
-               name="keyword"
-               placeholder="Search by keyword"
-               th:value="${keyword}">
+<div class="page-shell">
+    <div class="modern-card">
 
-        <select name="category">
-            <option value="">All Categories</option>
-            <option th:each="category : ${categories}"
-                    th:value="${category.id}"
-                    th:text="${category.name}"
-                    th:selected="${selectedCategory != null and selectedCategory == category.id}">
-            </option>
-        </select>
+        <!-- Page Header -->
+        <div class="modern-page-header">
+            <div class="modern-page-icon">
+                📋
+            </div>
+            <div>
+                <h1 class="modern-page-title">Available Topics</h1>
+                <p class="modern-page-subtitle">Browse and search available project topics</p>
+            </div>
+        </div>
 
-        <select name="sort">
-            <option value="newest" th:selected="${sort == 'newest'}">Newest first</option>
-            <option value="az" th:selected="${sort == 'az'}">A-Z</option>
-        </select>
+        <!-- Search / Filter Toolbar -->
+        <form class="modern-toolbar" method="get" th:action="@{/student/topics}">
+            <input class="modern-input"
+                   type="text"
+                   name="keyword"
+                   placeholder="Search by keyword"
+                   th:value="${keyword}">
 
-        <input type="hidden" name="page" value="0">
-        <input type="hidden" name="size" th:value="${size}">
+            <select class="modern-select" name="category">
+                <option value="">All Categories</option>
+                <option th:each="category : ${categories}"
+                        th:value="${category.id}"
+                        th:text="${category.name}"
+                        th:selected="${selectedCategory != null and selectedCategory == category.id}">
+                </option>
+            </select>
 
-        <button type="submit">Search</button>
-    </form>
+            <select class="modern-select" name="sort">
+                <option value="newest" th:selected="${sort == 'newest'}">Newest first</option>
+                <option value="az" th:selected="${sort == 'az'}">A-Z</option>
+            </select>
 
-    <div th:if="${successMessage}" class="alert alert-info">
-        <span th:text="${successMessage}"></span>
-    </div>
+            <input type="hidden" name="page" value="0">
+            <input type="hidden" name="size" th:value="${size}">
 
-    <div th:if="${errorMessage}" class="alert alert-error">
-        <span th:text="${errorMessage}"></span>
-    </div>
+            <button class="modern-btn modern-btn-primary" type="submit">
+                Search
+            </button>
+        </form>
 
-    <div class="project-table-wrapper" th:if="${!projects.isEmpty()}">
-        <table class="project-table">
-            <thead>
-            <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Teacher</th>
-                <th>Category</th>
-                <th>Description</th>
-                <th>Required Skills</th>
-                <th>Keywords</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="project : ${projects}">
-                <td th:text="${project.id}"></td>
+        <!-- Messages -->
+        <div th:if="${successMessage}" class="alert alert-info">
+            <span th:text="${successMessage}"></span>
+        </div>
 
-                <td class="title-cell">
-                    <span th:text="${project.title != null and !project.title.isEmpty() ? project.title : 'Untitled'}"></span>
-                </td>
+        <div th:if="${errorMessage}" class="alert alert-error">
+            <span th:text="${errorMessage}"></span>
+        </div>
 
-                <td th:text="${project.teacher != null ? project.teacher.name : 'N/A'}"></td>
+        <!-- Result Summary -->
+        <p class="result-summary" th:if="${!projects.isEmpty()}">
+            Showing available project topics
+        </p>
 
-                <td th:text="${project.category != null ? project.category.name : 'N/A'}"></td>
+        <!-- Table -->
+        <div class="modern-table-wrapper" th:if="${!projects.isEmpty()}">
+            <table class="modern-table project-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Teacher</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Required Skills</th>
+                    <th>Keywords</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
 
-                <td class="desc-cell"
-                    th:text="${project.description != null and #strings.length(project.description) > 20
-                    ? #strings.substring(project.description, 0, 20) + '...'
-                    : project.description}">
-                </td>
+                <tbody>
+                <tr th:each="project : ${projects}">
+                    <td th:text="${project.id}"></td>
 
-                <td class="skill-cell"
-                    th:text="${project.requiredSkills != null and !project.requiredSkills.isEmpty() ? project.requiredSkills : 'N/A'}">
-                </td>
+                    <td class="title-cell">
+                        <span th:text="${project.title != null and !project.title.isEmpty() ? project.title : 'Untitled'}"></span>
+                    </td>
 
-                <td>
-                    <span th:if="${project.keywords != null and !project.keywords.isEmpty()}">
-                        <span th:each="kw : ${#strings.arraySplit(project.keywords, ',')}"
-                              th:text="${#strings.trim(kw)}"
-                              class="keyword-tag">
+                    <td th:text="${project.teacher != null ? project.teacher.name : 'N/A'}"></td>
+
+                    <td th:text="${project.category != null ? project.category.name : 'N/A'}"></td>
+
+                    <td class="desc-cell"
+                        th:text="${project.description != null and #strings.length(project.description) > 20
+                        ? #strings.substring(project.description, 0, 20) + '...'
+                        : project.description}">
+                    </td>
+
+                    <td class="skill-cell"
+                        th:text="${project.requiredSkills != null and !project.requiredSkills.isEmpty() ? project.requiredSkills : 'N/A'}">
+                    </td>
+
+                    <td>
+                        <span th:if="${project.keywords != null and !project.keywords.isEmpty()}">
+                            <span th:each="kw : ${#strings.arraySplit(project.keywords, ',')}"
+                                  th:text="${#strings.trim(kw)}"
+                                  class="keyword-tag">
+                            </span>
                         </span>
-                    </span>
-                    <span th:if="${project.keywords == null or project.keywords.isEmpty()}">N/A</span>
-                </td>
+                        <span th:if="${project.keywords == null or project.keywords.isEmpty()}">N/A</span>
+                    </td>
 
-                <td>
-                    <span class="status-badge" th:text="${project.status}"></span>
-                </td>
+                    <td>
+                        <span class="status-badge status-available"
+                              th:text="${project.status}">
+                        </span>
+                    </td>
 
-                <td>
-                    <div class="action-group">
-                        <a th:href="@{/student/topics/{id}(id=${project.id})}"
-                           class="small-action-btn">
-                            View Details
-                        </a>
-                    </div>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+                    <td>
+                        <div class="action-group">
+                            <a th:href="@{/student/topics/{id}(id=${project.id})}"
+                               class="modern-btn modern-btn-dark">
+                                View Details
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Empty State -->
+        <p th:if="${projects.isEmpty()}" class="empty-message">
+            No results found.
+        </p>
+
+        <!-- Pagination -->
+        <div class="modern-pagination" th:if="${totalPages > 1}">
+            <a th:if="${currentPage > 0}"
+               th:href="@{/student/topics(
+               page=${currentPage - 1},
+               size=${size},
+               sort=${sort},
+               keyword=${keyword},
+               category=${selectedCategory}
+           )}">
+                Previous
+            </a>
+
+            <span>
+                <span th:text="${currentPage + 1}"></span>
+                of
+                <span th:text="${totalPages}"></span>
+            </span>
+
+            <a th:if="${currentPage + 1 < totalPages}"
+               th:href="@{/student/topics(
+               page=${currentPage + 1},
+               size=${size},
+               sort=${sort},
+               keyword=${keyword},
+               category=${selectedCategory}
+           )}">
+                Next
+            </a>
+        </div>
+
+        <!-- Bottom Actions -->
+        <div class="page-bottom-actions">
+            <a class="modern-btn modern-btn-outline"
+               th:href="@{/student/dashboard}">
+                ← Back to Student Dashboard
+            </a>
+        </div>
+
     </div>
-
-    <div class="pagination" th:if="${totalPages > 1}">
-        <a th:if="${currentPage > 0}"
-           th:href="@{/student/topics(
-           page=${currentPage - 1},
-           size=${size},
-           sort=${sort},
-           keyword=${keyword},
-           category=${selectedCategory}
-       )}">
-            Previous
-        </a>
-
-        <span>
-        Page <span th:text="${currentPage + 1}"></span>
-        of <span th:text="${totalPages}"></span>
-    </span>
-
-        <a th:if="${currentPage + 1 < totalPages}"
-           th:href="@{/student/topics(
-           page=${currentPage + 1},
-           size=${size},
-           sort=${sort},
-           keyword=${keyword},
-           category=${selectedCategory}
-       )}">
-            Next
-        </a>
-    </div>
-
-    <p th:if="${projects.isEmpty()}" class="empty-message">
-        No results found.
-    </p>
-
-    <p class="back-link-row">
-        <a th:href="@{/student/dashboard}">Back to student dashboard</a>
-    </p>
 </div>
 
 </body>

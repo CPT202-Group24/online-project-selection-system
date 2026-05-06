@@ -7,14 +7,77 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
+
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="container form-page-container">
-    <h2>Teacher Dashboard</h2>
-    <p>Welcome. Select a module to manage.</p>
+<div class="page-shell">
+    <div class="modern-card dashboard-modern-card">
 
-    <div class="project-toolbar" style="margin-top: 24px;">
-        <a th:href="@{/teacher/projects}" class="toolbar-link-btn">Project Management</a>
+        <!-- Page Header -->
+        <div class="modern-page-header">
+            <div class="modern-page-icon">
+                👩‍🏫
+            </div>
+            <div>
+                <h1 class="modern-page-title">Teacher Dashboard</h1>
+                <p class="modern-page-subtitle">
+                    Manage project topics, review applications and track project progress.
+                </p>
+            </div>
+        </div>
+
+        <!-- Dashboard Intro -->
+        <div class="dashboard-hero-card">
+            <div>
+                <h2>Project Topic Management</h2>
+                <p>
+                    Use this dashboard to create project topics, save drafts, publish available topics,
+                    and manage the lifecycle of your projects.
+                </p>
+            </div>
+
+            <a th:href="@{/teacher/projects}" class="modern-btn modern-btn-primary">
+                Project Management
+            </a>
+        </div>
+
+        <!-- Feature Cards -->
+        <div class="dashboard-card-grid">
+
+            <a th:href="@{/teacher/projects}" class="dashboard-action-card">
+                <div class="dashboard-action-icon">📁</div>
+                <div>
+                    <h3>Project Management</h3>
+                    <p>Create, edit, publish, close or archive your project topics.</p>
+                </div>
+            </a>
+
+            <a th:href="@{/teacher/projects(view='my')}" class="dashboard-action-card">
+                <div class="dashboard-action-icon">🧾</div>
+                <div>
+                    <h3>My Projects</h3>
+                    <p>View your own project topics and manage their current status.</p>
+                </div>
+            </a>
+
+            <a th:href="@{/notifications}" class="dashboard-action-card">
+                <div class="dashboard-action-icon">🔔</div>
+                <div>
+                    <h3>Notifications</h3>
+                    <p>Check system notifications related to applications and project updates.</p>
+                </div>
+            </a>
+
+            <a th:href="@{/profile}" class="dashboard-action-card">
+                <div class="dashboard-action-icon">👤</div>
+                <div>
+                    <h3>My Profile</h3>
+                    <p>View or update your teacher profile information.</p>
+                </div>
+            </a>
+
+        </div>
+
     </div>
 </div>
 

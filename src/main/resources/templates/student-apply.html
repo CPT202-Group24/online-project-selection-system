@@ -10,56 +10,118 @@
 
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="container form-page-container">
-    <h2>Apply for Project</h2>
+<div class="page-shell">
+    <div class="modern-card apply-modern-card">
 
-    <div th:if="${errorMessage}" class="alert alert-error">
-        <span th:text="${errorMessage}"></span>
-    </div>
-
-    <div class="project-table-wrapper" style="margin-bottom: 24px;">
-        <table class="project-table">
-            <tbody>
-            <tr>
-                <th>Title</th>
-                <td th:text="${project.title}"></td>
-            </tr>
-            <tr>
-                <th>Teacher</th>
-                <td th:text="${project.teacher != null ? project.teacher.name : 'N/A'}"></td>
-            </tr>
-            <tr>
-                <th>Description</th>
-                <td th:text="${project.description != null ? project.description : 'N/A'}"></td>
-            </tr>
-            <tr>
-                <th>Required Skills</th>
-                <td th:text="${project.requiredSkills != null ? project.requiredSkills : 'N/A'}"></td>
-            </tr>
-            <tr>
-                <th>Max Students</th>
-                <td th:text="${project.maxStudents != null ? project.maxStudents : 'N/A'}"></td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <form th:action="@{/student/applications/apply/{id}(id=${project.id})}" method="post">
-        <div class="form-group">
-            <label for="personalStatement">Personal Statement</label>
-            <textarea id="personalStatement"
-                      name="personalStatement"
-                      rows="6"
-                      minlength="50"
-                      placeholder="Explain why you are interested in this project and what relevant skills or experience you have (minimum 50 characters)..."
-                      required></textarea>
-            <p class="field-hint">Minimum 50 characters required.</p>
+        <!-- Page Header -->
+        <div class="modern-page-header">
+            <div class="modern-page-icon">
+                📝
+            </div>
+            <div>
+                <h1 class="modern-page-title">Apply for Project</h1>
+                <p class="modern-page-subtitle">
+                    Review the topic summary and submit your personal statement
+                </p>
+            </div>
         </div>
-        <div class="project-form-actions">
-            <a th:href="@{/student/topics/{id}(id=${project.id})}" class="toolbar-link-btn">Back</a>
-            <button type="submit" class="half-btn primary-btn">Submit Application</button>
+
+        <!-- Error Message -->
+        <div th:if="${errorMessage}" class="alert alert-error">
+            <span th:text="${errorMessage}"></span>
         </div>
-    </form>
+
+        <!-- Project Summary -->
+        <div class="modern-detail-card">
+            <h3 class="modern-detail-title">Project Summary</h3>
+
+            <div class="modern-detail-grid">
+                <div class="modern-detail-item full-row">
+                    <span class="detail-label">Title</span>
+                    <span class="detail-value" th:text="${project.title}">
+                        Project Title
+                    </span>
+                </div>
+
+                <div class="modern-detail-item">
+                    <span class="detail-label">Teacher</span>
+                    <span class="detail-value"
+                          th:text="${project.teacher != null ? project.teacher.name : 'N/A'}">
+                        Teacher
+                    </span>
+                </div>
+
+                <div class="modern-detail-item">
+                    <span class="detail-label">Max Students</span>
+                    <span class="detail-value"
+                          th:text="${project.maxStudents != null ? project.maxStudents : 'N/A'}">
+                        Max Students
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-two-column">
+            <div class="modern-detail-card">
+                <h3 class="modern-detail-title">Description</h3>
+
+                <p class="detail-text"
+                   th:text="${project.description != null ? project.description : 'N/A'}">
+                    Description
+                </p>
+            </div>
+
+            <div class="modern-detail-card">
+                <h3 class="modern-detail-title">Required Skills</h3>
+
+                <p class="detail-text"
+                   th:text="${project.requiredSkills != null ? project.requiredSkills : 'N/A'}">
+                    Required Skills
+                </p>
+            </div>
+        </div>
+
+        <!-- Application Form -->
+        <form th:action="@{/student/applications/apply/{id}(id=${project.id})}"
+              method="post"
+              class="modern-form">
+
+            <div class="form-section-card">
+                <h3 class="form-section-title">Personal Statement</h3>
+
+                <div class="modern-form-group">
+                    <label for="personalStatement">Why are you interested in this project?</label>
+
+                    <textarea id="personalStatement"
+                              name="personalStatement"
+                              rows="7"
+                              minlength="50"
+                              class="modern-textarea"
+                              placeholder="Explain why you are interested in this project and what relevant skills or experience you have (minimum 50 characters)..."
+                              required></textarea>
+
+                    <p class="field-hint">
+                        Minimum 50 characters required. You can mention your skills, motivation and relevant experience.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="modern-form-actions">
+                <a th:href="@{/student/topics/{id}(id=${project.id})}"
+                   class="modern-btn modern-btn-outline">
+                    ← Back
+                </a>
+
+                <button type="submit"
+                        class="modern-btn modern-btn-primary">
+                    Submit Application
+                </button>
+            </div>
+
+        </form>
+
+    </div>
 </div>
 
 </body>
