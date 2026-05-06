@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
@@ -18,7 +18,7 @@
         <!-- Page Header -->
         <div class="modern-page-header">
             <div class="modern-page-icon">
-                👥
+                &#128101;
             </div>
             <div>
                 <h1 class="modern-page-title">User Account Management</h1>
@@ -53,14 +53,14 @@
                 <tr>
                     <th>ID</th>
                     <th onclick="sortBy('name')" class="sortable-th">
-                        Name <span id="sort-name">↕</span>
+                        Name <span id="sort-name">&#8597;</span>
                     </th>
                     <th>Email</th>
                     <th onclick="sortBy('role')" class="sortable-th">
-                        Role <span id="sort-role">↕</span>
+                        Role <span id="sort-role">&#8597;</span>
                     </th>
                     <th onclick="sortBy('status')" class="sortable-th">
-                        Status <span id="sort-status">↕</span>
+                        Status <span id="sort-status">&#8597;</span>
                     </th>
                     <th>Phone</th>
                     <th>Department</th>
@@ -79,7 +79,7 @@
         <!-- Bottom Actions -->
         <div class="page-bottom-actions">
             <a th:href="@{/admin/dashboard}" class="modern-btn modern-btn-outline">
-                ← Back to Dashboard
+                &larr; Back to Dashboard
             </a>
         </div>
 
