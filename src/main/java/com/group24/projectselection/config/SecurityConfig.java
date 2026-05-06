@@ -3,6 +3,7 @@ package com.group24.projectselection.config;
 import com.group24.projectselection.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -39,7 +40,12 @@ public class SecurityConfig {
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
                 .successHandler(authenticationSuccessHandler)
-                .failureUrl("/login?error=true")
+                .failureHandler((request, response, exception) -> {
+                    String redirectUrl = (exception instanceof DisabledException)
+                            ? "/login?disabled=true"
+                            : "/login?error=true";
+                    response.sendRedirect(request.getContextPath() + redirectUrl);
+                })
                 .permitAll()
             )
             .logout(logout -> logout

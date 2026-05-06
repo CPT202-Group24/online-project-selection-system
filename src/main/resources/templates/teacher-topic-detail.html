@@ -10,129 +10,226 @@
 
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="container project-page-container topic-detail-container">
+<div class="page-shell">
+  <div class="modern-card detail-modern-card">
 
-  <div th:if="${successMessage}" class="alert alert-success">
-    <span th:text="${successMessage}"></span>
-  </div>
-
-  <div th:if="${errorMessage}" class="alert alert-error">
-    <span th:text="${errorMessage}"></span>
-  </div>
-
-  <div class="detail-header-card">
-    <div>
-      <p class="detail-page-label">Project Topic Detail</p>
-      <h2 th:text="${projectTopic.title}">Project Title</h2>
-    </div>
-
-    <div class="detail-status-area">
-            <span class="status-badge"
-                  th:classappend="'status-' + ${projectTopic.status.name()}"
-                  th:text="${projectTopic.status}">
-            </span>
-
-      <span th:if="${projectTopic.draft}" class="draft-badge">
-                Draft
-            </span>
-    </div>
-  </div>
-
-  <div class="detail-card">
-    <h3>Basic Information</h3>
-
-    <div class="detail-grid">
-      <div class="detail-item">
-        <span class="detail-label">Category</span>
-        <span class="detail-value"
-              th:text="${projectTopic.category != null ? projectTopic.category.name : 'N/A'}">
-                    N/A
-                </span>
+    <!-- Page Header -->
+    <div class="modern-page-header detail-modern-header">
+      <div class="modern-page-icon">
+        📄
       </div>
 
-      <div class="detail-item">
-        <span class="detail-label">Max Students</span>
-        <span class="detail-value"
-              th:text="${projectTopic.maxStudents != null ? projectTopic.maxStudents : 'N/A'}">
-                    N/A
-                </span>
+      <div class="detail-title-area">
+        <p class="detail-page-label">Project Topic Detail</p>
+        <h1 class="modern-page-title" th:text="${projectTopic.title}">
+          Project Title
+        </h1>
+        <p class="modern-page-subtitle">
+          View project information, current status and related student applications
+        </p>
       </div>
 
-      <div class="detail-item">
-        <span class="detail-label">Teacher</span>
-        <span class="detail-value"
-              th:text="${projectTopic.teacher != null ? projectTopic.teacher.name : 'N/A'}">
-                    Teacher
+      <div class="detail-status-area modern-detail-status-area">
+                <span class="status-badge"
+                      th:classappend="'status-' + ${projectTopic.status.name()}"
+                      th:text="${projectTopic.status}">
                 </span>
-      </div>
 
-      <div class="detail-item">
-        <span class="detail-label">Teacher Email</span>
-        <span class="detail-value"
-              th:text="${projectTopic.teacher != null ? projectTopic.teacher.email : 'N/A'}">
-                    Email
-                </span>
-      </div>
-
-      <div class="detail-item">
-        <span class="detail-label">Created At</span>
-        <span class="detail-value"
-              th:text="${projectTopic.createdAt != null ? #temporals.format(projectTopic.createdAt, 'yyyy-MM-dd HH:mm') : 'N/A'}">
-                    Created At
-                </span>
-      </div>
-
-      <div class="detail-item">
-        <span class="detail-label">Updated At</span>
-        <span class="detail-value"
-              th:text="${projectTopic.updatedAt != null ? #temporals.format(projectTopic.updatedAt, 'yyyy-MM-dd HH:mm') : 'N/A'}">
-                    Updated At
+        <span th:if="${projectTopic.draft}" class="draft-badge">
+                    Draft
                 </span>
       </div>
     </div>
-  </div>
 
-  <div class="detail-card">
-    <h3>Project Description</h3>
-    <p class="detail-text"
-       th:text="${projectTopic.description != null and !projectTopic.description.isEmpty()
-                    ? projectTopic.description
-                    : 'No description provided.'}">
-      Description
-    </p>
-  </div>
-
-  <div class="detail-card">
-    <h3>Required Skills</h3>
-    <p class="detail-text"
-       th:text="${projectTopic.requiredSkills != null and !projectTopic.requiredSkills.isEmpty()
-                    ? projectTopic.requiredSkills
-                    : 'No required skills provided.'}">
-      Required Skills
-    </p>
-  </div>
-
-  <div class="detail-card">
-    <h3>Keywords</h3>
-
-    <div th:if="${projectTopic.keywords != null and !projectTopic.keywords.isEmpty()}"
-         class="keyword-preview-row">
-            <span th:each="kw : ${#strings.arraySplit(projectTopic.keywords, ',')}"
-                  th:if="${#strings.trim(kw) != ''}"
-                  th:text="${#strings.trim(kw)}"
-                  class="keyword-tag">
-            </span>
+    <!-- Messages -->
+    <div th:if="${successMessage}" class="alert alert-success">
+      <span th:text="${successMessage}"></span>
     </div>
 
-    <p th:if="${projectTopic.keywords == null or projectTopic.keywords.isEmpty()}"
-       class="detail-text">
-      No keywords provided.
-    </p>
-  </div>
-  <div class="detail-action-bar">
-    <a th:href="@{/teacher/projects}" class="secondary-btn">
-      Back to Project List
-    </a>
+    <div th:if="${errorMessage}" class="alert alert-error">
+      <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Basic Information -->
+    <div class="modern-detail-card">
+      <h3 class="modern-detail-title">Basic Information</h3>
+
+      <div class="modern-detail-grid">
+        <div class="modern-detail-item">
+          <span class="detail-label">Category</span>
+          <span class="detail-value"
+                th:text="${projectTopic.category != null ? projectTopic.category.name : 'N/A'}">
+                        N/A
+                    </span>
+        </div>
+
+        <div class="modern-detail-item">
+          <span class="detail-label">Max Students</span>
+          <span class="detail-value"
+                th:text="${projectTopic.maxStudents != null ? projectTopic.maxStudents : 'N/A'}">
+                        N/A
+                    </span>
+        </div>
+
+        <div class="modern-detail-item">
+          <span class="detail-label">Teacher</span>
+          <span class="detail-value"
+                th:text="${projectTopic.teacher != null ? projectTopic.teacher.name : 'N/A'}">
+                        Teacher
+                    </span>
+        </div>
+
+        <div class="modern-detail-item">
+          <span class="detail-label">Teacher Email</span>
+          <span class="detail-value"
+                th:text="${projectTopic.teacher != null ? projectTopic.teacher.email : 'N/A'}">
+                        Email
+                    </span>
+        </div>
+
+        <div class="modern-detail-item">
+          <span class="detail-label">Created At</span>
+          <span class="detail-value"
+                th:text="${projectTopic.createdAt != null ? #temporals.format(projectTopic.createdAt, 'yyyy-MM-dd HH:mm') : 'N/A'}">
+                        Created At
+                    </span>
+        </div>
+
+        <div class="modern-detail-item">
+          <span class="detail-label">Updated At</span>
+          <span class="detail-value"
+                th:text="${projectTopic.updatedAt != null ? #temporals.format(projectTopic.updatedAt, 'yyyy-MM-dd HH:mm') : 'N/A'}">
+                        Updated At
+                    </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="modern-detail-card">
+      <h3 class="modern-detail-title">Project Description</h3>
+
+      <p class="detail-text"
+         th:text="${projectTopic.description != null and !projectTopic.description.isEmpty()
+                        ? projectTopic.description
+                        : 'No description provided.'}">
+        Description
+      </p>
+    </div>
+
+    <!-- Required Skills and Keywords -->
+    <div class="detail-two-column">
+      <div class="modern-detail-card">
+        <h3 class="modern-detail-title">Required Skills</h3>
+
+        <p class="detail-text"
+           th:text="${projectTopic.requiredSkills != null and !projectTopic.requiredSkills.isEmpty()
+                            ? projectTopic.requiredSkills
+                            : 'No required skills provided.'}">
+          Required Skills
+        </p>
+      </div>
+
+      <div class="modern-detail-card">
+        <h3 class="modern-detail-title">Keywords</h3>
+
+        <div th:if="${projectTopic.keywords != null and !projectTopic.keywords.isEmpty()}"
+             class="keyword-preview-row">
+                    <span th:each="kw : ${#strings.arraySplit(projectTopic.keywords, ',')}"
+                          th:if="${#strings.trim(kw) != ''}"
+                          th:text="${#strings.trim(kw)}"
+                          class="keyword-tag">
+                    </span>
+        </div>
+
+        <p th:if="${projectTopic.keywords == null or projectTopic.keywords.isEmpty()}"
+           class="detail-text">
+          No keywords provided.
+        </p>
+      </div>
+    </div>
+
+    <!-- Student Applications -->
+    <div class="modern-detail-card">
+      <div class="section-title-row">
+        <h3 class="modern-detail-title">Student Applications</h3>
+      </div>
+
+      <div th:if="${#lists.isEmpty(applications)}" class="empty-message">
+        No student applications for this topic yet.
+      </div>
+
+      <div th:if="${not #lists.isEmpty(applications)}" class="modern-table-wrapper">
+        <table class="modern-table project-table">
+          <thead>
+          <tr>
+            <th>Student</th>
+            <th>Email</th>
+            <th>Personal Statement</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+          </thead>
+
+          <tbody>
+          <tr th:each="app : ${applications}">
+            <td th:text="${app.student != null ? app.student.name : 'N/A'}">Student</td>
+
+            <td th:text="${app.student != null ? app.student.email : 'N/A'}">Email</td>
+
+            <td th:text="${app.personalStatement}">Statement</td>
+
+            <td>
+                            <span class="status-badge"
+                                  th:classappend="'status-' + ${app.status.name()}"
+                                  th:text="${app.status}">
+                                pending
+                            </span>
+            </td>
+
+            <td>
+              <div th:if="${app.status.name() == 'pending'}"
+                   class="application-action-group">
+                <form th:action="@{/teacher/applications/{id}/approve(id=${app.id})}"
+                      method="post">
+                  <input type="hidden" name="topicId" th:value="${projectTopic.id}">
+                  <input type="hidden" name="teacherId" th:value="${currentTeacherId}">
+
+                  <button type="submit"
+                          class="modern-btn modern-btn-primary table-action-btn">
+                    Approve
+                  </button>
+                </form>
+
+                <form th:action="@{/teacher/applications/{id}/reject(id=${app.id})}"
+                      method="post">
+                  <input type="hidden" name="topicId" th:value="${projectTopic.id}">
+                  <input type="hidden" name="teacherId" th:value="${currentTeacherId}">
+
+                  <button type="submit"
+                          class="modern-btn modern-btn-outline table-action-btn">
+                    Reject
+                  </button>
+                </form>
+              </div>
+
+              <span th:if="${app.status.name() != 'pending'}" class="muted">
+                                Processed
+                            </span>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Bottom Actions -->
+    <div class="page-bottom-actions detail-bottom-actions">
+      <a th:href="@{/teacher/projects}" class="modern-btn modern-btn-outline">
+        ← Back to Project List
+      </a>
+    </div>
+
   </div>
 </div>
 

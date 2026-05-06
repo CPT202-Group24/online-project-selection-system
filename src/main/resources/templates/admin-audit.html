@@ -5,57 +5,96 @@
     <meta charset="UTF-8">
     <title>Audit Log - Project Selection System</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
-    <style>
-        .page-container { max-width: 1100px; margin: 30px auto; background: #fff; padding: 24px; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,.1); }
-        .toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 16px; }
-        .toolbar label { font-weight: bold; font-size: 14px; display: block; margin-bottom: 4px; }
-        .toolbar input { width: 280px; padding: 8px 12px; }
-        .toolbar button { width: auto; margin-top: 0; padding: 8px 16px; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        th, td { border-bottom: 1px solid #eee; padding: 10px; text-align: left; }
-        th { background: #f7f7f7; }
-        .pager { margin-top: 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-        .pager button { width: auto; margin-top: 0; padding: 6px 12px; font-size: 13px; }
-        .muted { color: #888; }
-    </style>
 </head>
 <body>
+
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="page-container">
-    <h2>Audit Log</h2>
-    <p class="muted" style="margin-bottom:16px;">Search by action type, entity type, or admin email.</p>
+<div class="page-shell">
+    <div class="modern-card admin-audit-card">
 
-    <div class="toolbar">
-        <div>
-            <label for="q">Search</label>
-            <input type="text" id="q" placeholder="e.g. USER_STATUS_TOGGLE or admin@test.com">
+        <!-- Page Header -->
+        <div class="modern-page-header">
+            <div class="modern-page-icon">
+                🧾
+            </div>
+            <div>
+                <h1 class="modern-page-title">Audit Log</h1>
+                <p class="modern-page-subtitle">
+                    Search and review administrative operation records
+                </p>
+            </div>
         </div>
-        <button type="button" onclick="loadPage(0)">Search</button>
-        <a th:href="@{/admin/dashboard}" style="align-self:center;margin-left:auto;">Back to Dashboard</a>
-    </div>
 
-    <div id="msg"></div>
+        <!-- Toolbar -->
+        <div class="modern-list-toolbar admin-audit-toolbar">
+            <div class="admin-audit-search-group">
+                <label for="q">Search</label>
+                <input type="text"
+                       id="q"
+                       class="modern-input admin-audit-search"
+                       placeholder="e.g. USER_STATUS_TOGGLE or admin@test.com">
+            </div>
 
-    <table>
-        <thead>
-        <tr>
-            <th>Time</th>
-            <th>Admin</th>
-            <th>Action</th>
-            <th>Entity</th>
-            <th>Entity ID</th>
-        </tr>
-        </thead>
-        <tbody id="tbody">
-        <tr><td colspan="5" class="muted">Loading...</td></tr>
-        </tbody>
-    </table>
+            <button type="button"
+                    class="modern-btn modern-btn-primary"
+                    onclick="loadPage(0)">
+                Search
+            </button>
+        </div>
 
-    <div class="pager">
-        <button type="button" id="btnPrev" onclick="prevPage()">Previous</button>
-        <span id="pageInfo"></span>
-        <button type="button" id="btnNext" onclick="nextPage()">Next</button>
+        <!-- Message Area -->
+        <div id="msg"></div>
+
+        <!-- Table -->
+        <div class="modern-table-wrapper">
+            <table class="modern-table project-table admin-audit-table">
+                <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Admin</th>
+                    <th>Action</th>
+                    <th>Entity</th>
+                    <th>Entity ID</th>
+                </tr>
+                </thead>
+
+                <tbody id="tbody">
+                <tr>
+                    <td colspan="5" class="muted table-loading-cell">
+                        Loading...
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="modern-pagination admin-audit-pagination">
+            <button type="button"
+                    id="btnPrev"
+                    class="modern-btn modern-btn-outline table-action-btn"
+                    onclick="prevPage()">
+                Previous
+            </button>
+
+            <span id="pageInfo"></span>
+
+            <button type="button"
+                    id="btnNext"
+                    class="modern-btn modern-btn-outline table-action-btn"
+                    onclick="nextPage()">
+                Next
+            </button>
+        </div>
+
+        <!-- Bottom Actions -->
+        <div class="page-bottom-actions">
+            <a th:href="@{/admin/dashboard}" class="modern-btn modern-btn-outline">
+                ← Back to Dashboard
+            </a>
+        </div>
+
     </div>
 </div>
 
@@ -72,14 +111,21 @@
 
     function esc(s) {
         return String(s == null ? '' : s)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
     }
 
     function loadPage(page) {
         currentPage = page;
+
         const q = document.getElementById('q').value.trim();
         const params = new URLSearchParams({ page: String(page), size: String(pageSize) });
-        if (q) params.set('q', q);
+
+        if (q) {
+            params.set('q', q);
+        }
 
         fetch('/api/admin/audit-logs?' + params.toString(), { credentials: 'same-origin' })
             .then(function (r) {
@@ -88,6 +134,7 @@
             })
             .then(function (data) {
                 totalPages = Math.max(1, data.totalPages || 1);
+
                 document.getElementById('pageInfo').textContent =
                     'Page ' + (data.page + 1) + ' / ' + totalPages + ' (' + data.totalItems + ' entries)';
 
@@ -96,16 +143,19 @@
 
                 const items = data.items || [];
                 const tbody = document.getElementById('tbody');
+
                 if (!items.length) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="muted">No audit entries found.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" class="muted table-loading-cell">No audit entries found.</td></tr>';
                     return;
                 }
+
                 tbody.innerHTML = items.map(function (row) {
                     const t = row.createdAt ? String(row.createdAt).replace('T', ' ') : '';
+
                     return '<tr>' +
                         '<td>' + esc(t) + '</td>' +
                         '<td>' + esc(row.adminEmail) + '</td>' +
-                        '<td>' + esc(row.actionType) + '</td>' +
+                        '<td><span class="audit-action-badge">' + esc(row.actionType) + '</span></td>' +
                         '<td>' + esc(row.entityType) + '</td>' +
                         '<td>' + esc(row.entityId) + '</td>' +
                         '</tr>';
@@ -117,14 +167,19 @@
     }
 
     function prevPage() {
-        if (currentPage > 0) loadPage(currentPage - 1);
+        if (currentPage > 0) {
+            loadPage(currentPage - 1);
+        }
     }
 
     function nextPage() {
-        if (currentPage < totalPages - 1) loadPage(currentPage + 1);
+        if (currentPage < totalPages - 1) {
+            loadPage(currentPage + 1);
+        }
     }
 
     loadPage(0);
 </script>
+
 </body>
 </html>

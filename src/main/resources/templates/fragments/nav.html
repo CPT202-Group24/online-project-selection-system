@@ -2,32 +2,56 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
-<nav th:fragment="sharedNav">
-    <span>Project Selection System</span>
-    <span>
+
+<nav th:fragment="sharedNav" class="top-nav">
+
+    <!-- Left: system name -->
+    <div class="nav-left">
+        <a th:href="@{/dashboard}" class="brand-link">
+            Project Selection System
+        </a>
+    </div>
+
+    <!-- Center: role-based navigation links -->
+    <div class="nav-center">
+
         <span sec:authorize="hasAuthority('student')">
             <a th:href="@{/student/dashboard}">Student Dashboard</a>
         </span>
+
         <span sec:authorize="hasAuthority('teacher')">
             <a th:href="@{/teacher/dashboard}">Teacher Dashboard</a>
         </span>
+
         <span sec:authorize="hasAuthority('admin')">
             <a th:href="@{/admin/dashboard}">Admin Dashboard</a>
         </span>
+
         <span sec:authorize="isAuthenticated()">
             <a th:href="@{/notifications}" class="nav-notification-link">
                 Notifications
-                <span id="sharedNotificationBadge" class="notification-badge" style="display:none;">0</span>
+                <span id="sharedNotificationBadge"
+                      class="notification-badge"
+                      style="display:none;">0</span>
             </a>
         </span>
-        <a th:href="@{/profile}">My Profile</a>
-    </span>
-    <span style="display:flex;align-items:center;gap:16px;">
-        <span sec:authentication="name"></span>
-        <form th:action="@{/logout}" method="post" style="display:inline;margin:0;">
-            <button type="submit" style="width:auto;padding:4px 12px;font-size:14px;margin-top:0;">Logout</button>
+
+        <span sec:authorize="isAuthenticated()">
+            <a th:href="@{/profile}">My Profile</a>
+        </span>
+
+    </div>
+
+    <!-- Right: user email and logout -->
+    <div class="nav-right">
+        <span class="nav-email" sec:authentication="name"></span>
+
+        <form th:action="@{/logout}" method="post" class="logout-form">
+            <button type="submit" class="logout-btn">Logout</button>
         </form>
-    </span>
+    </div>
+
+    <!-- Notification unread badge script -->
     <script>
         (function () {
             const badge = document.getElementById('sharedNotificationBadge');
@@ -35,11 +59,14 @@
 
             fetch('/api/notifications/unread-count', { credentials: 'same-origin' })
                 .then(function (res) {
-                    if (!res.ok) throw new Error('Failed to load unread count');
+                    if (!res.ok) {
+                        throw new Error('Failed to load unread count');
+                    }
                     return res.json();
                 })
                 .then(function (data) {
                     const count = Number(data.unreadCount || 0);
+
                     if (count > 0) {
                         badge.textContent = String(count);
                         badge.style.display = 'inline-block';
@@ -52,6 +79,8 @@
                 });
         })();
     </script>
+
 </nav>
+
 </body>
 </html>
