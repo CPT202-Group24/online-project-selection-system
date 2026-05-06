@@ -20,6 +20,8 @@ public class AuditLogService {
 
     public static final String ACTION_USER_STATUS_TOGGLE    = "USER_STATUS_TOGGLE";
     public static final String ACTION_USER_ROLE_CHANGE       = "USER_ROLE_CHANGE";
+    public static final String ACTION_USER_STATUS_TOGGLE_FAILED = "USER_STATUS_TOGGLE_FAILED";
+    public static final String ACTION_USER_ROLE_CHANGE_FAILED = "USER_ROLE_CHANGE_FAILED";
     public static final String ACTION_CATEGORY_CREATE        = "CATEGORY_CREATE";
     public static final String ACTION_CATEGORY_EDIT          = "CATEGORY_EDIT";
     public static final String ACTION_CATEGORY_DEACTIVATE    = "CATEGORY_DEACTIVATE";
