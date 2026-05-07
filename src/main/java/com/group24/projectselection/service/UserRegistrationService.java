@@ -12,7 +12,10 @@ import java.util.regex.Pattern;
 @Service
 public class UserRegistrationService {
 
-    public static final int MIN_PASSWORD_LENGTH = 6;
+    public static final int MIN_PASSWORD_LENGTH = 8;
+
+    private static final Pattern PASSWORD_STRENGTH =
+            Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$");
 
     /** Student accounts use the student subdomain. */
     private static final Pattern STUDENT_EMAIL =
@@ -40,11 +43,21 @@ public class UserRegistrationService {
         return STAFF_EMAIL.matcher(trimmed).matches();
     }
 
+    /**
+     * Validates password strength: at least 8 chars, one uppercase, one lowercase, one digit.
+     */
+    public boolean isValidPassword(String password) {
+        if (!StringUtils.hasText(password)) {
+            return false;
+        }
+        return PASSWORD_STRENGTH.matcher(password).matches();
+    }
+
     public boolean isValidRegistrationInput(String name, String email, String password, User.Role role) {
         if (!StringUtils.hasText(name) || !StringUtils.hasText(password)) {
             return false;
         }
-        if (password.length() < MIN_PASSWORD_LENGTH) {
+        if (!isValidPassword(password)) {
             return false;
         }
         if (!isValidEmailForRole(email, role)) {
