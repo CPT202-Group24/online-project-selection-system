@@ -91,9 +91,9 @@ class PasswordResetServiceTest {
         token.setExpiresAt(LocalDateTime.now().plusMinutes(10));
 
         when(tokenRepository.findByToken("abc")).thenReturn(Optional.of(token));
-        when(passwordEncoder.encode("newPass")).thenReturn("new-hash");
+        when(passwordEncoder.encode("NewPass1")).thenReturn("new-hash");
 
-        String error = passwordResetService.validateTokenAndResetPassword("abc", "newPass");
+        String error = passwordResetService.validateTokenAndResetPassword("abc", "NewPass1");
 
         assertNull(error);
         assertEquals("new-hash", testUser.getPasswordHash());
@@ -107,9 +107,110 @@ class PasswordResetServiceTest {
     void validateAndReset_invalidToken_returnsError() {
         when(tokenRepository.findByToken("invalid")).thenReturn(Optional.empty());
 
-        String error = passwordResetService.validateTokenAndResetPassword("invalid", "newPass");
+        String error = passwordResetService.validateTokenAndResetPassword("invalid", "NewPass1");
 
         assertEquals("Invalid reset link.", error);
         verify(userRepository, never()).save(any());
+    }
+
+    // ── Security-focused tests ──────────────────────────────────────────
+
+    @Test
+    @DisplayName("Expired token is rejected - returns error and does not update password")
+    void validateAndReset_expiredToken_returnsError() {
+        PasswordResetToken token = new PasswordResetToken();
+        token.setToken("expired-token");
+        token.setUser(testUser);
+        token.setUsed(false);
+        token.setExpiresAt(LocalDateTime.now().minusMinutes(5)); // expired 5 minutes ago
+
+        when(tokenRepository.findByToken("expired-token")).thenReturn(Optional.of(token));
+
+        String error = passwordResetService.validateTokenAndResetPassword("expired-token", "NewPass1");
+
+        assertEquals("This reset link has expired.", error);
+        verify(userRepository, never()).save(any());
+        verify(passwordEncoder, never()).encode(any());
+    }
+
+    @Test
+    @DisplayName("Already-used token is rejected - returns error and does not update password")
+    void validateAndReset_usedToken_returnsError() {
+        PasswordResetToken token = new PasswordResetToken();
+        token.setToken("used-token");
+        token.setUser(testUser);
+        token.setUsed(true); // already used
+        token.setExpiresAt(LocalDateTime.now().plusMinutes(10));
+
+        when(tokenRepository.findByToken("used-token")).thenReturn(Optional.of(token));
+
+        String error = passwordResetService.validateTokenAndResetPassword("used-token", "NewPass1");
+
+        assertEquals("This reset link has already been used.", error);
+        verify(userRepository, never()).save(any());
+        verify(passwordEncoder, never()).encode(any());
+    }
+
+    @Test
+    @DisplayName("Token cannot be reused after successful reset - second attempt is rejected")
+    void validateAndReset_tokenCannotBeReused_afterSuccessfulReset() {
+        PasswordResetToken token = new PasswordResetToken();
+        token.setToken("single-use-token");
+        token.setUser(testUser);
+        token.setUsed(false);
+        token.setExpiresAt(LocalDateTime.now().plusMinutes(10));
+
+        when(tokenRepository.findByToken("single-use-token")).thenReturn(Optional.of(token));
+        when(passwordEncoder.encode("NewPass1")).thenReturn("new-hash");
+
+        // First use succeeds
+        String error1 = passwordResetService.validateTokenAndResetPassword("single-use-token", "NewPass1");
+        assertNull(error1);
+        assertTrue(token.getUsed());
+
+        // Second use is rejected (token is now marked used)
+        String error2 = passwordResetService.validateTokenAndResetPassword("single-use-token", "Another1P");
+        assertEquals("This reset link has already been used.", error2);
+    }
+
+    @Test
+    @DisplayName("Non-existent email in forgot-password does not throw exception")
+    void createResetToken_nonExistentEmail_doesNotThrow() {
+        when(userRepository.findByEmail("nonexistent@student.xjtlu.edu.cn")).thenReturn(Optional.empty());
+
+        // Should silently return without exception (enum prevention)
+        passwordResetService.createResetTokenAndSendEmail("nonexistent@student.xjtlu.edu.cn");
+
+        verify(tokenRepository, never()).save(any());
+        verify(emailService, never()).sendPasswordResetEmail(any(), any());
+    }
+
+    @Test
+    @DisplayName("Forgot-password normalizes email before lookup")
+    void createResetToken_normalizesEmailBeforeLookup() {
+        when(userRepository.findByEmail("s@student.xjtlu.edu.cn")).thenReturn(Optional.of(testUser));
+        when(tokenRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        passwordResetService.createResetTokenAndSendEmail("  S@STUDENT.XJTLU.EDU.CN  ");
+
+        verify(userRepository).findByEmail("s@student.xjtlu.edu.cn");
+    }
+
+    @Test
+    @DisplayName("Reset password encodes new password with BCrypt")
+    void validateAndReset_encodesNewPasswordWithBCrypt() {
+        PasswordResetToken token = new PasswordResetToken();
+        token.setToken("valid-token");
+        token.setUser(testUser);
+        token.setUsed(false);
+        token.setExpiresAt(LocalDateTime.now().plusMinutes(10));
+
+        when(tokenRepository.findByToken("valid-token")).thenReturn(Optional.of(token));
+        when(passwordEncoder.encode("secureNewPass123")).thenReturn("bcrypt-encoded-new-hash");
+
+        passwordResetService.validateTokenAndResetPassword("valid-token", "secureNewPass123");
+
+        verify(passwordEncoder).encode("secureNewPass123");
+        assertEquals("bcrypt-encoded-new-hash", testUser.getPasswordHash());
     }
 }

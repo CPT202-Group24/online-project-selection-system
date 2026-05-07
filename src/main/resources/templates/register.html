@@ -14,17 +14,16 @@
             <div class="auth-brand-icon">🎓</div>
             <div>
                 <h1>Project Selection System</h1>
-                <p>Create an account to access the project selection portal</p>
+                <p>Create your account to get started</p>
             </div>
         </div>
 
         <div class="auth-header">
             <h2>Register</h2>
-            <p>Use your university email and select the correct role.</p>
+            <p>Use your university email to create an account.</p>
         </div>
 
-        <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}">
-        </div>
+        <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
 
         <form th:action="@{/register}" method="post" class="auth-form">
 
@@ -44,11 +43,8 @@
                        type="email"
                        name="email"
                        class="modern-input"
-                       placeholder="student: @student.xjtlu.edu.cn; staff: @xjtlu.edu.cn"
+                       placeholder="your@student.xjtlu.edu.cn or your@xjtlu.edu.cn"
                        required>
-                <p class="field-hint">
-                    Students should use @student.xjtlu.edu.cn, and staff should use @xjtlu.edu.cn.
-                </p>
             </div>
 
             <div class="modern-form-group">
@@ -57,15 +53,14 @@
                        type="password"
                        name="password"
                        class="modern-input"
-                       placeholder="Create a password"
-                       required>
+                       placeholder="At least 8 chars, with upper/lowercase and a digit"
+                       required
+                       minlength="8">
             </div>
 
             <div class="modern-form-group">
                 <label for="role">Role</label>
-                <select id="role"
-                        name="role"
-                        class="modern-select">
+                <select id="role" name="role" class="modern-input">
                     <option value="student">Student</option>
                     <option value="teacher">Teacher</option>
                 </select>

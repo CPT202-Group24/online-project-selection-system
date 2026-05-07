@@ -27,19 +27,20 @@ public class RegistrationController {
             @RequestParam String role,
             RedirectAttributes redirectAttributes) {
 
+        String normalizedEmail = email.trim().toLowerCase();
         User.Role parsedRole = registrationService.parseRegisterableRole(role);
-        if (!registrationService.isValidRegistrationInput(name, email, password, parsedRole)) {
+        if (!registrationService.isValidRegistrationInput(name, normalizedEmail, password, parsedRole)) {
             redirectAttributes.addFlashAttribute("errorMessage", VALIDATION_ERROR);
             return "redirect:/register";
         }
 
-        if (registrationService.emailExists(email)) {
+        if (registrationService.emailExists(normalizedEmail)) {
             redirectAttributes.addFlashAttribute(
                     "errorMessage", "An account with this email already exists.");
             return "redirect:/register";
         }
 
-        registrationService.register(name, email, password, parsedRole);
+        registrationService.register(name, normalizedEmail, password, parsedRole);
         return "redirect:/login?registered=true";
     }
 }
