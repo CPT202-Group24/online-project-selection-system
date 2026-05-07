@@ -12,12 +12,14 @@ import java.util.regex.Pattern;
 @Service
 public class UserRegistrationService {
 
+    public static final int MIN_PASSWORD_LENGTH = 6;
+
     /** Student accounts use the student subdomain. */
     private static final Pattern STUDENT_EMAIL =
             Pattern.compile("(?i)^[a-z0-9._%+-]+@student\\.xjtlu\\.edu\\.cn$");
-    /** Staff (e.g. teacher) accounts use the main university domain. */
+    /** Staff (e.g. teacher) accounts use the main university domain (excluding student subdomain). */
     private static final Pattern STAFF_EMAIL =
-            Pattern.compile("(?i)^[a-z0-9._%+-]+@xjtlu\\.edu\\.cn$");
+            Pattern.compile("(?i)^[a-z0-9._%+-]+@(?!student\\.)xjtlu\\.edu\\.cn$");
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -40,6 +42,9 @@ public class UserRegistrationService {
 
     public boolean isValidRegistrationInput(String name, String email, String password, User.Role role) {
         if (!StringUtils.hasText(name) || !StringUtils.hasText(password)) {
+            return false;
+        }
+        if (password.length() < MIN_PASSWORD_LENGTH) {
             return false;
         }
         if (!isValidEmailForRole(email, role)) {

@@ -1,6 +1,7 @@
 package com.group24.projectselection.controller;
 
 import com.group24.projectselection.service.PasswordResetService;
+import com.group24.projectselection.service.UserRegistrationService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,9 +48,9 @@ public class PasswordResetController {
             return "reset-password";
         }
 
-        if (password.length() < 6) {
+        if (password.length() < UserRegistrationService.MIN_PASSWORD_LENGTH) {
             model.addAttribute("token", token);
-            model.addAttribute("errorMessage", "Password must be at least 6 characters.");
+            model.addAttribute("errorMessage", "Password must be at least " + UserRegistrationService.MIN_PASSWORD_LENGTH + " characters.");
             return "reset-password";
         }
 
