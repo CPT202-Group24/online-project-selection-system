@@ -48,4 +48,19 @@ class CustomUserDetailsServiceTest {
         assertThatThrownBy(() -> userDetailsService.loadUserByUsername("missing@xjtlu.edu.cn"))
                 .isInstanceOf(UsernameNotFoundException.class);
     }
+
+    @Test
+    void loadUserByUsername_disabledUser_returnsUserDetailsWithEnabledFalse() {
+        User user = new User();
+        user.setEmail("disabled@student.xjtlu.edu.cn");
+        user.setPasswordHash("stored-hash");
+        user.setRole(User.Role.student);
+        user.setStatus(User.UserStatus.disabled);
+        when(userRepository.findByEmail("disabled@student.xjtlu.edu.cn")).thenReturn(Optional.of(user));
+
+        UserDetails details = userDetailsService.loadUserByUsername("disabled@student.xjtlu.edu.cn");
+
+        assertThat(details.isEnabled()).isFalse();
+        assertThat(details.getUsername()).isEqualTo("disabled@student.xjtlu.edu.cn");
+    }
 }

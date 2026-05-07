@@ -4,11 +4,15 @@ import com.group24.projectselection.model.Notification;
 import com.group24.projectselection.model.User;
 import com.group24.projectselection.repository.UserRepository;
 import com.group24.projectselection.service.NotificationService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -49,6 +53,46 @@ public class NotificationController {
         Long userId = getCurrentUser(authentication).getId();
         long unreadCount = notificationService.countUnread(userId);
         return Map.of("unreadCount", unreadCount);
+    }
+
+    @PostMapping("/notifications/{id}/read")
+    public String markAsReadFromPage(@PathVariable Long id,
+                                     Authentication authentication,
+                                     RedirectAttributes redirectAttributes) {
+        Long userId = getCurrentUser(authentication).getId();
+        try {
+            notificationService.markAsRead(id, userId);
+            redirectAttributes.addFlashAttribute("successMessage", "Notification marked as read.");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/notifications";
+    }
+
+    @PostMapping("/notifications/read-all")
+    public String markAllAsReadFromPage(Authentication authentication,
+                                        RedirectAttributes redirectAttributes) {
+        Long userId = getCurrentUser(authentication).getId();
+        notificationService.markAllAsRead(userId);
+        redirectAttributes.addFlashAttribute("successMessage", "All notifications marked as read.");
+        return "redirect:/notifications";
+    }
+
+    @PostMapping("/api/notifications/{id}/read")
+    @ResponseBody
+    public ResponseEntity<String> markAsReadApi(@PathVariable Long id,
+                                                Authentication authentication) {
+        Long userId = getCurrentUser(authentication).getId();
+        notificationService.markAsRead(id, userId);
+        return ResponseEntity.ok("Notification marked as read.");
+    }
+
+    @PostMapping("/api/notifications/read-all")
+    @ResponseBody
+    public ResponseEntity<String> markAllAsReadApi(Authentication authentication) {
+        Long userId = getCurrentUser(authentication).getId();
+        notificationService.markAllAsRead(userId);
+        return ResponseEntity.ok("All notifications marked as read.");
     }
 
     private User getCurrentUser(Authentication authentication) {

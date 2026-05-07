@@ -1,14 +1,17 @@
 package com.group24.projectselection.controller;
 
+import com.group24.projectselection.model.Application;
 import com.group24.projectselection.model.Category;
 import com.group24.projectselection.model.ProjectTopic;
 import com.group24.projectselection.model.User;
+import com.group24.projectselection.repository.ApplicationRepository;
 import com.group24.projectselection.repository.CategoryRepository;
 import com.group24.projectselection.repository.ProjectTopicRepository;
 import com.group24.projectselection.repository.UserRepository;
 import com.group24.projectselection.service.ProjectTopicService;
 import com.group24.projectselection.service.TopicStatusService;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -24,6 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import java.util.Collections;
 import java.util.List;
 
 @Controller
@@ -34,6 +38,9 @@ public class ProjectTopicController {
     private final ProjectTopicService projectTopicService;
     private final TopicStatusService topicStatusService;
     private final CategoryRepository categoryRepository;
+
+    @Autowired(required = false)
+    private ApplicationRepository applicationRepository;
 
     public ProjectTopicController(ProjectTopicRepository projectTopicRepository,
                                   UserRepository userRepository,
@@ -236,8 +243,21 @@ public class ProjectTopicController {
             return "redirect:/teacher/projects";
         }
 
+        if (topic.getTeacher() == null || !topic.getTeacher().getId().equals(currentTeacherId)) {
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    "You are not authorized to view this topic."
+            );
+            return "redirect:/teacher/projects";
+        }
+
+        List<Application> applications = applicationRepository != null
+                ? applicationRepository.findByProjectId(id)
+                : Collections.emptyList();
+
         model.addAttribute("projectTopic", topic);
         model.addAttribute("currentTeacherId", currentTeacherId);
+        model.addAttribute("applications", applications);
 
         return "teacher-topic-detail";
     }

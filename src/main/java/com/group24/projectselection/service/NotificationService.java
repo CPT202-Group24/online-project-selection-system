@@ -9,4 +9,10 @@ public interface NotificationService {
     long countUnread(Long userId);
 
     List<Notification> listByUser(Long userId);
+
+    Notification createNotification(Long userId, String message);
+
+    void markAsRead(Long notificationId, Long userId);
+
+    void markAllAsRead(Long userId);
 }

@@ -3,6 +3,8 @@ package com.group24.projectselection;
 import com.group24.projectselection.model.Category;
 import com.group24.projectselection.repository.CategoryRepository;
 import com.group24.projectselection.service.CategoryService;
+import com.group24.projectselection.service.shared.CrudResult;
+import com.group24.projectselection.service.shared.SharedDataAccessUtility;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,6 +21,8 @@ class CategoryServiceTest {
 
     @Mock
     private CategoryRepository categoryRepository;
+    @Mock
+    private SharedDataAccessUtility dataAccessUtility;
 
     @InjectMocks
     private CategoryService categoryService;
@@ -31,7 +35,9 @@ class CategoryServiceTest {
         saved.setDescription("Information Technology");
 
         when(categoryRepository.existsByNameIgnoreCase("IT")).thenReturn(false);
-        when(categoryRepository.save(any(Category.class))).thenReturn(saved);
+        when(dataAccessUtility.create(any(), any(Category.class), any())).thenReturn(
+                CrudResult.success(201, "Category created.", saved)
+        );
 
         Category result = categoryService.create("IT", "Information Technology");
 

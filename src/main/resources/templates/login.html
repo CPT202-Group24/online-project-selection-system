@@ -5,40 +5,82 @@
     <title>Login - Project Selection System</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-<body>
-<div class="container">
-    <h2>Login</h2>
+<body class="auth-body">
 
-    <div th:if="${param.error}" class="alert alert-error">
-        Invalid email or password.
-    </div>
-    <div th:if="${param.registered}" class="alert alert-info">
-        Registration successful. You can sign in with your university email.
-    </div>
-    <div th:if="${param.logout}" class="alert alert-info">
-        You have been logged out.
-    </div>
-    <div th:if="${param.expired}" class="alert alert-error">
-        Your session has expired. Please log in again.
-    </div>
-    <div th:if="${param.reset}" class="alert alert-success">
-        Your password has been reset successfully. Please sign in with your new password.
-    </div>
+<div class="auth-shell">
+    <div class="auth-card">
 
-    <form th:action="@{/login}" method="post">
-        <div class="form-group">
-            <label>Email</label>
-            <input type="email" name="username" placeholder="your@student.xjtlu.edu.cn or your@xjtlu.edu.cn" required>
+        <div class="auth-brand">
+            <div class="auth-brand-icon">🎓</div>
+            <div>
+                <h1>Project Selection System</h1>
+                <p>Sign in to manage your project selection process</p>
+            </div>
         </div>
-        <div class="form-group">
-            <label>Password</label>
-            <input type="password" name="password" required>
-        </div>
-        <button type="submit">Login</button>
-    </form>
 
-    <p><a th:href="@{/forgot-password}">Forgot password?</a></p>
-    <p>Don't have an account? <a th:href="@{/register}">Register here</a></p>
+        <div class="auth-header">
+            <h2>Login</h2>
+            <p>Use your university email and password to continue.</p>
+        </div>
+
+        <div th:if="${param.disabled}" class="alert alert-error">
+            Account disabled. Please contact an administrator.
+        </div>
+
+        <div th:if="${param.error}" class="alert alert-error">
+            Invalid email or password.
+        </div>
+
+        <div th:if="${param.registered}" class="alert alert-info">
+            Registration successful. You can sign in with your university email.
+        </div>
+
+        <div th:if="${param.logout}" class="alert alert-info">
+            You have been logged out.
+        </div>
+
+        <div th:if="${param.expired}" class="alert alert-error">
+            Your session has expired. Please log in again.
+        </div>
+
+        <div th:if="${param.reset}" class="alert alert-success">
+            Your password has been reset successfully. Please sign in with your new password.
+        </div>
+
+        <form th:action="@{/login}" method="post" class="auth-form">
+
+            <div class="modern-form-group">
+                <label for="username">Email</label>
+                <input id="username"
+                       type="email"
+                       name="username"
+                       class="modern-input"
+                       placeholder="your@student.xjtlu.edu.cn or your@xjtlu.edu.cn"
+                       required>
+            </div>
+
+            <div class="modern-form-group">
+                <label for="password">Password</label>
+                <input id="password"
+                       type="password"
+                       name="password"
+                       class="modern-input"
+                       placeholder="Enter your password"
+                       required>
+            </div>
+
+            <button type="submit" class="modern-btn modern-btn-primary auth-submit-btn">
+                Login
+            </button>
+        </form>
+
+        <div class="auth-links">
+            <a th:href="@{/forgot-password}">Forgot password?</a>
+            <span>Don't have an account? <a th:href="@{/register}">Register here</a></span>
+        </div>
+
+    </div>
 </div>
+
 </body>
 </html>

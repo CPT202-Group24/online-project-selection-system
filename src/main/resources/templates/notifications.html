@@ -6,38 +6,101 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
+
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="container project-page-container">
-    <h2>Notifications</h2>
+<div class="page-shell">
+    <div class="modern-card">
 
-    <div th:if="${#lists.isEmpty(notifications)}" class="empty-message">
-        You have no notifications.
-    </div>
+        <!-- Page Header -->
+        <div class="modern-page-header">
+            <div class="modern-page-icon">
+                🔔
+            </div>
+            <div>
+                <h1 class="modern-page-title">Notifications</h1>
+                <p class="modern-page-subtitle">
+                    View system messages and updates related to your project selection activities
+                </p>
+            </div>
+        </div>
 
-    <div th:if="${not #lists.isEmpty(notifications)}" class="project-table-wrapper">
-        <table class="project-table notification-table">
-            <thead>
-            <tr>
-                <th>Status</th>
-                <th>Message</th>
-                <th>Created At</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="n : ${notifications}">
-                <td>
-                    <span class="status-badge"
-                          th:classappend="${n.isRead} ? ' status-archived' : ' status-requested'"
-                          th:text="${n.isRead} ? 'Read' : 'Unread'">
-                    </span>
-                </td>
-                <td th:text="${n.message}"></td>
-                <td th:text="${n.createdAt != null ? #temporals.format(n.createdAt, 'yyyy-MM-dd HH:mm') : '-'}"></td>
-            </tr>
-            </tbody>
-        </table>
+        <!-- Messages -->
+        <div th:if="${successMessage}" class="alert alert-success">
+            <span th:text="${successMessage}"></span>
+        </div>
+
+        <div th:if="${errorMessage}" class="alert alert-error">
+            <span th:text="${errorMessage}"></span>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${#lists.isEmpty(notifications)}" class="modern-empty-state">
+            <div class="modern-empty-icon">✅</div>
+            <h3>No notifications</h3>
+            <p>You have no notifications at the moment. New updates will appear here.</p>
+        </div>
+
+        <!-- Toolbar -->
+        <div th:if="${not #lists.isEmpty(notifications)}" class="modern-list-toolbar">
+            <p class="result-summary notification-summary">
+                Notification list
+            </p>
+
+            <form th:action="@{/notifications/read-all}" method="post" class="inline-action-form">
+                <button type="submit" class="modern-btn modern-btn-primary">
+                    Mark all as read
+                </button>
+            </form>
+        </div>
+
+        <!-- Notification Table -->
+        <div th:if="${not #lists.isEmpty(notifications)}" class="modern-table-wrapper">
+            <table class="modern-table project-table notification-table">
+                <thead>
+                <tr>
+                    <th>Status</th>
+                    <th>Message</th>
+                    <th>Created At</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="n : ${notifications}">
+                    <td>
+                        <span class="status-badge"
+                              th:classappend="${n.isRead} ? ' status-archived' : ' status-requested'"
+                              th:text="${n.isRead} ? 'Read' : 'Unread'">
+                        </span>
+                    </td>
+
+                    <td class="notification-message" th:text="${n.message}"></td>
+
+                    <td th:text="${n.createdAt != null ? #temporals.format(n.createdAt, 'yyyy-MM-dd HH:mm') : '-'}"></td>
+
+                    <td>
+                        <form th:if="${!n.isRead}"
+                              th:action="@{/notifications/{id}/read(id=${n.id})}"
+                              method="post"
+                              class="inline-action-form">
+                            <button type="submit"
+                                    class="modern-btn modern-btn-outline table-action-btn">
+                                Mark as read
+                            </button>
+                        </form>
+
+                        <span th:if="${n.isRead}" class="muted">
+                            No action
+                        </span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
     </div>
 </div>
+
 </body>
 </html>

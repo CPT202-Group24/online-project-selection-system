@@ -10,74 +10,144 @@
 
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="container project-page-container">
-    <h2>Topic Detail</h2>
+<div class="page-shell">
+    <div class="modern-card detail-modern-card">
 
-    <div th:if="${errorMessage}" class="alert alert-error">
-        <span th:text="${errorMessage}"></span>
-    </div>
+        <!-- Page Header -->
+        <div class="modern-page-header detail-modern-header">
+            <div class="modern-page-icon">
+                📘
+            </div>
 
-    <div class="project-table-wrapper">
-        <table class="project-table">
-            <tbody>
-            <tr>
-                <th>ID</th>
-                <td th:text="${projectTopic.id}"></td>
-            </tr>
-            <tr>
-                <th>Title</th>
-                <td th:text="${projectTopic.title != null and !projectTopic.title.isEmpty() ? projectTopic.title : 'Untitled'}"></td>
-            </tr>
-            <tr>
-                <th>Teacher</th>
-                <td th:text="${projectTopic.teacher != null ? projectTopic.teacher.name : 'N/A'}"></td>
-            </tr>
-            <tr>
-                <th>Category</th>
-                <td th:text="${projectTopic.category != null ? projectTopic.category.name : 'N/A'}"></td>
-            </tr>
-            <tr>
-                <th>Description</th>
-                <td th:text="${projectTopic.description != null and !projectTopic.description.isEmpty() ? projectTopic.description : 'N/A'}"></td>
-            </tr>
-            <tr>
-                <th>Required Skills</th>
-                <td th:text="${projectTopic.requiredSkills != null and !projectTopic.requiredSkills.isEmpty() ? projectTopic.requiredSkills : 'N/A'}"></td>
-            </tr>
-            <tr>
-                <th>Keywords</th>
-                <td>
-                    <span th:if="${projectTopic.keywords != null and !projectTopic.keywords.isEmpty()}">
-                        <span th:each="kw : ${#strings.arraySplit(projectTopic.keywords, ',')}"
-                              th:text="${#strings.trim(kw)}"
-                              class="keyword-tag">
-                        </span>
+            <div class="detail-title-area">
+                <p class="detail-page-label">Available Topic Detail</p>
+                <h1 class="modern-page-title"
+                    th:text="${projectTopic.title != null and !projectTopic.title.isEmpty() ? projectTopic.title : 'Untitled'}">
+                    Topic Title
+                </h1>
+                <p class="modern-page-subtitle">
+                    Review the project information before submitting your application
+                </p>
+            </div>
+
+            <div class="detail-status-area modern-detail-status-area">
+                <span class="status-badge status-available"
+                      th:text="${projectTopic.status}">
+                    Available
+                </span>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div th:if="${errorMessage}" class="alert alert-error">
+            <span th:text="${errorMessage}"></span>
+        </div>
+
+        <!-- Basic Information -->
+        <div class="modern-detail-card">
+            <h3 class="modern-detail-title">Basic Information</h3>
+
+            <div class="modern-detail-grid">
+                <div class="modern-detail-item">
+                    <span class="detail-label">Topic ID</span>
+                    <span class="detail-value" th:text="${projectTopic.id}">ID</span>
+                </div>
+
+                <div class="modern-detail-item">
+                    <span class="detail-label">Teacher</span>
+                    <span class="detail-value"
+                          th:text="${projectTopic.teacher != null ? projectTopic.teacher.name : 'N/A'}">
+                        Teacher
                     </span>
-                    <span th:if="${projectTopic.keywords == null or projectTopic.keywords.isEmpty()}">N/A</span>
-                </td>
-            </tr>
-            <tr>
-                <th>Max Students</th>
-                <td th:text="${projectTopic.maxStudents != null ? projectTopic.maxStudents : 'N/A'}"></td>
-            </tr>
-            <tr>
-                <th>Status</th>
-                <td>
-                    <span class="status-badge" th:text="${projectTopic.status}"></span>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+                </div>
 
-    <div style="margin-top: 24px;">
-        <a th:href="@{/student/applications/apply/{id}(id=${projectTopic.id})}"
-           class="toolbar-link-btn">Apply</a>
-    </div>
+                <div class="modern-detail-item">
+                    <span class="detail-label">Category</span>
+                    <span class="detail-value"
+                          th:text="${projectTopic.category != null ? projectTopic.category.name : 'N/A'}">
+                        Category
+                    </span>
+                </div>
 
-    <p class="back-link-row">
-        <a th:href="@{/student/topics}">Back to available topics</a>
-    </p>
+                <div class="modern-detail-item">
+                    <span class="detail-label">Max Students</span>
+                    <span class="detail-value"
+                          th:text="${projectTopic.maxStudents != null ? projectTopic.maxStudents : 'N/A'}">
+                        Max Students
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Description -->
+        <div class="modern-detail-card">
+            <h3 class="modern-detail-title">Project Description</h3>
+
+            <p class="detail-text"
+               th:text="${projectTopic.description != null and !projectTopic.description.isEmpty()
+                        ? projectTopic.description
+                        : 'N/A'}">
+                Description
+            </p>
+        </div>
+
+        <!-- Skills and Keywords -->
+        <div class="detail-two-column">
+            <div class="modern-detail-card">
+                <h3 class="modern-detail-title">Required Skills</h3>
+
+                <p class="detail-text"
+                   th:text="${projectTopic.requiredSkills != null and !projectTopic.requiredSkills.isEmpty()
+                            ? projectTopic.requiredSkills
+                            : 'N/A'}">
+                    Required Skills
+                </p>
+            </div>
+
+            <div class="modern-detail-card">
+                <h3 class="modern-detail-title">Keywords</h3>
+
+                <div th:if="${projectTopic.keywords != null and !projectTopic.keywords.isEmpty()}"
+                     class="keyword-preview-row">
+                    <span th:each="kw : ${#strings.arraySplit(projectTopic.keywords, ',')}"
+                          th:if="${#strings.trim(kw) != ''}"
+                          th:text="${#strings.trim(kw)}"
+                          class="keyword-tag">
+                    </span>
+                </div>
+
+                <p th:if="${projectTopic.keywords == null or projectTopic.keywords.isEmpty()}"
+                   class="detail-text">
+                    N/A
+                </p>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="modern-detail-card action-panel-card">
+            <div class="action-panel-content">
+                <div>
+                    <h3 class="action-panel-title">Interested in this topic?</h3>
+                    <p class="action-panel-subtitle">
+                        Submit your application and personal statement to the project teacher.
+                    </p>
+                </div>
+
+                <a th:href="@{/student/applications/apply/{id}(id=${projectTopic.id})}"
+                   class="modern-btn modern-btn-primary">
+                    Apply
+                </a>
+            </div>
+        </div>
+
+        <!-- Bottom Actions -->
+        <div class="page-bottom-actions detail-bottom-actions">
+            <a th:href="@{/student/topics}" class="modern-btn modern-btn-outline">
+                ← Back to Available Topics
+            </a>
+        </div>
+
+    </div>
 </div>
 
 </body>

@@ -1,5 +1,8 @@
 package com.group24.projectselection.controller;
 
+import com.group24.projectselection.model.User;
+import com.group24.projectselection.repository.UserRepository;
+import com.group24.projectselection.service.AuditLogService;
 import com.group24.projectselection.service.UserAdminService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -17,9 +20,15 @@ import java.util.NoSuchElementException;
 public class AdminUserController {
 
     private final UserAdminService userAdminService;
+    private final UserRepository userRepository;
+    private final AuditLogService auditLogService;
 
-    public AdminUserController(UserAdminService userAdminService) {
+    public AdminUserController(UserAdminService userAdminService,
+                               UserRepository userRepository,
+                               AuditLogService auditLogService) {
         this.userAdminService = userAdminService;
+        this.userRepository = userRepository;
+        this.auditLogService = auditLogService;
     }
 
     @GetMapping("/admin/users")
@@ -39,8 +48,10 @@ public class AdminUserController {
         try {
             return ResponseEntity.ok(userAdminService.toggleStatus(id, authentication.getName()));
         } catch (NoSuchElementException e) {
+            logAction(authentication, AuditLogService.ACTION_USER_STATUS_TOGGLE_FAILED, id);
             return ResponseEntity.notFound().build();
         } catch (IllegalArgumentException e) {
+            logAction(authentication, AuditLogService.ACTION_USER_STATUS_TOGGLE_FAILED, id);
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
@@ -51,13 +62,30 @@ public class AdminUserController {
                                         @RequestBody Map<String, String> body,
                                         Authentication authentication) {
         try {
-            return ResponseEntity.ok(
-                    userAdminService.updateRole(id, body.get("role"), authentication.getName())
-            );
+            UserAdminService.UserSummary result =
+                    userAdminService.updateRole(id, body.get("role"), authentication.getName());
+            User admin = userRepository.findByEmail(authentication.getName()).orElse(null);
+            if (admin != null) {
+                auditLogService.log(admin, AuditLogService.ACTION_USER_ROLE_CHANGE,
+                        AuditLogService.ENTITY_USER, id);
+            }
+            return ResponseEntity.ok(result);
         } catch (NoSuchElementException e) {
+            logAction(authentication, AuditLogService.ACTION_USER_ROLE_CHANGE_FAILED, id);
             return ResponseEntity.notFound().build();
         } catch (IllegalArgumentException e) {
+            logAction(authentication, AuditLogService.ACTION_USER_ROLE_CHANGE_FAILED, id);
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    private void logAction(Authentication authentication, String action, Long entityId) {
+        if (authentication == null) {
+            return;
+        }
+        User admin = userRepository.findByEmail(authentication.getName()).orElse(null);
+        if (admin != null) {
+            auditLogService.log(admin, action, AuditLogService.ENTITY_USER, entityId);
         }
     }
 }

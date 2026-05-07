@@ -10,86 +10,159 @@
 
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="container form-page-container">
-    <h2 th:text="${projectTopic.id != null} ? 'Edit Project' : 'Create New Project'"></h2>
+<div class="page-shell">
+    <div class="modern-card form-modern-card">
 
-    <div th:if="${errorMessage}" class="alert alert-error">
-        <span th:text="${errorMessage}"></span>
+        <!-- Page Header -->
+        <div class="modern-page-header">
+            <div class="modern-page-icon">
+                ✏️
+            </div>
+            <div>
+                <h1 class="modern-page-title"
+                    th:text="${projectTopic.id != null} ? 'Edit Project' : 'Create New Project'">
+                    Create New Project
+                </h1>
+                <p class="modern-page-subtitle">
+                    Fill in the project topic information and choose whether to publish later or save as draft
+                </p>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div th:if="${errorMessage}" class="alert alert-error">
+            <span th:text="${errorMessage}"></span>
+        </div>
+
+        <!-- Form -->
+        <form th:action="@{/teacher/projects}" th:object="${projectTopic}" method="post" class="modern-form">
+            <input type="hidden" th:field="*{id}">
+
+            <div class="form-section-card">
+                <h3 class="form-section-title">Basic Information</h3>
+
+                <div class="modern-form-grid">
+
+                    <div class="modern-form-group full-width">
+                        <label for="title">Title</label>
+                        <input id="title"
+                               type="text"
+                               th:field="*{title}"
+                               class="modern-input"
+                               placeholder="Enter project title">
+                        <div th:if="${#fields.hasErrors('title')}"
+                             th:errors="*{title}"
+                             class="field-error">
+                        </div>
+                    </div>
+
+                    <div class="modern-form-group full-width">
+                        <label for="description">Description</label>
+                        <textarea id="description"
+                                  th:field="*{description}"
+                                  rows="5"
+                                  class="modern-textarea"
+                                  placeholder="Describe the project topic, background and expected outcomes"></textarea>
+                    </div>
+
+                    <div class="modern-form-group full-width">
+                        <label for="requiredSkills">Required Skills</label>
+                        <textarea id="requiredSkills"
+                                  th:field="*{requiredSkills}"
+                                  rows="4"
+                                  class="modern-textarea"
+                                  placeholder="Example: Java, Spring Boot, MySQL, frontend basics"></textarea>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="form-section-card">
+                <h3 class="form-section-title">Project Settings</h3>
+
+                <div class="modern-form-grid">
+
+                    <div class="modern-form-group">
+                        <label for="category">Category</label>
+                        <select id="category"
+                                th:field="*{category.id}"
+                                class="modern-select">
+                            <option value="">-- Select Category --</option>
+                            <option th:each="cat : ${categories}"
+                                    th:value="${cat.id}"
+                                    th:text="${cat.name}">
+                            </option>
+                        </select>
+
+                        <div class="field-hint">
+                            Category is required for normal save, but optional for Save as Draft.
+                        </div>
+
+                        <div th:if="${#fields.hasErrors('category')}"
+                             th:errors="*{category}"
+                             class="field-error">
+                        </div>
+                    </div>
+
+                    <div class="modern-form-group">
+                        <label for="maxStudents">Max Students</label>
+                        <input id="maxStudents"
+                               type="number"
+                               th:field="*{maxStudents}"
+                               class="modern-input"
+                               placeholder="Enter max students">
+                    </div>
+
+                    <div class="modern-form-group full-width">
+                        <label for="keywords">Keywords</label>
+                        <input id="keywords"
+                               type="text"
+                               th:field="*{keywords}"
+                               class="modern-input"
+                               placeholder="Example: AI, Java, Spring">
+
+                        <div class="field-hint">
+                            Separate keywords with commas, for example: AI, Java, Spring
+                        </div>
+
+                        <div th:if="${projectTopic.keywords != null and !projectTopic.keywords.isEmpty()}"
+                             class="keyword-preview-row">
+                            <span th:each="kw : ${#strings.arraySplit(projectTopic.keywords, ',')}"
+                                  th:if="${#strings.trim(kw) != ''}"
+                                  th:text="${#strings.trim(kw)}"
+                                  class="keyword-tag">
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="modern-form-actions">
+                <button type="submit"
+                        name="submitAction"
+                        value="save"
+                        class="modern-btn modern-btn-primary"
+                        th:text="${projectTopic.id != null} ? 'Save Changes' : 'Create Project'">
+                    Create Project
+                </button>
+
+                <button type="submit"
+                        name="submitAction"
+                        value="draft"
+                        class="modern-btn modern-btn-outline">
+                    Save as Draft
+                </button>
+
+                <a th:href="@{/teacher/projects}"
+                   class="modern-btn modern-btn-outline">
+                    Cancel
+                </a>
+            </div>
+        </form>
+
     </div>
-
-    <form th:action="@{/teacher/projects}" th:object="${projectTopic}" method="post">
-        <input type="hidden" th:field="*{id}">
-
-        <div class="form-group">
-            <label for="title">Title</label>
-            <input id="title" type="text" th:field="*{title}">
-            <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}" class="field-error"></div>
-        </div>
-
-        <div class="form-group">
-            <label for="description">Description</label>
-            <textarea id="description" th:field="*{description}" rows="4"></textarea>
-        </div>
-
-        <div class="form-group">
-            <label for="requiredSkills">Required Skills</label>
-            <textarea id="requiredSkills" th:field="*{requiredSkills}" rows="3"></textarea>
-        </div>
-
-        <div class="form-group">
-            <label for="category">Category</label>
-            <select id="category" th:field="*{category.id}">
-                <option value="">-- Select Category --</option>
-                <option th:each="cat : ${categories}"
-                        th:value="${cat.id}"
-                        th:text="${cat.name}">
-                </option>
-            </select>
-            <div class="field-hint">
-                Category is required for normal save, but optional for Save as Draft.
-            </div>
-            <div th:if="${#fields.hasErrors('category')}" th:errors="*{category}" class="field-error"></div>
-        </div>
-
-        <div class="form-group">
-            <label for="keywords">Keywords</label>
-            <input id="keywords" type="text" th:field="*{keywords}">
-            <div class="field-hint">Example: AI, Java, Spring</div>
-
-            <div th:if="${projectTopic.keywords != null and !projectTopic.keywords.isEmpty()}" class="keyword-preview-row">
-                <span th:each="kw : ${#strings.arraySplit(projectTopic.keywords, ',')}"
-                      th:if="${#strings.trim(kw) != ''}"
-                      th:text="${#strings.trim(kw)}"
-                      class="keyword-tag">
-                </span>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label for="maxStudents">Max Students</label>
-            <input id="maxStudents" type="number" th:field="*{maxStudents}">
-        </div>
-
-        <div class="project-form-actions">
-            <button type="submit"
-                    name="submitAction"
-                    value="save"
-                    class="primary-btn"
-                    th:text="${projectTopic.id != null} ? 'Save Changes' : 'Create Project'">
-            </button>
-
-            <button type="submit"
-                    name="submitAction"
-                    value="draft"
-                    class="secondary-btn">
-                Save as Draft
-            </button>
-        </div>
-    </form>
-
-    <p class="back-link-row">
-        <a th:href="@{/teacher/projects}">Back to Project List</a>
-    </p>
 </div>
 
 </body>

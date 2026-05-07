@@ -2,6 +2,8 @@ package com.group24.projectselection.service;
 
 import com.group24.projectselection.model.Category;
 import com.group24.projectselection.repository.CategoryRepository;
+import com.group24.projectselection.service.shared.CrudResult;
+import com.group24.projectselection.service.shared.SharedDataAccessUtility;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -19,9 +21,12 @@ public class CategoryService {
     private static final int MAX_PAGE_SIZE = 50;
 
     private final CategoryRepository categoryRepository;
+    private final SharedDataAccessUtility dataAccessUtility;
 
-    public CategoryService(CategoryRepository categoryRepository) {
+    public CategoryService(CategoryRepository categoryRepository,
+                           SharedDataAccessUtility dataAccessUtility) {
         this.categoryRepository = categoryRepository;
+        this.dataAccessUtility = dataAccessUtility;
     }
 
     public List<Category> findAll() {
@@ -51,14 +56,66 @@ public class CategoryService {
         Category category = new Category();
         category.setName(trimmedName);
         category.setDescription(StringUtils.hasText(description) ? description.trim() : null);
-        return categoryRepository.save(category);
+        CrudResult<Category> result = dataAccessUtility.create(categoryRepository, category, "Category");
+        if (!result.success()) {
+            throw new IllegalStateException(result.message());
+        }
+        return result.data();
+    }
+
+    @Transactional
+    public Category update(Long id, String name, String description) {
+        if (!StringUtils.hasText(name)) {
+            throw new IllegalArgumentException("Category name must not be blank.");
+        }
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Category not found: " + id));
+        String trimmed = name.trim();
+        if (!trimmed.equalsIgnoreCase(category.getName())
+                && categoryRepository.existsByNameIgnoreCase(trimmed)) {
+            throw new IllegalArgumentException("A category with this name already exists.");
+        }
+        category.setName(trimmed);
+        category.setDescription(StringUtils.hasText(description) ? description.trim() : null);
+        CrudResult<Category> result = dataAccessUtility.update(categoryRepository, category, "Category");
+        if (!result.success()) {
+            throw new IllegalStateException(result.message());
+        }
+        return result.data();
+    }
+
+    @Transactional
+    public Category deactivate(Long id) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Category not found: " + id));
+        category.setIsActive(false);
+        CrudResult<Category> result = dataAccessUtility.update(categoryRepository, category, "Category");
+        if (!result.success()) {
+            throw new IllegalStateException(result.message());
+        }
+        return result.data();
+    }
+
+    @Transactional
+    public Category activate(Long id) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Category not found: " + id));
+        category.setIsActive(true);
+        CrudResult<Category> result = dataAccessUtility.update(categoryRepository, category, "Category");
+        if (!result.success()) {
+            throw new IllegalStateException(result.message());
+        }
+        return result.data();
     }
 
     @Transactional
     public void delete(Long id) {
-        if (!categoryRepository.existsById(id)) {
-            throw new NoSuchElementException("Category not found: " + id);
+        CrudResult<Void> result = dataAccessUtility.deleteById(categoryRepository, id, "Category");
+        if (!result.success()) {
+            if (result.statusCode() == 404) {
+                throw new NoSuchElementException("Category not found: " + id);
+            }
+            throw new IllegalStateException(result.message());
         }
-        categoryRepository.deleteById(id);
     }
 }
