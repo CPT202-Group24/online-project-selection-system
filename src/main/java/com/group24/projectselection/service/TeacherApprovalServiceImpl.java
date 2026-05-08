@@ -22,20 +22,29 @@ public class TeacherApprovalServiceImpl implements TeacherApprovalService {
     private final ApplicationRepository applicationRepository;
     private final ProjectTopicRepository projectTopicRepository;
     private final ConflictLogRepository conflictLogRepository;
+    private final NotificationService notificationService;
 
     @Autowired
     public TeacherApprovalServiceImpl(
             ApplicationRepository applicationRepository,
             ProjectTopicRepository projectTopicRepository,
-            ConflictLogRepository conflictLogRepository) {
+            ConflictLogRepository conflictLogRepository,
+            NotificationService notificationService) {
         this.applicationRepository = applicationRepository;
         this.projectTopicRepository = projectTopicRepository;
         this.conflictLogRepository = conflictLogRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
     @Transactional(noRollbackFor = ResponseStatusException.class)
     public void processApproval(Long applicationId, boolean isAccepted) {
+        processApproval(applicationId, isAccepted, null);
+    }
+
+    @Override
+    @Transactional(noRollbackFor = ResponseStatusException.class)
+    public void processApproval(Long applicationId, boolean isAccepted, Long currentTeacherId) {
         Application application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new RuntimeException("Application not found"));
 
@@ -44,6 +53,16 @@ public class TeacherApprovalServiceImpl implements TeacherApprovalService {
         }
 
         ProjectTopic project = application.getProject();
+
+        if (project == null) {
+            throw new RuntimeException("Application project not found");
+        }
+
+        if (currentTeacherId != null
+                && project.getTeacher() != null
+                && !project.getTeacher().getId().equals(currentTeacherId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to process this application.");
+        }
 
         if (isAccepted) {
             Long studentId = application.getStudent().getId();
@@ -91,10 +110,16 @@ public class TeacherApprovalServiceImpl implements TeacherApprovalService {
 
             application.setStatus(Application.ApplicationStatus.accepted);
 
+            notifyStudent(
+                    application.getStudent(),
+                    "Your application for \"" + safeProjectTitle(project) + "\" has been accepted."
+            );
+
             for (Application studentApp : studentApplications) {
                 if (!studentApp.getId().equals(applicationId)
                         && studentApp.getStatus() == Application.ApplicationStatus.pending) {
                     studentApp.setStatus(Application.ApplicationStatus.rejected);
+
                     applicationRepository.save(studentApp);
 
                     saveConflictLog(
@@ -103,10 +128,17 @@ public class TeacherApprovalServiceImpl implements TeacherApprovalService {
                             "AUTO_REJECTED",
                             "Student accepted by another project"
                     );
+
+                    notifyStudent(
+                            studentApp.getStudent(),
+                            "Your application for \"" + safeProjectTitle(studentApp.getProject())
+                                    + "\" was automatically rejected because you were accepted by another project."
+                    );
                 }
             }
 
             long acceptedCountAfter = acceptedCountBefore + 1;
+
             boolean projectIsFull = project.getMaxStudents() != null
                     && acceptedCountAfter >= project.getMaxStudents();
 
@@ -117,6 +149,7 @@ public class TeacherApprovalServiceImpl implements TeacherApprovalService {
                     if (!otherApp.getId().equals(applicationId)
                             && otherApp.getStatus() == Application.ApplicationStatus.pending) {
                         otherApp.setStatus(Application.ApplicationStatus.rejected);
+
                         applicationRepository.save(otherApp);
 
                         saveConflictLog(
@@ -125,11 +158,22 @@ public class TeacherApprovalServiceImpl implements TeacherApprovalService {
                                 "AUTO_REJECTED",
                                 "Project reached maximum student capacity"
                         );
+
+                        notifyStudent(
+                                otherApp.getStudent(),
+                                "Your application for \"" + safeProjectTitle(project)
+                                        + "\" was automatically rejected because the project reached maximum capacity."
+                        );
                     }
                 }
             }
         } else {
             application.setStatus(Application.ApplicationStatus.rejected);
+
+            notifyStudent(
+                    application.getStudent(),
+                    "Your application for \"" + safeProjectTitle(project) + "\" has been rejected."
+            );
         }
 
         applicationRepository.save(application);
@@ -146,8 +190,18 @@ public class TeacherApprovalServiceImpl implements TeacherApprovalService {
         }
 
         List<Application> allApplications = applicationRepository.findByProjectId(topicId);
+
         return allApplications.stream()
                 .filter(app -> app.getStatus() == Application.ApplicationStatus.accepted)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Application> getPendingApplicationsByEmail(String email) {
+        return applicationRepository.findAll().stream()
+                .filter(app -> app.getStatus() != null && "pending".equalsIgnoreCase(app.getStatus().toString()))
+                .filter(app -> app.getProject() != null && app.getProject().getTeacher() != null)
+                .filter(app -> email.equals(app.getProject().getTeacher().getEmail()))
                 .collect(Collectors.toList());
     }
 
@@ -163,5 +217,19 @@ public class TeacherApprovalServiceImpl implements TeacherApprovalService {
         conflictLog.setReason(reason);
 
         conflictLogRepository.save(conflictLog);
+    }
+
+    private void notifyStudent(User student, String message) {
+        if (notificationService == null || student == null) {
+            return;
+        }
+        notificationService.createNotification(student.getId(), message);
+    }
+
+    private String safeProjectTitle(ProjectTopic project) {
+        if (project == null || project.getTitle() == null || project.getTitle().isBlank()) {
+            return "the project topic";
+        }
+        return project.getTitle();
     }
 }

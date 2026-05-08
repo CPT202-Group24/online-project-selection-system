@@ -7,14 +7,109 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
+
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="container form-page-container">
-    <h2>Teacher Dashboard</h2>
-    <p>Welcome. Select a module to manage.</p>
+<div class="page-shell">
+    <div class="modern-card dashboard-modern-card">
 
-    <div class="project-toolbar" style="margin-top: 24px;">
-        <a th:href="@{/teacher/projects}" class="toolbar-link-btn">Project Management</a>
+        <div class="modern-page-header">
+            <div class="modern-page-icon">
+                👩‍🏫
+            </div>
+            <div>
+                <h1 class="modern-page-title">Teacher Dashboard</h1>
+                <p class="modern-page-subtitle">
+                    Manage project topics, review applications and track project progress.
+                </p>
+            </div>
+        </div>
+
+        <div th:if="${successMessage}" style="background-color: #d1fae5; color: #065f46; padding: 12px; border-radius: 8px; margin-bottom: 20px;" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" style="background-color: #fee2e2; color: #991b1b; padding: 12px; border-radius: 8px; margin-bottom: 20px;" th:text="${errorMessage}"></div>
+
+        <div class="dashboard-hero-card">
+            <div>
+                <h2>Project Topic Management</h2>
+                <p>
+                    Use this dashboard to create project topics, save drafts, publish available topics,
+                    and manage the lifecycle of your projects.
+                </p>
+            </div>
+
+            <a th:href="@{/teacher/projects}" class="modern-btn modern-btn-primary">
+                Project Management
+            </a>
+        </div>
+
+        <div style="margin: 30px 0; padding: 25px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <h2 style="margin-top: 0; font-size: 1.25rem; color: #1e293b; margin-bottom: 15px;">🔔 Pending Student Applications</h2>
+
+            <div th:if="${#lists.isEmpty(pendingApplications)}" style="color: #64748b; padding: 10px 0;">
+                No pending applications at the moment.
+            </div>
+
+            <table th:if="${!#lists.isEmpty(pendingApplications)}" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                <tr style="background-color: #f8fafc; text-align: left; border-bottom: 2px solid #e2e8f0;">
+                    <th style="padding: 12px; font-weight: 600; color: #475569;">Student Name</th>
+                    <th style="padding: 12px; font-weight: 600; color: #475569;">Project Title</th>
+                    <th style="padding: 12px; font-weight: 600; color: #475569;">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="app : ${pendingApplications}" style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 12px; color: #334155;" th:text="${app.student.name}"></td>
+                    <td style="padding: 12px; color: #334155;" th:text="${app.project.title}"></td>
+                    <td style="padding: 12px;">
+                        <form th:action="@{/api/teacher/applications/{id}/approve(id=${app.id})}" method="post" style="display:inline;">
+                            <button type="submit" onclick="this.disabled=true;this.form.submit();" style="background-color: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-right: 8px; font-weight: 500;">Accept</button>
+                        </form>
+                        <form th:action="@{/api/teacher/applications/{id}/reject(id=${app.id})}" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to reject this student?')">
+                            <button type="submit" style="background-color: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500;">Reject</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="dashboard-card-grid">
+
+            <a th:href="@{/teacher/projects}" class="dashboard-action-card">
+                <div class="dashboard-action-icon">📁</div>
+                <div>
+                    <h3>Project Management</h3>
+                    <p>Create, edit, publish, close or archive your project topics.</p>
+                </div>
+            </a>
+
+            <a th:href="@{/teacher/projects(view='my')}" class="dashboard-action-card">
+                <div class="dashboard-action-icon">🧾</div>
+                <div>
+                    <h3>My Projects</h3>
+                    <p>View your own project topics and manage their current status.</p>
+                </div>
+            </a>
+
+            <a th:href="@{/notifications}" class="dashboard-action-card">
+                <div class="dashboard-action-icon">🔔</div>
+                <div>
+                    <h3>Notifications</h3>
+                    <p>Check system notifications related to applications and project updates.</p>
+                </div>
+            </a>
+
+            <a th:href="@{/profile}" class="dashboard-action-card">
+                <div class="dashboard-action-icon">👤</div>
+                <div>
+                    <h3>My Profile</h3>
+                    <p>View or update your teacher profile information.</p>
+                </div>
+            </a>
+
+        </div>
+
     </div>
 </div>
 
