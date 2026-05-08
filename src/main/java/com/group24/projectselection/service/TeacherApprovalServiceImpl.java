@@ -53,6 +53,15 @@ public class TeacherApprovalServiceImpl implements TeacherApprovalService {
         }
 
         ProjectTopic project = application.getProject();
+        if (project == null) {
+            throw new RuntimeException("Application project not found");
+        }
+
+        if (currentTeacherId != null
+                && project.getTeacher() != null
+                && !project.getTeacher().getId().equals(currentTeacherId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to process this application.");
+        }
 
         if (project == null) {
             throw new RuntimeException("Application project not found");
@@ -109,6 +118,10 @@ public class TeacherApprovalServiceImpl implements TeacherApprovalService {
             }
 
             application.setStatus(Application.ApplicationStatus.accepted);
+            notifyStudent(
+                    application.getStudent(),
+                    "Your application for \"" + safeProjectTitle(project) + "\" has been accepted."
+            );
 
             notifyStudent(
                     application.getStudent(),

@@ -2,43 +2,105 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Conflict Logs</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <title>Conflict Logs - Project Selection System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<main style="max-width: 1100px; margin: 40px auto; padding: 24px;">
-    <h1>Allocation Conflict Logs</h1>
 
-    <p>
-        <a href="/admin/dashboard">Back to Admin Dashboard</a>
-    </p>
+<div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-    <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Student</th>
-            <th>Project</th>
-            <th>Action Taken</th>
-            <th>Reason</th>
-            <th>Created At</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:if="${#lists.isEmpty(conflictLogs)}">
-            <td colspan="6">No conflict logs found.</td>
-        </tr>
+<div class="page-shell">
+    <div class="modern-card admin-conflicts-card">
 
-        <tr th:each="log : ${conflictLogs}">
-            <td th:text="${log.id}">1</td>
-            <td th:text="${log.student != null ? log.student.name : 'N/A'}">Student Name</td>
-            <td th:text="${log.project != null ? log.project.title : 'N/A'}">Project Title</td>
-            <td th:text="${log.actionTaken}">AUTO_REJECTED</td>
-            <td th:text="${log.reason}">Reason</td>
-            <td th:text="${log.createdAt}">2026-05-05</td>
-        </tr>
-        </tbody>
-    </table>
-</main>
+        <!-- Page Header -->
+        <div class="modern-page-header">
+            <div class="modern-page-icon">
+                🔀
+            </div>
+            <div>
+                <h1 class="modern-page-title">Allocation Conflict Logs</h1>
+                <p class="modern-page-subtitle">
+                    Review automatic allocation conflicts and blocked approval actions
+                </p>
+            </div>
+        </div>
+
+        <!-- Explanation -->
+        <div class="modern-detail-card conflict-info-card">
+            <h3 class="modern-detail-title">Conflict Monitoring</h3>
+            <p class="detail-text">
+                This page records allocation conflicts, such as blocked approvals or automatic rejections
+                caused by project allocation rules.
+            </p>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${#lists.isEmpty(conflictLogs)}" class="modern-empty-state">
+            <div class="modern-empty-icon">✅</div>
+            <h3>No conflict logs</h3>
+            <p>No allocation conflicts have been recorded.</p>
+        </div>
+
+        <!-- Conflict Table -->
+        <div th:if="${not #lists.isEmpty(conflictLogs)}">
+            <p class="result-summary">
+                Recorded allocation conflicts
+            </p>
+
+            <div class="modern-table-wrapper">
+                <table class="modern-table project-table admin-conflict-table">
+                    <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Student</th>
+                        <th>Project</th>
+                        <th>Action Taken</th>
+                        <th>Reason</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="log : ${conflictLogs}">
+                        <td th:text="${log.createdAt != null ? #temporals.format(log.createdAt, 'yyyy-MM-dd HH:mm') : '-'}">
+                            Time
+                        </td>
+
+                        <td th:text="${log.student != null ? log.student.name : 'N/A'}">
+                            Student Name
+                        </td>
+
+                        <td>
+                            <strong th:text="${log.project != null ? log.project.title : 'N/A'}">
+                                Project Title
+                            </strong>
+                        </td>
+
+                        <td>
+                            <span class="status-badge status-rejected"
+                                  th:text="${log.actionTaken}">
+                                AUTO_REJECTED
+                            </span>
+                        </td>
+
+                        <td class="conflict-reason-cell"
+                            th:text="${log.reason}">
+                            Reason
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Bottom Actions -->
+        <div class="page-bottom-actions">
+            <a th:href="@{/admin/dashboard}" class="modern-btn modern-btn-outline">
+                ← Back to Dashboard
+            </a>
+        </div>
+
+    </div>
+</div>
+
 </body>
 </html>

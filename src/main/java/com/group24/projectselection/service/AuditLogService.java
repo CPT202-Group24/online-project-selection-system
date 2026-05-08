@@ -18,11 +18,22 @@ import java.util.Map;
 @Service
 public class AuditLogService {
 
-    public static final String ACTION_USER_STATUS_TOGGLE = "USER_STATUS_TOGGLE";
-    public static final String ACTION_CATEGORY_DELETE = "CATEGORY_DELETE";
+    public static final String ACTION_USER_STATUS_TOGGLE    = "USER_STATUS_TOGGLE";
+    public static final String ACTION_USER_ROLE_CHANGE       = "USER_ROLE_CHANGE";
+    public static final String ACTION_USER_STATUS_TOGGLE_FAILED = "USER_STATUS_TOGGLE_FAILED";
+    public static final String ACTION_USER_ROLE_CHANGE_FAILED = "USER_ROLE_CHANGE_FAILED";
+    public static final String ACTION_CATEGORY_CREATE        = "CATEGORY_CREATE";
+    public static final String ACTION_CATEGORY_EDIT          = "CATEGORY_EDIT";
+    public static final String ACTION_CATEGORY_DEACTIVATE    = "CATEGORY_DEACTIVATE";
+    public static final String ACTION_CATEGORY_ACTIVATE      = "CATEGORY_ACTIVATE";
+    public static final String ACTION_CATEGORY_DELETE        = "CATEGORY_DELETE";
+    public static final String ACTION_PROJECT_FORCE_ARCHIVE  = "PROJECT_FORCE_ARCHIVE";
+    public static final String ACTION_PROJECT_RESTORE        = "PROJECT_RESTORE";
+    public static final String ACTION_ADMIN_MANUAL_ASSIGN    = "ADMIN_MANUAL_ASSIGN";
 
-    public static final String ENTITY_USER = "User";
-    public static final String ENTITY_CATEGORY = "Category";
+    public static final String ENTITY_USER         = "User";
+    public static final String ENTITY_CATEGORY     = "Category";
+    public static final String ENTITY_PROJECT_TOPIC = "ProjectTopic";
 
     private static final int MAX_PAGE_SIZE = 100;
 

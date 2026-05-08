@@ -56,6 +56,10 @@ public class ProjectTopic {
     @Column(nullable = false)
     private TopicStatus status = TopicStatus.unpublished;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "previous_status")
+    private TopicStatus previousStatus;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
@@ -156,6 +160,14 @@ public class ProjectTopic {
 
     public void setStatus(TopicStatus status) {
         this.status = status;
+    }
+
+    public TopicStatus getPreviousStatus() {
+        return previousStatus;
+    }
+
+    public void setPreviousStatus(TopicStatus previousStatus) {
+        this.previousStatus = previousStatus;
     }
 
     public LocalDateTime getCreatedAt() {

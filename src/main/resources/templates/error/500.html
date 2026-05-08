@@ -3,14 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>500 Server Error</title>
+    <title>500 Server Error - Project Selection System</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-<body>
-<main style="max-width: 720px; margin: 60px auto; padding: 24px;">
-    <h1>500 - Internal Server Error</h1>
-    <p>Something went wrong on our side. Please try again later.</p>
-    <p><a th:href="@{/login}">Back to Login</a></p>
-</main>
+<body class="auth-body">
+
+<div class="auth-shell">
+    <main class="error-card">
+
+        <div class="error-code">500</div>
+
+        <div class="error-icon">🛠️</div>
+
+        <h1>Internal Server Error</h1>
+
+        <p>
+            Something went wrong on our side.
+            Please try again later or return to the login page.
+        </p>
+
+        <div class="error-actions">
+            <a th:href="@{/login}" class="modern-btn modern-btn-primary">
+                Back to Login
+            </a>
+        </div>
+
+    </main>
+</div>
+
 </body>
 </html>

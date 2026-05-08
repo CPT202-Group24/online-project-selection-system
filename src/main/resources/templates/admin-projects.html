@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Project Management (Admin) - Project Selection System</title>
+    <meta name="_csrf"        th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/nav :: sharedNav}"></div>
+
+<div class="page-shell">
+    <div class="modern-card admin-projects-card">
+
+        <!-- Page Header -->
+        <div class="modern-page-header">
+            <div class="modern-page-icon">
+                📁
+            </div>
+            <div>
+                <h1 class="modern-page-title">Project Management</h1>
+                <p class="modern-page-subtitle">
+                    Force archive or restore project topics when administrative intervention is required
+                </p>
+            </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="modern-list-toolbar admin-project-toolbar">
+            <p class="result-summary notification-summary">
+                Admin project list
+            </p>
+
+            <input id="searchInput"
+                   type="text"
+                   class="modern-input admin-project-search"
+                   placeholder="Search by title or teacher..."
+                   oninput="renderTable()">
+        </div>
+
+        <!-- Message Area -->
+        <div id="msgBox"></div>
+
+        <!-- Table -->
+        <div class="modern-table-wrapper">
+            <table class="modern-table project-table admin-project-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Teacher</th>
+                    <th>Category</th>
+                    <th>Max Students</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+
+                <tbody id="projectTbody">
+                <tr>
+                    <td colspan="7" class="muted table-loading-cell">
+                        Loading...
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Bottom Actions -->
+        <div class="page-bottom-actions">
+            <a th:href="@{/admin/dashboard}" class="modern-btn modern-btn-outline">
+                ← Back to Dashboard
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const csrfToken  = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+    let projects = [];
+
+    function showMsg(text, type) {
+        const el = document.getElementById('msgBox');
+        el.innerHTML = `<div class="alert alert-${type === 'error' ? 'error' : 'info'}">${text}</div>`;
+        setTimeout(() => { el.innerHTML = ''; }, 4000);
+    }
+
+    function esc(s) {
+        return String(s == null ? '' : s)
+            .replace(/&/g,'&amp;')
+            .replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;')
+            .replace(/"/g,'&quot;');
+    }
+
+    function renderTable() {
+        const kw = document.getElementById('searchInput').value.trim().toLowerCase();
+
+        const filtered = projects.filter(p =>
+            ((p.title || '') + ' ' + (p.teacherName || '')).toLowerCase().includes(kw)
+        );
+
+        const tbody = document.getElementById('projectTbody');
+
+        if (!filtered.length) {
+            tbody.innerHTML = '<tr><td colspan="7" class="muted table-loading-cell">No projects found.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = filtered.map(p => `
+            <tr id="row-${p.id}">
+                <td>${p.id}</td>
+                <td><strong>${esc(p.title)}</strong></td>
+                <td>${esc(p.teacherName)}</td>
+                <td>${esc(p.category)}</td>
+                <td>${esc(p.maxStudents)}</td>
+                <td>
+                    <span class="status-badge status-${esc(p.status)}">
+                        ${esc(p.status)}
+                    </span>
+                </td>
+                <td>
+                    <div class="admin-project-actions">
+                        ${p.status !== 'archived'
+            ? `<button class="modern-btn table-action-btn admin-warning-btn"
+                                       onclick="doArchive(${p.id})">
+                                   Archive
+                               </button>`
+            : `<button class="modern-btn table-action-btn modern-btn-primary"
+                                       onclick="doRestore(${p.id})">
+                                   Restore
+                               </button>`
+        }
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    async function loadProjects() {
+        const tbody = document.getElementById('projectTbody');
+
+        try {
+            const res = await fetch('/api/admin/projects');
+
+            if (!res.ok) {
+                throw new Error('Server error: ' + res.status);
+            }
+
+            projects = await res.json();
+            renderTable();
+        } catch (e) {
+            tbody.innerHTML = '<tr><td colspan="7" class="muted table-loading-cell">Failed to load projects. Please refresh.</td></tr>';
+        }
+    }
+
+    async function doArchive(id) {
+        const p = projects.find(x => x.id === id);
+        if (!p) return;
+
+        if (!confirm(`Force-archive project "${p.title}"? It will no longer appear in student search.`)) return;
+
+        try {
+            const res = await fetch(`/api/admin/projects/${id}/archive`, {
+                method: 'POST',
+                headers: { [csrfHeader]: csrfToken }
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                p.status = data.status;
+                showMsg(`Project "${esc(p.title)}" archived successfully.`, 'info');
+                renderTable();
+            } else {
+                showMsg(data.error || 'Failed to archive project.', 'error');
+            }
+        } catch (e) {
+            showMsg('Network error. Please try again.', 'error');
+        }
+    }
+
+    async function doRestore(id) {
+        const p = projects.find(x => x.id === id);
+        if (!p) return;
+
+        if (!confirm(`Restore project "${p.title}" to its previous status?`)) return;
+
+        try {
+            const res = await fetch(`/api/admin/projects/${id}/restore`, {
+                method: 'POST',
+                headers: { [csrfHeader]: csrfToken }
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                p.status = data.status;
+                showMsg(`Project "${esc(p.title)}" restored to status: ${data.status}.`, 'info');
+                renderTable();
+            } else {
+                showMsg(data.error || 'Failed to restore project.', 'error');
+            }
+        } catch (e) {
+            showMsg('Network error. Please try again.', 'error');
+        }
+    }
+
+    loadProjects();
+</script>
+
+</body>
+</html>

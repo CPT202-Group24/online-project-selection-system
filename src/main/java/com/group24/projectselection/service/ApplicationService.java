@@ -17,11 +17,14 @@ public class ApplicationService {
 
     private final ApplicationRepository applicationRepository;
     private final ProjectTopicRepository projectTopicRepository;
+    private final NotificationService notificationService;
 
     public ApplicationService(ApplicationRepository applicationRepository,
-                              ProjectTopicRepository projectTopicRepository) {
+                              ProjectTopicRepository projectTopicRepository,
+                              NotificationService notificationService) {
         this.applicationRepository = applicationRepository;
         this.projectTopicRepository = projectTopicRepository;
+        this.notificationService = notificationService;
     }
 
     public ProjectTopic getProjectById(Long projectId) {
@@ -61,7 +64,9 @@ public class ApplicationService {
                         || app.getStatus() == ApplicationStatus.rejected) {
                     app.setPersonalStatement(personalStatement);
                     app.setStatus(ApplicationStatus.pending);
-                    return applicationRepository.save(app);
+                    Application saved = applicationRepository.save(app);
+                    notifyTeacherAboutApplication(project, student);
+                    return saved;
                 } else {
                     throw new IllegalStateException("You have already applied to this project.");
                 }
@@ -74,7 +79,9 @@ public class ApplicationService {
         application.setPersonalStatement(personalStatement);
         application.setStatus(ApplicationStatus.pending);
 
-        return applicationRepository.save(application);
+        Application saved = applicationRepository.save(application);
+        notifyTeacherAboutApplication(project, student);
+        return saved;
     }
 
     public List<Application> getMyApplications(User student) {
@@ -100,5 +107,18 @@ public class ApplicationService {
 
         application.setStatus(ApplicationStatus.withdrawn);
         applicationRepository.save(application);
+    }
+
+    private void notifyTeacherAboutApplication(ProjectTopic project, User student) {
+        if (notificationService == null || project == null || project.getTeacher() == null) {
+            return;
+        }
+
+        String studentName = student != null && student.getName() != null ? student.getName() : "A student";
+        String topicTitle = project.getTitle() != null ? project.getTitle() : "your project topic";
+        notificationService.createNotification(
+                project.getTeacher().getId(),
+                studentName + " submitted an application for \"" + topicTitle + "\"."
+        );
     }
 }

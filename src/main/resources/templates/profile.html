@@ -10,39 +10,105 @@
 
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="container">
-    <h2>My Profile</h2>
+<div class="page-shell">
+    <div class="modern-card profile-modern-card">
 
-    <div th:if="${saveSuccess}" class="alert alert-success">
-        Profile updated successfully.
+        <!-- Page Header -->
+        <div class="modern-page-header">
+            <div class="modern-page-icon">
+                👤
+            </div>
+            <div>
+                <h1 class="modern-page-title">My Profile</h1>
+                <p class="modern-page-subtitle">
+                    View your account email and update your personal information
+                </p>
+            </div>
+        </div>
+
+        <!-- Success Message -->
+        <div th:if="${saveSuccess}" class="alert alert-success">
+            Profile updated successfully.
+        </div>
+
+        <!-- Profile Form -->
+        <form th:action="@{/profile}"
+              th:object="${profileForm}"
+              method="post"
+              class="modern-form">
+
+            <div class="form-section-card">
+                <h3 class="form-section-title">Account Information</h3>
+
+                <div class="modern-form-grid">
+                    <div class="modern-form-group full-width">
+                        <label for="email">Email</label>
+                        <input id="email"
+                               type="email"
+                               th:value="${currentEmail}"
+                               class="modern-input readonly-input"
+                               readonly>
+                        <p class="field-hint">
+                            Email is linked to your account and cannot be edited here.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section-card">
+                <h3 class="form-section-title">Personal Information</h3>
+
+                <div class="modern-form-grid">
+                    <div class="modern-form-group">
+                        <label for="name">Name</label>
+                        <input id="name"
+                               type="text"
+                               th:field="*{name}"
+                               class="modern-input"
+                               placeholder="Enter your name">
+                        <div class="field-error"
+                             th:if="${#fields.hasErrors('name')}"
+                             th:errors="*{name}">
+                        </div>
+                    </div>
+
+                    <div class="modern-form-group">
+                        <label for="phone">Phone Number</label>
+                        <input id="phone"
+                               type="text"
+                               th:field="*{phone}"
+                               class="modern-input"
+                               placeholder="Enter your phone number">
+                        <div class="field-error"
+                             th:if="${#fields.hasErrors('phone')}"
+                             th:errors="*{phone}">
+                        </div>
+                    </div>
+
+                    <div class="modern-form-group full-width">
+                        <label for="department">Department</label>
+                        <input id="department"
+                               type="text"
+                               th:field="*{department}"
+                               class="modern-input"
+                               placeholder="Enter your department">
+                        <div class="field-error"
+                             th:if="${#fields.hasErrors('department')}"
+                             th:errors="*{department}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modern-form-actions">
+                <button type="submit" class="modern-btn modern-btn-primary">
+                    Save Profile
+                </button>
+            </div>
+
+        </form>
+
     </div>
-
-    <form th:action="@{/profile}" th:object="${profileForm}" method="post">
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input id="email" type="email" th:value="${currentEmail}" readonly>
-        </div>
-
-        <div class="form-group">
-            <label for="name">Name</label>
-            <input id="name" type="text" th:field="*{name}">
-            <div class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
-        </div>
-
-        <div class="form-group">
-            <label for="phone">Phone Number</label>
-            <input id="phone" type="text" th:field="*{phone}">
-            <div class="field-error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
-        </div>
-
-        <div class="form-group">
-            <label for="department">Department</label>
-            <input id="department" type="text" th:field="*{department}">
-            <div class="field-error" th:if="${#fields.hasErrors('department')}" th:errors="*{department}"></div>
-        </div>
-
-        <button type="submit">Save</button>
-    </form>
 </div>
 
 </body>

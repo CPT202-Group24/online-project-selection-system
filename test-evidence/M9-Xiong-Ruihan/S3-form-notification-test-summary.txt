@@ -1,0 +1,12 @@
+﻿PBI1 + PBI4 Test Summary
+Generated at: 2026-05-06 +08:00
+Command: mvn -Dtest=Pbi1FormComponentContractTest,Pbi4NotificationIntegrationTest test
+
+[INFO] Running com.group24.projectselection.Pbi1FormComponentContractTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] Running com.group24.projectselection.Pbi4NotificationIntegrationTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] Total tests run: 6, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS

@@ -10,13 +10,74 @@
 
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="container">
-    <h2>Student dashboard</h2>
-    <p>Welcome. Student features will appear here as they are implemented.</p>
+<div class="page-shell">
+    <div class="modern-card dashboard-modern-card">
 
-    <div style="margin-top: 24px;">
-        <a th:href="@{/student/topics}" class="toolbar-link-btn">Browse Available Topics</a>
-        <a th:href="@{/student/applications/my}" class="toolbar-link-btn" style="margin-left: 12px;">My Applications</a>
+        <!-- Page Header -->
+        <div class="modern-page-header">
+            <div class="modern-page-icon">
+                🎓
+            </div>
+            <div>
+                <h1 class="modern-page-title">Student Dashboard</h1>
+                <p class="modern-page-subtitle">
+                    Welcome back. Browse available project topics and track your submitted applications.
+                </p>
+            </div>
+        </div>
+
+        <!-- Dashboard Intro -->
+        <div class="dashboard-hero-card">
+            <div>
+                <h2>Project Selection Portal</h2>
+                <p>
+                    Use this dashboard to explore available project topics, view project details,
+                    submit applications, and check your application status.
+                </p>
+            </div>
+
+            <a th:href="@{/student/topics}" class="modern-btn modern-btn-primary">
+                Browse Topics
+            </a>
+        </div>
+
+        <!-- Feature Cards -->
+        <div class="dashboard-card-grid">
+
+            <a th:href="@{/student/topics}" class="dashboard-action-card">
+                <div class="dashboard-action-icon">📚</div>
+                <div>
+                    <h3>Browse Available Topics</h3>
+                    <p>Search and filter available project topics by keyword, category and sorting options.</p>
+                </div>
+            </a>
+
+            <a th:href="@{/student/applications/my}" class="dashboard-action-card">
+                <div class="dashboard-action-icon">📬</div>
+                <div>
+                    <h3>My Applications</h3>
+                    <p>Review submitted applications and monitor whether they are pending, accepted or rejected.</p>
+                </div>
+            </a>
+
+            <a th:href="@{/notifications}" class="dashboard-action-card">
+                <div class="dashboard-action-icon">🔔</div>
+                <div>
+                    <h3>Notifications</h3>
+                    <p>Check system messages and updates related to your project selection process.</p>
+                </div>
+            </a>
+
+            <a th:href="@{/profile}" class="dashboard-action-card">
+                <div class="dashboard-action-icon">👤</div>
+                <div>
+                    <h3>My Profile</h3>
+                    <p>View or update your personal profile information used in the system.</p>
+                </div>
+            </a>
+
+        </div>
+
     </div>
 </div>
 

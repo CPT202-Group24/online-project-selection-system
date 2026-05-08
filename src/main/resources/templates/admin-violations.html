@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Rule Violation Report - Project Selection System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/nav :: sharedNav}"></div>
+
+<div class="page-shell">
+    <div class="modern-card admin-violations-card">
+
+        <!-- Page Header -->
+        <div class="modern-page-header">
+            <div class="modern-page-icon">
+                ⚠️
+            </div>
+            <div>
+                <h1 class="modern-page-title">Rule Violation Report</h1>
+                <p class="modern-page-subtitle">
+                    Review students who hold two or more accepted project allocations
+                </p>
+            </div>
+        </div>
+
+        <!-- Explanation -->
+        <div class="modern-detail-card violation-info-card">
+            <h3 class="modern-detail-title">One-Project Rule Check</h3>
+            <p class="detail-text">
+                Students listed below hold <strong>2 or more</strong> accepted project allocations,
+                which violates the one-project rule.
+            </p>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${#lists.isEmpty(violations)}" class="modern-empty-state violation-empty-state">
+            <div class="modern-empty-icon">✅</div>
+            <h3>No violations found</h3>
+            <p>All students currently comply with the one-project rule.</p>
+        </div>
+
+        <!-- Violation List -->
+        <div th:if="${!#lists.isEmpty(violations)}" class="violation-list">
+            <div th:each="record : ${violations}" class="modern-violation-card">
+
+                <div class="violation-card-header">
+                    <div class="violation-student-icon">!</div>
+
+                    <div>
+                        <h3 th:text="${record.student != null ? record.student.name : 'Unknown Student'}">
+                            Student Name
+                        </h3>
+
+                        <p th:text="${record.student != null ? record.student.email : 'Unknown Email'}">
+                            student@example.com
+                        </p>
+                    </div>
+                </div>
+
+                <div class="violation-count-row">
+                    <span>
+                        Violating accepted projects:
+                    </span>
+
+                    <strong th:text="${#lists.size(record.violatingApplications)}">
+                        0
+                    </strong>
+                </div>
+
+                <ul class="violation-project-list">
+                    <li th:each="app : ${record.violatingApplications}">
+                        <div>
+                            <span class="project-title"
+                                  th:text="${app.project != null ? app.project.title : 'Unknown Project'}">
+                                Project Title
+                            </span>
+
+                            <span class="teacher-name"
+                                  th:text="${app.project != null and app.project.teacher != null
+                                             ? 'Supervisor: ' + app.project.teacher.name
+                                             : 'Supervisor: N/A'}">
+                                Supervisor
+                            </span>
+                        </div>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+
+        <!-- Bottom Actions -->
+        <div class="page-bottom-actions">
+            <a th:href="@{/admin/dashboard}" class="modern-btn modern-btn-outline">
+                ← Back to Dashboard
+            </a>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

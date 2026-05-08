@@ -10,62 +10,108 @@
 
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="container project-page-container">
-    <h2>My Applications</h2>
+<div class="page-shell">
+    <div class="modern-card">
 
-    <div th:if="${successMessage}" class="alert alert-success">
-        <span th:text="${successMessage}"></span>
-    </div>
-    <div th:if="${errorMessage}" class="alert alert-error">
-        <span th:text="${errorMessage}"></span>
-    </div>
+        <!-- Page Header -->
+        <div class="modern-page-header">
+            <div class="modern-page-icon">
+                📬
+            </div>
+            <div>
+                <h1 class="modern-page-title">My Applications</h1>
+                <p class="modern-page-subtitle">
+                    Track your submitted project applications and current review status
+                </p>
+            </div>
+        </div>
 
-    <div th:if="${#lists.isEmpty(applications)}" class="empty-message">
-        You have not submitted any applications yet.
-        <a th:href="@{/student/topics}">Browse available topics</a>
-    </div>
+        <!-- Messages -->
+        <div th:if="${successMessage}" class="alert alert-success">
+            <span th:text="${successMessage}"></span>
+        </div>
 
-    <div th:if="${!#lists.isEmpty(applications)}" class="project-table-wrapper">
-        <table class="project-table">
-            <thead>
-            <tr>
-                <th>Project Title</th>
-                <th>Teacher</th>
-                <th>Submitted</th>
-                <th>Last Updated</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="app : ${applications}">
-                <td th:text="${app.project.title}"></td>
-                <td th:text="${app.project.teacher.name}"></td>
-                <td th:text="${#temporals.format(app.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
-                <td th:text="${#temporals.format(app.updatedAt, 'yyyy-MM-dd HH:mm')}"></td>
-                <td>
-                    <span class="status-badge"
-                          th:classappend="'status-' + ${app.status.name()}"
-                          th:text="${app.status.name()}"></span>
-                </td>
-                <td>
-                    <form th:if="${app.status.name() == 'pending'}"
-                          th:action="@{/student/applications/{id}/withdraw(id=${app.id})}"
-                          method="post"
-                          style="margin:0;"
-                          onsubmit="return confirm('Are you sure you want to withdraw this application?')">
-                        <button type="submit" class="small-action-btn">Withdraw</button>
-                    </form>
-                    <span th:if="${app.status.name() != 'pending'}">—</span>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+        <div th:if="${errorMessage}" class="alert alert-error">
+            <span th:text="${errorMessage}"></span>
+        </div>
 
-    <p class="back-link-row">
-        <a th:href="@{/student/topics}">Browse more topics</a>
-    </p>
+        <!-- Empty State -->
+        <div th:if="${#lists.isEmpty(applications)}" class="modern-empty-state">
+            <div class="modern-empty-icon">🔎</div>
+            <h3>No applications yet</h3>
+            <p>You have not submitted any applications yet. Browse available topics and apply for one that interests you.</p>
+
+            <a th:href="@{/student/topics}" class="modern-btn modern-btn-primary">
+                Browse Available Topics
+            </a>
+        </div>
+
+        <!-- Applications Table -->
+        <div th:if="${!#lists.isEmpty(applications)}">
+            <p class="result-summary">
+                Your submitted applications
+            </p>
+
+            <div class="modern-table-wrapper">
+                <table class="modern-table project-table">
+                    <thead>
+                    <tr>
+                        <th>Project Title</th>
+                        <th>Teacher</th>
+                        <th>Submitted</th>
+                        <th>Last Updated</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="app : ${applications}">
+                        <td th:text="${app.project.title}"></td>
+
+                        <td th:text="${app.project.teacher.name}"></td>
+
+                        <td th:text="${#temporals.format(app.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+
+                        <td th:text="${#temporals.format(app.updatedAt, 'yyyy-MM-dd HH:mm')}"></td>
+
+                        <td>
+                            <span class="status-badge"
+                                  th:classappend="'status-' + ${app.status.name()}"
+                                  th:text="${app.status.name()}">
+                            </span>
+                        </td>
+
+                        <td>
+                            <form th:if="${app.status.name() == 'pending'}"
+                                  th:action="@{/student/applications/{id}/withdraw(id=${app.id})}"
+                                  method="post"
+                                  class="inline-action-form"
+                                  onsubmit="return confirm('Are you sure you want to withdraw this application?')">
+                                <button type="submit"
+                                        class="modern-btn modern-btn-dark table-action-btn">
+                                    Withdraw
+                                </button>
+                            </form>
+
+                            <span th:if="${app.status.name() != 'pending'}" class="muted">
+                                —
+                            </span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Bottom Actions -->
+        <div class="page-bottom-actions">
+            <a th:href="@{/student/topics}" class="modern-btn modern-btn-outline">
+                Browse More Topics
+            </a>
+        </div>
+
+    </div>
 </div>
 
 </body>

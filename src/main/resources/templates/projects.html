@@ -10,170 +10,221 @@
 
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="container project-page-container">
-    <h2>Teacher Projects</h2>
+<div class="page-shell">
+    <div class="modern-card">
 
-    <div class="view-toggle">
-        <a th:href="@{/teacher/projects(view='my')}"
-           th:classappend="${view == 'my'} ? ' active-toggle' : ''">
-            My Projects
-        </a>
+        <!-- Page Header -->
+        <div class="modern-page-header">
+            <div class="modern-page-icon">
+                📁
+            </div>
+            <div>
+                <h1 class="modern-page-title">Teacher Projects</h1>
+                <p class="modern-page-subtitle">
+                    Manage your project topics, publication status and project lifecycle
+                </p>
+            </div>
+        </div>
 
-        <a th:href="@{/teacher/projects(view='all')}"
-           th:classappend="${view == 'all'} ? ' active-toggle' : ''">
-            All Projects
-        </a>
-    </div>
+        <!-- View Switch -->
+        <div class="modern-tab-bar">
+            <a th:href="@{/teacher/projects(view='my')}"
+               th:classappend="${view == 'my'} ? ' active-toggle' : ''">
+                My Projects
+            </a>
 
-    <div th:if="${successMessage}" class="alert alert-info">
-        <span th:text="${successMessage}"></span>
-    </div>
+            <a th:href="@{/teacher/projects(view='all')}"
+               th:classappend="${view == 'all'} ? ' active-toggle' : ''">
+                All Projects
+            </a>
+        </div>
 
-    <div th:if="${errorMessage}" class="alert alert-error">
-        <span th:text="${errorMessage}"></span>
-    </div>
+        <!-- Messages -->
+        <div th:if="${successMessage}" class="alert alert-info">
+            <span th:text="${successMessage}"></span>
+        </div>
 
-    <div th:if="${view == 'my'}" class="status-filter">
-        <a th:href="@{/teacher/projects}"
-           th:classappend="${currentStatus == ''} ? ' active-filter' : ''">All</a>
-        <a th:href="@{/teacher/projects(status='unpublished')}"
-           th:classappend="${currentStatus == 'unpublished'} ? ' active-filter' : ''">Unpublished</a>
-        <a th:href="@{/teacher/projects(status='available')}"
-           th:classappend="${currentStatus == 'available'} ? ' active-filter' : ''">Available</a>
-        <a th:href="@{/teacher/projects(status='closed')}"
-           th:classappend="${currentStatus == 'closed'} ? ' active-filter' : ''">Closed</a>
-        <a th:href="@{/teacher/projects(status='archived')}"
-           th:classappend="${currentStatus == 'archived'} ? ' active-filter' : ''">Archived</a>
-    </div>
+        <div th:if="${errorMessage}" class="alert alert-error">
+            <span th:text="${errorMessage}"></span>
+        </div>
 
-    <div class="project-toolbar">
-        <a th:href="@{/teacher/projects/new}" class="toolbar-link-btn">Create New Project</a>
-    </div>
+        <!-- Status Filter + Create Button -->
+        <div class="modern-list-toolbar">
+            <div th:if="${view == 'my'}" class="modern-status-filter">
+                <a th:href="@{/teacher/projects}"
+                   th:classappend="${currentStatus == ''} ? ' active-filter' : ''">All</a>
 
-    <div class="project-table-wrapper">
-        <table class="project-table">
-            <thead>
-            <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th th:if="${view != 'my'}">Teacher ID</th>
-                <th>Category</th>
-                <th>Description</th>
-                <th>Required Skills</th>
-                <th>Keywords</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="project : ${projects}">
-                <td th:text="${project.id}"></td>
+                <a th:href="@{/teacher/projects(status='unpublished')}"
+                   th:classappend="${currentStatus == 'unpublished'} ? ' active-filter' : ''">Unpublished</a>
 
-                <td class="title-cell">
-                    <span th:text="${project.title != null and !project.title.isEmpty() ? project.title : 'Untitled Project'}"></span>
-                    <span th:if="${project.status.name() == 'unpublished' and project.draft}"
-                          class="status-badge status-unpublished">
-                        Draft
-                    </span>
-                </td>
+                <a th:href="@{/teacher/projects(status='available')}"
+                   th:classappend="${currentStatus == 'available'} ? ' active-filter' : ''">Available</a>
 
-                <td th:if="${view != 'my'}"
-                    th:text="${project.teacher != null ? project.teacher.id : 'N/A'}">
-                </td>
+                <a th:href="@{/teacher/projects(status='closed')}"
+                   th:classappend="${currentStatus == 'closed'} ? ' active-filter' : ''">Closed</a>
 
-                <td th:text="${project.category != null ? project.category.name : 'N/A'}"></td>
+                <a th:href="@{/teacher/projects(status='archived')}"
+                   th:classappend="${currentStatus == 'archived'} ? ' active-filter' : ''">Archived</a>
+            </div>
 
-                <td class="desc-cell"
-                    th:text="${project.description != null and #strings.length(project.description) > 20
-                        ? #strings.substring(project.description, 0, 20) + '...'
-                        : project.description}">
-                </td>
+            <a th:href="@{/teacher/projects/new}" class="modern-btn modern-btn-primary">
+                + Create New Project
+            </a>
+        </div>
 
-                <td class="skill-cell"
-                    th:text="${project.requiredSkills != null and !project.requiredSkills.isEmpty() ? project.requiredSkills : 'N/A'}">
-                </td>
+        <!-- Result Summary -->
+        <p class="result-summary">
+            Project topic management list
+        </p>
 
-                <td>
-                    <span th:if="${project.keywords != null and !project.keywords.isEmpty()}">
-                        <span th:each="kw : ${#strings.arraySplit(project.keywords, ',')}"
-                              th:if="${#strings.trim(kw) != ''}"
-                              th:text="${#strings.trim(kw)}"
-                              class="keyword-tag">
+        <!-- Table -->
+        <div class="modern-table-wrapper">
+            <table class="modern-table project-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th th:if="${view != 'my'}">Teacher ID</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Required Skills</th>
+                    <th>Keywords</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="project : ${projects}">
+                    <td th:text="${project.id}"></td>
+
+                    <td class="title-cell">
+                        <span th:text="${project.title != null and !project.title.isEmpty() ? project.title : 'Untitled Project'}"></span>
+
+                        <span th:if="${project.status.name() == 'unpublished' and project.draft}"
+                              class="status-badge status-unpublished">
+                            Draft
                         </span>
-                    </span>
-                    <span th:if="${project.keywords == null or project.keywords.isEmpty()}">N/A</span>
-                </td>
+                    </td>
 
-                <td>
-                    <span class="status-badge"
-                          th:classappend="'status-' + ${project.status.name()}"
-                          th:text="${project.status}">
-                    </span>
-                </td>
+                    <td th:if="${view != 'my'}"
+                        th:text="${project.teacher != null ? project.teacher.id : 'N/A'}">
+                    </td>
 
-                <td>
-                    <div class="action-group">
+                    <td th:text="${project.category != null ? project.category.name : 'N/A'}"></td>
 
-                        <a th:href="@{/teacher/topics/{id}(id=${project.id})}"
-                           class="small-action-btn">
-                            View
-                        </a>
-                        <a th:if="${project.teacher != null
-                            and project.teacher.id == currentTeacherId
-                            and project.status.name() == 'unpublished'}"
-                           th:href="@{'/teacher/projects/' + ${project.id} + '/edit'}"
-                           class="small-action-btn">
-                            Edit
-                        </a>
+                    <td class="desc-cell"
+                        th:text="${project.description != null and #strings.length(project.description) > 20
+                            ? #strings.substring(project.description, 0, 20) + '...'
+                            : project.description}">
+                    </td>
 
-                        <form th:if="${project.teacher != null
-                                       and project.teacher.id == currentTeacherId
-                                       and project.status.name() == 'unpublished'}"
-                              th:action="@{/teacher/projects/{id}/publish(id=${project.id})}"
-                              method="post">
-                            <button type="submit" class="small-action-btn btn-publish">Publish</button>
-                        </form>
+                    <td class="skill-cell"
+                        th:text="${project.requiredSkills != null and !project.requiredSkills.isEmpty() ? project.requiredSkills : 'N/A'}">
+                    </td>
 
-                        <form th:if="${project.teacher != null
-                                       and project.teacher.id == currentTeacherId
-                                       and (project.status.name() == 'available'
-                                            or project.status.name() == 'requested')}"
-                              th:action="@{/teacher/projects/{id}/close(id=${project.id})}"
-                              method="post">
-                            <button type="submit" class="small-action-btn btn-close-topic">Close</button>
-                        </form>
-                        <form th:if="${project.teacher != null
-                                       and project.teacher.id == currentTeacherId
-                                       and project.status.name() == 'closed'}"
-                              th:action="@{/teacher/projects/{id}/archive(id=${project.id})}"
-                              method="post">
-                            <button type="submit" class="small-action-btn btn-archive">Archive</button>
-                        </form>
-                        <form th:if="${project.teacher != null
-               and project.teacher.id == currentTeacherId
-               and project.status.name() == 'unpublished'}"
-                              th:action="@{/teacher/projects/{id}/delete(id=${project.id})}"
-                              method="post"
-                              onsubmit="return confirm('Are you sure you want to delete this unpublished project topic?');">
-                            <button type="submit" class="small-action-btn btn-delete-topic">
-                                Delete
-                            </button>
-                        </form>
+                    <td>
+                        <span th:if="${project.keywords != null and !project.keywords.isEmpty()}">
+                            <span th:each="kw : ${#strings.arraySplit(project.keywords, ',')}"
+                                  th:if="${#strings.trim(kw) != ''}"
+                                  th:text="${#strings.trim(kw)}"
+                                  class="keyword-tag">
+                            </span>
+                        </span>
 
-                    </div>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+                        <span th:if="${project.keywords == null or project.keywords.isEmpty()}">N/A</span>
+                    </td>
+
+                    <td>
+                        <span class="status-badge"
+                              th:classappend="'status-' + ${project.status.name()}"
+                              th:text="${project.status}">
+                        </span>
+                    </td>
+
+                    <td>
+                        <div class="action-group action-group-wrap">
+
+                            <a th:href="@{/teacher/topics/{id}(id=${project.id})}"
+                               class="modern-btn modern-btn-dark table-action-btn">
+                                View
+                            </a>
+
+                            <a th:if="${project.teacher != null
+                                and project.teacher.id == currentTeacherId
+                                and project.status.name() == 'unpublished'}"
+                               th:href="@{'/teacher/projects/' + ${project.id} + '/edit'}"
+                               class="modern-btn modern-btn-dark table-action-btn">
+                                Edit
+                            </a>
+
+                            <form th:if="${project.teacher != null
+                                           and project.teacher.id == currentTeacherId
+                                           and project.status.name() == 'unpublished'}"
+                                  th:action="@{/teacher/projects/{id}/publish(id=${project.id})}"
+                                  method="post">
+                                <button type="submit"
+                                        class="modern-btn modern-btn-dark table-action-btn btn-publish">
+                                    Publish
+                                </button>
+                            </form>
+
+                            <form th:if="${project.teacher != null
+                                           and project.teacher.id == currentTeacherId
+                                           and (project.status.name() == 'available'
+                                                or project.status.name() == 'requested')}"
+                                  th:action="@{/teacher/projects/{id}/close(id=${project.id})}"
+                                  method="post">
+                                <button type="submit"
+                                        class="modern-btn modern-btn-dark table-action-btn btn-close-topic">
+                                    Close
+                                </button>
+                            </form>
+
+                            <form th:if="${project.teacher != null
+                                           and project.teacher.id == currentTeacherId
+                                           and project.status.name() == 'closed'}"
+                                  th:action="@{/teacher/projects/{id}/archive(id=${project.id})}"
+                                  method="post">
+                                <button type="submit"
+                                        class="modern-btn modern-btn-dark table-action-btn btn-archive">
+                                    Archive
+                                </button>
+                            </form>
+
+                            <form th:if="${project.teacher != null
+                                           and project.teacher.id == currentTeacherId
+                                           and project.status.name() == 'unpublished'}"
+                                  th:action="@{/teacher/projects/{id}/delete(id=${project.id})}"
+                                  method="post"
+                                  onsubmit="return confirm('Are you sure you want to delete this unpublished project topic?');">
+                                <button type="submit"
+                                        class="modern-btn modern-btn-dark table-action-btn btn-delete-topic">
+                                    Delete
+                                </button>
+                            </form>
+
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Empty State -->
+        <p th:if="${projects.isEmpty()}" class="empty-message">
+            There are no related projects.
+        </p>
+
+        <!-- Bottom Actions -->
+        <div class="page-bottom-actions">
+            <a class="modern-btn modern-btn-outline"
+               th:href="@{/teacher/dashboard}">
+                ← Back to Teacher Dashboard
+            </a>
+        </div>
+
     </div>
-
-    <p th:if="${projects.isEmpty()}" class="empty-message">
-        There are no related projects
-    </p>
-
-    <p class="back-link-row">
-        <a th:href="@{/teacher/dashboard}">Back to teacher dashboard</a>
-    </p>
 </div>
 
 </body>

@@ -12,12 +12,17 @@ import java.util.regex.Pattern;
 @Service
 public class UserRegistrationService {
 
+    public static final int MIN_PASSWORD_LENGTH = 8;
+
+    private static final Pattern PASSWORD_STRENGTH =
+            Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$");
+
     /** Student accounts use the student subdomain. */
     private static final Pattern STUDENT_EMAIL =
             Pattern.compile("(?i)^[a-z0-9._%+-]+@student\\.xjtlu\\.edu\\.cn$");
-    /** Staff (e.g. teacher) accounts use the main university domain. */
+    /** Staff (e.g. teacher) accounts use the main university domain (excluding student subdomain). */
     private static final Pattern STAFF_EMAIL =
-            Pattern.compile("(?i)^[a-z0-9._%+-]+@xjtlu\\.edu\\.cn$");
+            Pattern.compile("(?i)^[a-z0-9._%+-]+@(?!student\\.)xjtlu\\.edu\\.cn$");
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -38,8 +43,21 @@ public class UserRegistrationService {
         return STAFF_EMAIL.matcher(trimmed).matches();
     }
 
+    /**
+     * Validates password strength: at least 8 chars, one uppercase, one lowercase, one digit.
+     */
+    public boolean isValidPassword(String password) {
+        if (!StringUtils.hasText(password)) {
+            return false;
+        }
+        return PASSWORD_STRENGTH.matcher(password).matches();
+    }
+
     public boolean isValidRegistrationInput(String name, String email, String password, User.Role role) {
         if (!StringUtils.hasText(name) || !StringUtils.hasText(password)) {
+            return false;
+        }
+        if (!isValidPassword(password)) {
             return false;
         }
         if (!isValidEmailForRole(email, role)) {

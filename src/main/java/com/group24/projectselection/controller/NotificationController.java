@@ -4,6 +4,7 @@ import com.group24.projectselection.model.Notification;
 import com.group24.projectselection.model.User;
 import com.group24.projectselection.repository.UserRepository;
 import com.group24.projectselection.service.NotificationService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -34,27 +35,7 @@ public class NotificationController {
         Long userId = getCurrentUser(authentication).getId();
         List<Notification> notifications = notificationService.listByUser(userId);
         model.addAttribute("notifications", notifications);
-        return "notifications"; // 对应 notifications.html
-    }
-
-    @PostMapping("/notifications/{id}/read")
-    public String markAsRead(@PathVariable("id") Long id,
-                             RedirectAttributes redirectAttributes) {
-        try {
-            notificationService.markAsRead(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Notification marked as read.");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error: " + e.getMessage());
-        }
-        return "redirect:/notifications";
-    }
-
-    @GetMapping("/api/notifications/unread-count")
-    @ResponseBody
-    public Map<String, Long> unreadCount(Authentication authentication) {
-        Long userId = getCurrentUser(authentication).getId();
-        long unreadCount = notificationService.countUnread(userId);
-        return Map.of("unreadCount", unreadCount);
+        return "notifications";
     }
 
     @GetMapping("/api/notifications")
@@ -66,10 +47,59 @@ public class NotificationController {
                 .toList();
     }
 
+    @GetMapping("/api/notifications/unread-count")
+    @ResponseBody
+    public Map<String, Long> unreadCount(Authentication authentication) {
+        Long userId = getCurrentUser(authentication).getId();
+        long unreadCount = notificationService.countUnread(userId);
+        return Map.of("unreadCount", unreadCount);
+    }
+
+    @PostMapping("/notifications/{id}/read")
+    public String markAsReadFromPage(@PathVariable Long id,
+                                     Authentication authentication,
+                                     RedirectAttributes redirectAttributes) {
+        Long userId = getCurrentUser(authentication).getId();
+        try {
+            notificationService.markAsRead(id, userId);
+            redirectAttributes.addFlashAttribute("successMessage", "Notification marked as read.");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/notifications";
+    }
+
+    @PostMapping("/notifications/read-all")
+    public String markAllAsReadFromPage(Authentication authentication,
+                                        RedirectAttributes redirectAttributes) {
+        Long userId = getCurrentUser(authentication).getId();
+        notificationService.markAllAsRead(userId);
+        redirectAttributes.addFlashAttribute("successMessage", "All notifications marked as read.");
+        return "redirect:/notifications";
+    }
+
+    @PostMapping("/api/notifications/{id}/read")
+    @ResponseBody
+    public ResponseEntity<String> markAsReadApi(@PathVariable Long id,
+                                                Authentication authentication) {
+        Long userId = getCurrentUser(authentication).getId();
+        notificationService.markAsRead(id, userId);
+        return ResponseEntity.ok("Notification marked as read.");
+    }
+
+    @PostMapping("/api/notifications/read-all")
+    @ResponseBody
+    public ResponseEntity<String> markAllAsReadApi(Authentication authentication) {
+        Long userId = getCurrentUser(authentication).getId();
+        notificationService.markAllAsRead(userId);
+        return ResponseEntity.ok("All notifications marked as read.");
+    }
+
     private User getCurrentUser(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new IllegalStateException("No authenticated user found");
         }
+
         String email = authentication.getName();
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalStateException("Current user not found: " + email));

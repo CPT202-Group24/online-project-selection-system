@@ -6,8 +6,10 @@ import com.group24.projectselection.model.ConflictLog;
 import com.group24.projectselection.model.ProjectTopic;
 import com.group24.projectselection.model.User;
 import com.group24.projectselection.repository.ApplicationRepository;
+import com.group24.projectselection.repository.AuditLogRepository;
 import com.group24.projectselection.repository.CategoryRepository;
 import com.group24.projectselection.repository.ConflictLogRepository;
+import com.group24.projectselection.repository.NotificationRepository;
 import com.group24.projectselection.repository.ProjectTopicRepository;
 import com.group24.projectselection.repository.UserRepository;
 import com.group24.projectselection.service.ApplicationService;
@@ -36,33 +38,50 @@ class M9EndToEndIntegrationTest {
 
     @Autowired
     private UserRegistrationService userRegistrationService;
+
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
+
     @Autowired
     private ProjectTopicService projectTopicService;
+
     @Autowired
     private TopicStatusService topicStatusService;
+
     @Autowired
     private ApplicationService applicationService;
+
     @Autowired
     private TeacherApprovalService teacherApprovalService;
 
     @Autowired
     private UserRepository userRepository;
+
     @Autowired
     private CategoryRepository categoryRepository;
+
     @Autowired
     private ProjectTopicRepository projectTopicRepository;
+
     @Autowired
     private ApplicationRepository applicationRepository;
+
     @Autowired
     private ConflictLogRepository conflictLogRepository;
 
+    @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
+    private AuditLogRepository auditLogRepository;
+
     @BeforeEach
     void cleanData() {
+        notificationRepository.deleteAll();
         conflictLogRepository.deleteAll();
         applicationRepository.deleteAll();
         projectTopicRepository.deleteAll();
+        auditLogRepository.deleteAll();
         userRepository.deleteAll();
         categoryRepository.deleteAll();
     }
@@ -77,12 +96,14 @@ class M9EndToEndIntegrationTest {
                 "secret",
                 User.Role.teacher
         );
+
         User studentA = userRegistrationService.register(
                 "Student A",
                 "student.a." + suffix + "@student.xjtlu.edu.cn",
                 "secret",
                 User.Role.student
         );
+
         User studentB = userRegistrationService.register(
                 "Student B",
                 "student.b." + suffix + "@student.xjtlu.edu.cn",
@@ -90,9 +111,9 @@ class M9EndToEndIntegrationTest {
                 User.Role.student
         );
 
-        // login check for registered accounts
         UserDetails teacherLogin = customUserDetailsService.loadUserByUsername(teacher.getEmail());
         UserDetails studentLogin = customUserDetailsService.loadUserByUsername(studentA.getEmail());
+
         assertThat(teacherLogin.getAuthorities()).extracting("authority").contains("teacher");
         assertThat(studentLogin.getAuthorities()).extracting("authority").contains("student");
 
@@ -120,6 +141,7 @@ class M9EndToEndIntegrationTest {
                 publishedTopic.getId(),
                 "I want this project because I match the skills."
         );
+
         Application applicationB = applicationService.submitApplication(
                 studentB,
                 publishedTopic.getId(),
@@ -139,6 +161,7 @@ class M9EndToEndIntegrationTest {
         assertThat(approvedA.getStatus()).isEqualTo(Application.ApplicationStatus.accepted);
         assertThat(autoRejectedB.getStatus()).isEqualTo(Application.ApplicationStatus.rejected);
         assertThat(finalTopic.getStatus()).isEqualTo(ProjectTopic.TopicStatus.agreed);
+
         assertThat(logs)
                 .anyMatch(log -> "AUTO_REJECTED".equals(log.getActionTaken())
                         && "Project reached maximum student capacity".equals(log.getReason()));
