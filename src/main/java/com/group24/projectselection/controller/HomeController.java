@@ -1,11 +1,20 @@
 package com.group24.projectselection.controller;
 
+import com.group24.projectselection.model.Application;
+import com.group24.projectselection.service.TeacherApprovalService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import java.util.List;
+
 
 @Controller
 public class HomeController {
+
+    @Autowired
+    private TeacherApprovalService teacherApprovalService;
 
     @GetMapping("/")
     public String index() {
@@ -44,7 +53,10 @@ public class HomeController {
     }
 
     @GetMapping("/teacher/dashboard")
-    public String teacherDashboard() {
+    public String teacherDashboard(Authentication authentication, Model model) {
+        String email = authentication.getName();
+        List<Application> pendingApplications = teacherApprovalService.getPendingApplicationsByEmail(email);
+        model.addAttribute("pendingApplications", pendingApplications);
         return "teacher-dashboard";
     }
 
