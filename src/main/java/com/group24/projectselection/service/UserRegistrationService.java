@@ -32,15 +32,22 @@ public class UserRegistrationService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public boolean isValidEmailForRole(String email, User.Role role) {
-        if (!StringUtils.hasText(email) || role == null) {
-            return false;
+    /**
+     * Resolves the role from the email domain.
+     * @return student or teacher role, or null if the email does not match any valid university domain
+     */
+    public User.Role resolveRoleFromEmail(String email) {
+        if (!StringUtils.hasText(email)) {
+            return null;
         }
         String trimmed = email.trim();
-        if (role == User.Role.student) {
-            return STUDENT_EMAIL.matcher(trimmed).matches();
+        if (STUDENT_EMAIL.matcher(trimmed).matches()) {
+            return User.Role.student;
         }
-        return STAFF_EMAIL.matcher(trimmed).matches();
+        if (STAFF_EMAIL.matcher(trimmed).matches()) {
+            return User.Role.teacher;
+        }
+        return null;
     }
 
     /**
@@ -51,37 +58,6 @@ public class UserRegistrationService {
             return false;
         }
         return PASSWORD_STRENGTH.matcher(password).matches();
-    }
-
-    public boolean isValidRegistrationInput(String name, String email, String password, User.Role role) {
-        if (!StringUtils.hasText(name) || !StringUtils.hasText(password)) {
-            return false;
-        }
-        if (!isValidPassword(password)) {
-            return false;
-        }
-        if (!isValidEmailForRole(email, role)) {
-            return false;
-        }
-        return role != null && role != User.Role.admin;
-    }
-
-    /**
-     * @return null if role is not allowed for self-registration (e.g. admin)
-     */
-    public User.Role parseRegisterableRole(String role) {
-        if (!StringUtils.hasText(role)) {
-            return null;
-        }
-        try {
-            User.Role r = User.Role.valueOf(role.trim().toLowerCase());
-            if (r == User.Role.admin) {
-                return null;
-            }
-            return r;
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
     }
 
     public boolean emailExists(String email) {
