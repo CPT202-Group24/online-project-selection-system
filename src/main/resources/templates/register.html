@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>Register - Project Selection System</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
 </head>
 <body class="auth-body">
 
@@ -39,13 +41,33 @@
 
             <div class="modern-form-group">
                 <label for="email">Email</label>
-                <input id="email"
-                       type="email"
-                       name="email"
+                <div style="display:flex;gap:8px;">
+                    <input id="email"
+                           type="email"
+                           name="email"
+                           class="modern-input"
+                           placeholder="your@student.xjtlu.edu.cn or your@xjtlu.edu.cn"
+                           required
+                           style="flex:1;">
+                    <button type="button" id="sendCodeBtn" class="modern-btn modern-btn-primary" style="white-space:nowrap;min-width:120px;">
+                        Send Code
+                    </button>
+                </div>
+            </div>
+
+            <div class="modern-form-group" id="verificationCodeGroup" style="display:none;">
+                <label for="verificationCode">Verification Code</label>
+                <input id="verificationCode"
+                       type="text"
+                       name="verificationCode"
                        class="modern-input"
-                       placeholder="your@student.xjtlu.edu.cn or your@xjtlu.edu.cn"
+                       placeholder="Enter 6-digit code"
+                       maxlength="6"
+                       pattern="\d{6}"
+                       inputmode="numeric"
                        required>
             </div>
+            <p id="code-hint" class="password-hint" style="display:none;margin-top:6px;margin-bottom:12px;font-size:0.85rem;"></p>
 
             <div class="modern-form-group">
                 <label for="password">Password</label>
@@ -95,6 +117,8 @@
     var confirmHint = document.getElementById('confirm-hint');
     var form = passwordInput.closest('form');
 
+    // ── Password validation ──────────────────────────────────────────
+
     function isStrong(pw) {
         return pw.length >= 8 && /[a-z]/.test(pw) && /[A-Z]/.test(pw) && /\d/.test(pw);
     }
@@ -138,8 +162,80 @@
     confirmInput.addEventListener('input', validateConfirm);
     confirmInput.addEventListener('blur', validateConfirm);
 
+    // ── Verification code ────────────────────────────────────────────
+
+    var sendBtn = document.getElementById('sendCodeBtn');
+    var codeGroup = document.getElementById('verificationCodeGroup');
+    var codeHint = document.getElementById('code-hint');
+    var emailInput = document.getElementById('email');
+    var countdown = null;
+
+    sendBtn.addEventListener('click', function () {
+        var email = emailInput.value.trim();
+        if (!email) {
+            showCodeHint('Please enter your email first.', '#dc2626');
+            return;
+        }
+
+        sendBtn.disabled = true;
+        sendBtn.textContent = 'Sending...';
+
+        var csrfToken = document.querySelector('meta[name="_csrf"]').content;
+        var csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+        fetch('/api/send-verification-code', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                [csrfHeader]: csrfToken
+            },
+            body: 'email=' + encodeURIComponent(email)
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.error) {
+                showCodeHint(data.error, '#dc2626');
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Send Code';
+            } else {
+                codeGroup.style.display = 'block';
+                showCodeHint('Code sent! Check your inbox.', '#16a34a');
+                startCountdown();
+            }
+        })
+        .catch(function () {
+            showCodeHint('Failed to send code. Try again.', '#dc2626');
+            sendBtn.disabled = false;
+            sendBtn.textContent = 'Send Code';
+        });
+    });
+
+    function showCodeHint(msg, color) {
+        codeHint.style.display = 'block';
+        codeHint.textContent = msg;
+        codeHint.style.color = color;
+    }
+
+    function startCountdown() {
+        var seconds = 60;
+        sendBtn.textContent = seconds + 's';
+        countdown = setInterval(function () {
+            seconds--;
+            if (seconds <= 0) {
+                clearInterval(countdown);
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Resend';
+            } else {
+                sendBtn.textContent = seconds + 's';
+            }
+        }, 1000);
+    }
+
+    // ── Form submit ──────────────────────────────────────────────────
+
     form.addEventListener('submit', function (e) {
-        if (!validatePassword() || !validateConfirm()) {
+        var ok = validatePassword() && validateConfirm();
+        if (!ok) {
             e.preventDefault();
         }
     });

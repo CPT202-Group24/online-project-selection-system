@@ -1,20 +1,44 @@
 package com.group24.projectselection.controller;
 
 import com.group24.projectselection.model.User;
+import com.group24.projectselection.service.EmailVerificationService;
 import com.group24.projectselection.service.UserRegistrationService;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.Map;
 
 @Controller
 public class RegistrationController {
 
     private final UserRegistrationService registrationService;
+    private final EmailVerificationService emailVerificationService;
 
-    public RegistrationController(UserRegistrationService registrationService) {
+    public RegistrationController(UserRegistrationService registrationService,
+                                  EmailVerificationService emailVerificationService) {
         this.registrationService = registrationService;
+        this.emailVerificationService = emailVerificationService;
+    }
+
+    @PostMapping("/api/send-verification-code")
+    @ResponseBody
+    public Map<String, String> sendVerificationCode(@RequestParam String email) {
+        if (!StringUtils.hasText(email)) {
+            return Map.of("error", "Please enter your email.");
+        }
+        String normalizedEmail = email.trim().toLowerCase();
+        if (registrationService.emailExists(normalizedEmail)) {
+            return Map.of("error", "An account with this email already exists.");
+        }
+        String error = emailVerificationService.sendVerificationCode(normalizedEmail);
+        if (error != null) {
+            return Map.of("error", error);
+        }
+        return Map.of("success", "Verification code sent.");
     }
 
     @PostMapping("/register")
@@ -23,6 +47,7 @@ public class RegistrationController {
             @RequestParam String email,
             @RequestParam String password,
             @RequestParam String confirmPassword,
+            @RequestParam String verificationCode,
             RedirectAttributes redirectAttributes) {
 
         if (!StringUtils.hasText(name)) {
@@ -57,6 +82,12 @@ public class RegistrationController {
         if (registrationService.emailExists(normalizedEmail)) {
             redirectAttributes.addFlashAttribute(
                     "errorMessage", "An account with this email already exists.");
+            return "redirect:/register";
+        }
+
+        String verificationError = emailVerificationService.verifyCode(normalizedEmail, verificationCode);
+        if (verificationError != null) {
+            redirectAttributes.addFlashAttribute("errorMessage", verificationError);
             return "redirect:/register";
         }
 

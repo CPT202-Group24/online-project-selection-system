@@ -36,6 +36,36 @@ public class EmailService {
     }
 
     @Async
+    public void sendVerificationCodeEmail(String toEmail, String code) {
+        if (mailSender == null) {
+            log.warn("JavaMailSender is not configured (missing spring.mail.*); "
+                    + "skipping verification code email to {}.", toEmail);
+            return;
+        }
+
+        String subject = "Your Verification Code";
+        String body = """
+                <p>Hello,</p>
+                <p>Your verification code is:</p>
+                <p style="font-size:24px;font-weight:bold;letter-spacing:4px;text-align:center;">%s</p>
+                <p>This code expires in 5 minutes. If you did not request this, you can safely ignore this email.</p>
+                """.formatted(code);
+
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(fromAddress);
+            helper.setTo(toEmail);
+            helper.setSubject(subject);
+            helper.setText(body, true);
+            mailSender.send(message);
+            log.info("Verification code email sent to {}", toEmail);
+        } catch (MessagingException e) {
+            log.error("Failed to send verification code email to {}", toEmail, e);
+        }
+    }
+
+    @Async
     public void sendPasswordResetEmail(String toEmail, String token) {
         if (mailSender == null) {
             log.warn("JavaMailSender is not configured (missing spring.mail.*); "

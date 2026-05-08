@@ -1,6 +1,7 @@
 package com.group24.projectselection.controller;
 
 import com.group24.projectselection.model.User;
+import com.group24.projectselection.service.EmailVerificationService;
 import com.group24.projectselection.service.UserRegistrationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -30,6 +32,60 @@ class RegistrationControllerTest {
     @MockBean
     private UserRegistrationService registrationService;
 
+    @MockBean
+    private EmailVerificationService emailVerificationService;
+
+    // ── Send verification code tests ─────────────────────────────────
+
+    @Test
+    @DisplayName("send verification code returns success JSON")
+    void sendVerificationCode_returnsSuccess() throws Exception {
+        when(registrationService.emailExists("s@student.xjtlu.edu.cn")).thenReturn(false);
+        when(emailVerificationService.sendVerificationCode("s@student.xjtlu.edu.cn")).thenReturn(null);
+
+        mockMvc.perform(post("/api/send-verification-code")
+                        .param("email", "s@student.xjtlu.edu.cn"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"success\":\"Verification code sent.\"}"));
+    }
+
+    @Test
+    @DisplayName("send verification code returns error when service fails")
+    void sendVerificationCode_returnsError() throws Exception {
+        when(registrationService.emailExists("s@student.xjtlu.edu.cn")).thenReturn(false);
+        when(emailVerificationService.sendVerificationCode("s@student.xjtlu.edu.cn"))
+                .thenReturn("Please wait before requesting another code.");
+
+        mockMvc.perform(post("/api/send-verification-code")
+                        .param("email", "s@student.xjtlu.edu.cn"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"error\":\"Please wait before requesting another code.\"}"));
+    }
+
+    @Test
+    @DisplayName("send verification code rejects duplicate email")
+    void sendVerificationCode_rejectsDuplicateEmail() throws Exception {
+        when(registrationService.emailExists("dup@student.xjtlu.edu.cn")).thenReturn(true);
+
+        mockMvc.perform(post("/api/send-verification-code")
+                        .param("email", "dup@student.xjtlu.edu.cn"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"error\":\"An account with this email already exists.\"}"));
+
+        verify(emailVerificationService, never()).sendVerificationCode(any());
+    }
+
+    @Test
+    @DisplayName("send verification code rejects blank email")
+    void sendVerificationCode_rejectsBlankEmail() throws Exception {
+        mockMvc.perform(post("/api/send-verification-code")
+                        .param("email", ""))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"error\":\"Please enter your email.\"}"));
+    }
+
+    // ── Registration validation tests ────────────────────────────────
+
     @Test
     @DisplayName("blank name shows specific error message")
     void blankName_showsSpecificError() throws Exception {
@@ -37,7 +93,8 @@ class RegistrationControllerTest {
                         .param("name", "")
                         .param("email", "s@student.xjtlu.edu.cn")
                         .param("password", "Secret123")
-                        .param("confirmPassword", "Secret123"))
+                        .param("confirmPassword", "Secret123")
+                        .param("verificationCode", "123456"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/register"))
                 .andExpect(flash().attribute("errorMessage", "Please enter your name."));
@@ -52,7 +109,8 @@ class RegistrationControllerTest {
                         .param("name", "Alice")
                         .param("email", "s@student.xjtlu.edu.cn")
                         .param("password", "")
-                        .param("confirmPassword", ""))
+                        .param("confirmPassword", "")
+                        .param("verificationCode", "123456"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/register"))
                 .andExpect(flash().attribute("errorMessage", "Please enter a password."));
@@ -67,7 +125,8 @@ class RegistrationControllerTest {
                         .param("name", "Alice")
                         .param("email", "s@student.xjtlu.edu.cn")
                         .param("password", "Secret123")
-                        .param("confirmPassword", "Different123"))
+                        .param("confirmPassword", "Different123")
+                        .param("verificationCode", "123456"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/register"))
                 .andExpect(flash().attribute("errorMessage", "Passwords do not match."));
@@ -84,7 +143,8 @@ class RegistrationControllerTest {
                         .param("name", "Alice")
                         .param("email", "a@student.xjtlu.edu.cn")
                         .param("password", "123")
-                        .param("confirmPassword", "123"))
+                        .param("confirmPassword", "123")
+                        .param("verificationCode", "123456"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/register"))
                 .andExpect(flash().attribute("errorMessage",
@@ -103,7 +163,8 @@ class RegistrationControllerTest {
                         .param("name", "Hacker")
                         .param("email", "hacker@gmail.com")
                         .param("password", "Secret123")
-                        .param("confirmPassword", "Secret123"))
+                        .param("confirmPassword", "Secret123")
+                        .param("verificationCode", "123456"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/register"))
                 .andExpect(flash().attribute("errorMessage",
@@ -123,10 +184,33 @@ class RegistrationControllerTest {
                         .param("name", "Dup User")
                         .param("email", "dup@student.xjtlu.edu.cn")
                         .param("password", "Secret123")
-                        .param("confirmPassword", "Secret123"))
+                        .param("confirmPassword", "Secret123")
+                        .param("verificationCode", "123456"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/register"))
                 .andExpect(flash().attribute("errorMessage", "An account with this email already exists."));
+
+        verify(registrationService, never()).register(any(), any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("invalid verification code shows error and does not persist")
+    void invalidVerificationCode_showsError() throws Exception {
+        when(registrationService.isValidPassword("Secret123")).thenReturn(true);
+        when(registrationService.resolveRoleFromEmail("n@student.xjtlu.edu.cn")).thenReturn(User.Role.student);
+        when(registrationService.emailExists("n@student.xjtlu.edu.cn")).thenReturn(false);
+        when(emailVerificationService.verifyCode("n@student.xjtlu.edu.cn", "000000"))
+                .thenReturn("Incorrect verification code.");
+
+        mockMvc.perform(post("/register")
+                        .param("name", "N")
+                        .param("email", "n@student.xjtlu.edu.cn")
+                        .param("password", "Secret123")
+                        .param("confirmPassword", "Secret123")
+                        .param("verificationCode", "000000"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/register"))
+                .andExpect(flash().attribute("errorMessage", "Incorrect verification code."));
 
         verify(registrationService, never()).register(any(), any(), any(), any());
     }
@@ -137,12 +221,14 @@ class RegistrationControllerTest {
         when(registrationService.isValidPassword("Secret123")).thenReturn(true);
         when(registrationService.resolveRoleFromEmail("n@student.xjtlu.edu.cn")).thenReturn(User.Role.student);
         when(registrationService.emailExists("n@student.xjtlu.edu.cn")).thenReturn(false);
+        when(emailVerificationService.verifyCode("n@student.xjtlu.edu.cn", "123456")).thenReturn(null);
 
         mockMvc.perform(post("/register")
                         .param("name", "N")
                         .param("email", "n@student.xjtlu.edu.cn")
                         .param("password", "Secret123")
-                        .param("confirmPassword", "Secret123"))
+                        .param("confirmPassword", "Secret123")
+                        .param("verificationCode", "123456"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login?registered=true"));
 
@@ -155,12 +241,14 @@ class RegistrationControllerTest {
         when(registrationService.isValidPassword("Secret123")).thenReturn(true);
         when(registrationService.resolveRoleFromEmail("n@student.xjtlu.edu.cn")).thenReturn(User.Role.student);
         when(registrationService.emailExists("n@student.xjtlu.edu.cn")).thenReturn(false);
+        when(emailVerificationService.verifyCode("n@student.xjtlu.edu.cn", "123456")).thenReturn(null);
 
         mockMvc.perform(post("/register")
                         .param("name", "N")
                         .param("email", "  N@STUDENT.XJTLU.EDU.CN  ")
                         .param("password", "Secret123")
-                        .param("confirmPassword", "Secret123"))
+                        .param("confirmPassword", "Secret123")
+                        .param("verificationCode", "123456"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login?registered=true"));
 
@@ -180,7 +268,8 @@ class RegistrationControllerTest {
                         .param("name", "Hacker")
                         .param("email", "'; DROP TABLE users; --@student.xjtlu.edu.cn")
                         .param("password", "Secret123")
-                        .param("confirmPassword", "Secret123"))
+                        .param("confirmPassword", "Secret123")
+                        .param("verificationCode", "123456"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/register"))
                 .andExpect(flash().attribute("errorMessage",
@@ -195,12 +284,14 @@ class RegistrationControllerTest {
         when(registrationService.isValidPassword("Secret123")).thenReturn(true);
         when(registrationService.resolveRoleFromEmail("s@student.xjtlu.edu.cn")).thenReturn(User.Role.student);
         when(registrationService.emailExists("s@student.xjtlu.edu.cn")).thenReturn(false);
+        when(emailVerificationService.verifyCode("s@student.xjtlu.edu.cn", "123456")).thenReturn(null);
 
         mockMvc.perform(post("/register")
                         .param("name", "<script>alert('xss')</script>")
                         .param("email", "s@student.xjtlu.edu.cn")
                         .param("password", "Secret123")
-                        .param("confirmPassword", "Secret123"))
+                        .param("confirmPassword", "Secret123")
+                        .param("verificationCode", "123456"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login?registered=true"));
 
