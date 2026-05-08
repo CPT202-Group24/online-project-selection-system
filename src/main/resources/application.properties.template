@@ -10,6 +10,16 @@ spring.jpa.properties.hibernate.format_sql=true
 
 spring.thymeleaf.cache=false
 
+# Mail (configure with your SMTP credentials)
+spring.mail.host=smtp.qq.com
+spring.mail.port=587
+spring.mail.username=209498863@qq.com
+spring.mail.password=mzjzgxmlygcibjdb
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+
+app.base-url=http://localhost:8080
+
 server.port=8080
 
 # Session timeout: 30 minutes of inactivity
