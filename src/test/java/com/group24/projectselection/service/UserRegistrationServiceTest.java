@@ -33,6 +33,8 @@ class UserRegistrationServiceTest {
     @InjectMocks
     private UserRegistrationService registrationService;
 
+    // ── register tests ─────────────────────────────────────────────────
+
     @Test
     @DisplayName("register encodes password, normalizes email and saves user")
     void register_encodesPasswordNormalizesEmailAndSavesUser() {
@@ -56,169 +58,6 @@ class UserRegistrationServiceTest {
         assertEquals(User.Role.student, persisted.getRole());
         assertEquals(User.UserStatus.active, persisted.getStatus());
         assertSame(persisted, saved);
-    }
-
-    @Test
-    @DisplayName("isValidRegistrationInput rejects when email domain does not match role")
-    void isValidRegistrationInput_rejectsWhenEmailDomainDoesNotMatchRole() {
-        assertFalse(registrationService.isValidRegistrationInput(
-                "Bob", "bob@xjtlu.edu.cn", "Secret123", User.Role.student));
-    }
-
-    @Test
-    @DisplayName("isValidRegistrationInput accepts student and teacher university emails")
-    void isValidRegistrationInput_acceptsStudentAndTeacherUniversityEmails() {
-        assertTrue(registrationService.isValidRegistrationInput(
-                "S", "s1@student.xjtlu.edu.cn", "Secret123", User.Role.student));
-        assertTrue(registrationService.isValidRegistrationInput(
-                "T", "t1@xjtlu.edu.cn", "Secret123", User.Role.teacher));
-    }
-
-    @Test
-    @DisplayName("isValidRegistrationInput rejects student email with teacher role")
-    void isValidRegistrationInput_rejectsStudentEmailWithTeacherRole() {
-        assertFalse(registrationService.isValidRegistrationInput(
-                "T", "t1@student.xjtlu.edu.cn", "Secret123", User.Role.teacher));
-    }
-
-    @Test
-    @DisplayName("isValidRegistrationInput rejects teacher email with student role")
-    void isValidRegistrationInput_rejectsTeacherEmailWithStudentRole() {
-        assertFalse(registrationService.isValidRegistrationInput(
-                "S", "s1@xjtlu.edu.cn", "Secret123", User.Role.student));
-    }
-
-    @Test
-    @DisplayName("isValidRegistrationInput rejects password shorter than minimum length")
-    void isValidRegistrationInput_rejectsShortPassword() {
-        assertFalse(registrationService.isValidRegistrationInput(
-                "Alice", "a@student.xjtlu.edu.cn", "Abcdefg", User.Role.student));
-    }
-
-    @Test
-    @DisplayName("isValidRegistrationInput accepts password at minimum length")
-    void isValidRegistrationInput_acceptsPasswordAtMinLength() {
-        assertTrue(registrationService.isValidRegistrationInput(
-                "Alice", "a@student.xjtlu.edu.cn", "Abcdef1x", User.Role.student));
-    }
-
-    @Test
-    @DisplayName("isValidRegistrationInput rejects admin role")
-    void isValidRegistrationInput_rejectsAdminRole() {
-        assertFalse(registrationService.isValidRegistrationInput(
-                "Admin", "admin@xjtlu.edu.cn", "Secret123", User.Role.admin));
-    }
-
-    @Test
-    @DisplayName("isValidRegistrationInput rejects blank name")
-    void isValidRegistrationInput_rejectsBlankName() {
-        assertFalse(registrationService.isValidRegistrationInput(
-                "  ", "s@student.xjtlu.edu.cn", "Secret123", User.Role.student));
-    }
-
-    @Test
-    @DisplayName("isValidRegistrationInput rejects blank password")
-    void isValidRegistrationInput_rejectsBlankPassword() {
-        assertFalse(registrationService.isValidRegistrationInput(
-                "Alice", "s@student.xjtlu.edu.cn", "  ", User.Role.student));
-    }
-
-    @Test
-    @DisplayName("parseRegisterableRole returns null for admin")
-    void parseRegisterableRole_returnsNullForAdmin() {
-        assertNull(registrationService.parseRegisterableRole("admin"));
-    }
-
-    @Test
-    @DisplayName("parseRegisterableRole returns null for invalid role string")
-    void parseRegisterableRole_returnsNullForInvalidRole() {
-        assertNull(registrationService.parseRegisterableRole("invalid"));
-    }
-
-    @Test
-    @DisplayName("parseRegisterableRole returns student for valid student string")
-    void parseRegisterableRole_returnsStudentForValidString() {
-        assertEquals(User.Role.student, registrationService.parseRegisterableRole("student"));
-    }
-
-    @Test
-    @DisplayName("parseRegisterableRole returns teacher for valid teacher string")
-    void parseRegisterableRole_returnsTeacherForValidString() {
-        assertEquals(User.Role.teacher, registrationService.parseRegisterableRole("teacher"));
-    }
-
-    // ── Security-focused tests ──────────────────────────────────────────
-
-    @Test
-    @DisplayName("Password with special characters is accepted")
-    void isValidRegistrationInput_acceptsPasswordWithSpecialCharacters() {
-        assertTrue(registrationService.isValidRegistrationInput(
-                "Alice", "a@student.xjtlu.edu.cn", "P@$$w0rd!#%", User.Role.student));
-    }
-
-    @Test
-    @DisplayName("Password with exactly MIN_LENGTH chars is accepted")
-    void isValidRegistrationInput_acceptsPasswordWithExactMinLength() {
-        assertTrue(registrationService.isValidRegistrationInput(
-                "Alice", "a@student.xjtlu.edu.cn", "Abcdef1x", User.Role.student));
-    }
-
-    @Test
-    @DisplayName("Password with 5 chars (one below MIN_LENGTH) is rejected")
-    void isValidRegistrationInput_rejectsPasswordOneBelowMinLength() {
-        assertFalse(registrationService.isValidRegistrationInput(
-                "Alice", "a@student.xjtlu.edu.cn", "Abcdefg", User.Role.student));
-    }
-
-    @Test
-    @DisplayName("SQL injection attempt in email is safely rejected (no exception, returns false)")
-    void isValidRegistrationInput_sqlInjectionInEmail_isSafelyRejected() {
-        assertFalse(registrationService.isValidRegistrationInput(
-                "Alice", "'; DROP TABLE users; --@student.xjtlu.edu.cn", "Secret123", User.Role.student));
-    }
-
-    @Test
-    @DisplayName("SQL injection attempt in email without valid domain is rejected")
-    void isValidRegistrationInput_sqlInjectionInEmail_noDomain_isRejected() {
-        assertFalse(registrationService.isValidRegistrationInput(
-                "Alice", "' OR 1=1 --", "Secret123", User.Role.student));
-    }
-
-    @Test
-    @DisplayName("XSS attempt in email is safely rejected")
-    void isValidRegistrationInput_xssInEmail_isSafelyRejected() {
-        assertFalse(registrationService.isValidRegistrationInput(
-                "Alice", "<script>alert('xss')</script>@student.xjtlu.edu.cn", "Secret123", User.Role.student));
-    }
-
-    @Test
-    @DisplayName("Email validation is case-insensitive for domain part")
-    void isValidEmailForRole_caseInsensitiveDomain_matchesCorrectly() {
-        assertTrue(registrationService.isValidEmailForRole("ALICE@STUDENT.XJTLU.EDU.CN", User.Role.student));
-        assertTrue(registrationService.isValidEmailForRole("alice@student.xjtlu.edu.cn", User.Role.student));
-        assertTrue(registrationService.isValidEmailForRole("TEACHER@XJTLU.EDU.CN", User.Role.teacher));
-        assertTrue(registrationService.isValidEmailForRole("teacher@xjtlu.edu.cn", User.Role.teacher));
-    }
-
-    @Test
-    @DisplayName("Student email with non-university domain is rejected")
-    void isValidEmailForRole_studentWithGenericDomain_isRejected() {
-        assertFalse(registrationService.isValidEmailForRole("alice@gmail.com", User.Role.student));
-        assertFalse(registrationService.isValidEmailForRole("alice@hotmail.com", User.Role.student));
-        assertFalse(registrationService.isValidEmailForRole("alice@xjtlu.com", User.Role.student));
-    }
-
-    @Test
-    @DisplayName("Teacher email with non-university domain is rejected")
-    void isValidEmailForRole_teacherWithGenericDomain_isRejected() {
-        assertFalse(registrationService.isValidEmailForRole("teacher@gmail.com", User.Role.teacher));
-        assertFalse(registrationService.isValidEmailForRole("teacher@yahoo.com", User.Role.teacher));
-    }
-
-    @Test
-    @DisplayName("Staff email with student subdomain is rejected (prevents role escalation)")
-    void isValidEmailForRole_staffEmailWithStudentSubdomain_isRejected() {
-        assertFalse(registrationService.isValidEmailForRole("staff@student.xjtlu.edu.cn", User.Role.teacher));
     }
 
     @Test
@@ -269,24 +108,108 @@ class UserRegistrationServiceTest {
         assertEquals(User.UserStatus.active, saved.getStatus());
     }
 
+    // ── isValidPassword tests ──────────────────────────────────────────
+
     @Test
-    @DisplayName("isValidRegistrationInput rejects null email")
-    void isValidRegistrationInput_rejectsNullEmail() {
-        assertFalse(registrationService.isValidRegistrationInput(
-                "Alice", null, "Secret123", User.Role.student));
+    @DisplayName("isValidPassword accepts password at minimum length with required character classes")
+    void isValidPassword_acceptsPasswordAtMinLength() {
+        assertTrue(registrationService.isValidPassword("Abcdef1x"));
     }
 
     @Test
-    @DisplayName("isValidRegistrationInput rejects null role")
-    void isValidRegistrationInput_rejectsNullRole() {
-        assertFalse(registrationService.isValidRegistrationInput(
-                "Alice", "a@student.xjtlu.edu.cn", "Secret123", null));
+    @DisplayName("isValidPassword rejects password shorter than minimum length")
+    void isValidPassword_rejectsShortPassword() {
+        assertFalse(registrationService.isValidPassword("Abcdefg"));
     }
 
     @Test
-    @DisplayName("isValidRegistrationInput rejects empty string email")
-    void isValidRegistrationInput_rejectsEmptyEmail() {
-        assertFalse(registrationService.isValidRegistrationInput(
-                "Alice", "", "Secret123", User.Role.student));
+    @DisplayName("isValidPassword accepts password with special characters")
+    void isValidPassword_acceptsPasswordWithSpecialCharacters() {
+        assertTrue(registrationService.isValidPassword("P@$$w0rd!#%"));
+    }
+
+    @Test
+    @DisplayName("isValidPassword rejects blank password")
+    void isValidPassword_rejectsBlankPassword() {
+        assertFalse(registrationService.isValidPassword("  "));
+    }
+
+    @Test
+    @DisplayName("isValidPassword rejects null password")
+    void isValidPassword_rejectsNullPassword() {
+        assertFalse(registrationService.isValidPassword(null));
+    }
+
+    @Test
+    @DisplayName("isValidPassword rejects password missing uppercase")
+    void isValidPassword_rejectsPasswordMissingUppercase() {
+        assertFalse(registrationService.isValidPassword("abcdef1x"));
+    }
+
+    @Test
+    @DisplayName("isValidPassword rejects password missing lowercase")
+    void isValidPassword_rejectsPasswordMissingLowercase() {
+        assertFalse(registrationService.isValidPassword("ABCDEF1X"));
+    }
+
+    @Test
+    @DisplayName("isValidPassword rejects password missing digit")
+    void isValidPassword_rejectsPasswordMissingDigit() {
+        assertFalse(registrationService.isValidPassword("Abcdefgh"));
+    }
+
+    // ── resolveRoleFromEmail tests ─────────────────────────────────────
+
+    @Test
+    @DisplayName("resolveRoleFromEmail returns student for student email")
+    void resolveRoleFromEmail_studentEmail_returnsStudent() {
+        assertSame(User.Role.student, registrationService.resolveRoleFromEmail("alice@student.xjtlu.edu.cn"));
+    }
+
+    @Test
+    @DisplayName("resolveRoleFromEmail returns teacher for staff email")
+    void resolveRoleFromEmail_staffEmail_returnsTeacher() {
+        assertSame(User.Role.teacher, registrationService.resolveRoleFromEmail("bob@xjtlu.edu.cn"));
+    }
+
+    @Test
+    @DisplayName("resolveRoleFromEmail returns null for non-university email")
+    void resolveRoleFromEmail_nonUniversityEmail_returnsNull() {
+        assertNull(registrationService.resolveRoleFromEmail("alice@gmail.com"));
+    }
+
+    @Test
+    @DisplayName("resolveRoleFromEmail returns null for blank email")
+    void resolveRoleFromEmail_blankEmail_returnsNull() {
+        assertNull(registrationService.resolveRoleFromEmail("  "));
+    }
+
+    @Test
+    @DisplayName("resolveRoleFromEmail is case-insensitive")
+    void resolveRoleFromEmail_caseInsensitive() {
+        assertSame(User.Role.student, registrationService.resolveRoleFromEmail("ALICE@STUDENT.XJTLU.EDU.CN"));
+        assertSame(User.Role.teacher, registrationService.resolveRoleFromEmail("BOB@XJTLU.EDU.CN"));
+    }
+
+    // ── Security-focused tests ──────────────────────────────────────────
+
+    @Test
+    @DisplayName("SQL injection attempt in email is safely rejected by resolveRoleFromEmail")
+    void resolveRoleFromEmail_sqlInjectionInEmail_returnsNull() {
+        assertNull(registrationService.resolveRoleFromEmail(
+                "'; DROP TABLE users; --@student.xjtlu.edu.cn"));
+    }
+
+    @Test
+    @DisplayName("SQL injection attempt in email without valid domain returns null")
+    void resolveRoleFromEmail_sqlInjectionNoDomain_returnsNull() {
+        assertNull(registrationService.resolveRoleFromEmail("' OR 1=1 --"));
+    }
+
+    @Test
+    @DisplayName("XSS attempt in email is safely rejected by resolveRoleFromEmail")
+    void resolveRoleFromEmail_xssInEmail_returnsNull() {
+        assertNull(registrationService.resolveRoleFromEmail(
+                "<script>alert('xss')</script>@student.xjtlu.edu.cn"));
     }
 }
