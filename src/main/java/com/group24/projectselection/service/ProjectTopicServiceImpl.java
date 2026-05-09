@@ -10,10 +10,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
 import java.util.Arrays;
 import java.util.List;
@@ -127,7 +123,7 @@ public class ProjectTopicServiceImpl implements ProjectTopicService {
         Pageable pageable = PageRequest.of(page, size, sortOption);
 
         return projectTopicRepository.searchTopicsByKeywordAndCategory(
-                ProjectTopic.TopicStatus.available,
+                List.of(ProjectTopic.TopicStatus.available, ProjectTopic.TopicStatus.requested),
                 keyword,
                 categoryId,
                 pageable

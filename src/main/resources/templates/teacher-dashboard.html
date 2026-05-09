@@ -249,6 +249,12 @@
             margin-bottom: 10px;
         }
 
+        .teacher-application-time {
+            color: #64748b;
+            font-size: 0.85rem;
+            margin-top: 6px;
+        }
+
         .teacher-statement {
             margin: 10px 0 0;
             color: #475569;
@@ -474,6 +480,12 @@
                                 <span th:text="'📌 ' + ${app.status}">
                                     pending
                                 </span>
+                            </div>
+
+                            <div class="teacher-application-time"
+                                 th:if="${app.createdAt != null}"
+                                 th:text="'Submitted ' + ${#temporals.format(app.createdAt, 'yyyy-MM-dd HH:mm')}">
+                                Submitted 2026-01-01 10:00
                             </div>
 
                             <p class="teacher-statement"

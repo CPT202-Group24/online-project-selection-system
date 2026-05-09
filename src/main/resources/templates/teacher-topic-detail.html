@@ -193,7 +193,6 @@
                 <form th:action="@{/teacher/applications/{id}/approve(id=${app.id})}"
                       method="post">
                   <input type="hidden" name="topicId" th:value="${projectTopic.id}">
-                  <input type="hidden" name="teacherId" th:value="${currentTeacherId}">
 
                   <button type="submit"
                           class="modern-btn modern-btn-primary table-action-btn">
@@ -204,7 +203,6 @@
                 <form th:action="@{/teacher/applications/{id}/reject(id=${app.id})}"
                       method="post">
                   <input type="hidden" name="topicId" th:value="${projectTopic.id}">
-                  <input type="hidden" name="teacherId" th:value="${currentTeacherId}">
 
                   <button type="submit"
                           class="modern-btn modern-btn-outline table-action-btn">

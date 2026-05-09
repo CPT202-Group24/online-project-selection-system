@@ -95,7 +95,8 @@ class ProjectTopicServiceTest {
         topic.setTitle("Java Web Project");
 
         when(projectTopicRepository.searchTopicsByKeywordAndCategory(
-                eq(ProjectTopic.TopicStatus.available),
+                argThat(statuses -> statuses.contains(ProjectTopic.TopicStatus.available)
+                        && statuses.contains(ProjectTopic.TopicStatus.requested)),
                 eq(keyword),
                 eq(categoryId),
                 any(Pageable.class)
@@ -120,7 +121,8 @@ class ProjectTopicServiceTest {
         Long categoryId = 2L;
 
         when(projectTopicRepository.searchTopicsByKeywordAndCategory(
-                eq(ProjectTopic.TopicStatus.available),
+                argThat(statuses -> statuses.contains(ProjectTopic.TopicStatus.available)
+                        && statuses.contains(ProjectTopic.TopicStatus.requested)),
                 eq(keyword),
                 eq(categoryId),
                 any(Pageable.class)
@@ -146,7 +148,8 @@ class ProjectTopicServiceTest {
         topic.setTitle("Java Web Project");
 
         when(projectTopicRepository.searchTopicsByKeywordAndCategory(
-                eq(ProjectTopic.TopicStatus.available),
+                argThat(statuses -> statuses.contains(ProjectTopic.TopicStatus.available)
+                        && statuses.contains(ProjectTopic.TopicStatus.requested)),
                 eq(keyword),
                 eq(categoryId),
                 any(Pageable.class)
@@ -164,7 +167,8 @@ class ProjectTopicServiceTest {
         assertEquals(1, result.getContent().size());
 
         verify(projectTopicRepository).searchTopicsByKeywordAndCategory(
-                eq(ProjectTopic.TopicStatus.available),
+                argThat(statuses -> statuses.contains(ProjectTopic.TopicStatus.available)
+                        && statuses.contains(ProjectTopic.TopicStatus.requested)),
                 eq(keyword),
                 eq(categoryId),
                 argThat(pageable ->
@@ -184,7 +188,8 @@ class ProjectTopicServiceTest {
         topic.setTitle("Algorithms Project");
 
         when(projectTopicRepository.searchTopicsByKeywordAndCategory(
-                eq(ProjectTopic.TopicStatus.available),
+                argThat(statuses -> statuses.contains(ProjectTopic.TopicStatus.available)
+                        && statuses.contains(ProjectTopic.TopicStatus.requested)),
                 eq(keyword),
                 eq(categoryId),
                 any(Pageable.class)
@@ -202,7 +207,8 @@ class ProjectTopicServiceTest {
         assertEquals(1, result.getContent().size());
 
         verify(projectTopicRepository).searchTopicsByKeywordAndCategory(
-                eq(ProjectTopic.TopicStatus.available),
+                argThat(statuses -> statuses.contains(ProjectTopic.TopicStatus.available)
+                        && statuses.contains(ProjectTopic.TopicStatus.requested)),
                 eq(keyword),
                 eq(categoryId),
                 argThat(pageable ->

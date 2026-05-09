@@ -64,6 +64,12 @@
             margin-bottom: 12px;
         }
 
+        .approval-submeta {
+            color: #64748b;
+            font-size: 0.86rem;
+            margin-top: 6px;
+        }
+
         .approval-statement {
             margin: 12px 0 0;
             color: #475569;
@@ -239,6 +245,12 @@
                             <span th:text="'📌 ' + ${app.status}">
                                 pending
                             </span>
+                        </div>
+
+                        <div class="approval-submeta"
+                             th:if="${app.createdAt != null}"
+                             th:text="'Submitted ' + ${#temporals.format(app.createdAt, 'yyyy-MM-dd HH:mm')}">
+                            Submitted 2026-01-01 10:00
                         </div>
                     </div>
 
