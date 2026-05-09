@@ -90,6 +90,13 @@ public class ProjectTopic {
         this.id = id;
     }
 
+    public String getDisplayCode() {
+        if (id == null) {
+            return "TOPIC----";
+        }
+        return String.format("TOPIC-%03d", id);
+    }
+
     public User getTeacher() {
         return teacher;
     }
