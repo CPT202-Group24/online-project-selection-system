@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Teacher Dashboard - Project Selection System</title>
@@ -282,6 +281,12 @@
             background: #dc2626;
         }
 
+        .teacher-view-all {
+            margin-top: 18px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
         .teacher-side-list {
             display: flex;
             flex-direction: column;
@@ -381,7 +386,7 @@
                 <div class="teacher-page-icon">👩‍🏫</div>
                 <div>
                     <h1>Teacher Dashboard</h1>
-                    <p>Review student applications and manage your project topics.</p>
+                    <p>Review recent applications and manage your project topics.</p>
                 </div>
             </div>
 
@@ -417,7 +422,7 @@
                 <div class="teacher-process-step">
                     <div class="teacher-step-number">3</div>
                     <h3>Review</h3>
-                    <p>Approve or reject student applications from this dashboard.</p>
+                    <p>Check recent applications here or open the full approval page.</p>
                 </div>
 
                 <div class="teacher-process-step">
@@ -432,21 +437,21 @@
 
             <div class="teacher-section-card">
                 <div class="teacher-section-header">
-                    <h2>🔔 Pending Student Applications</h2>
+                    <h2>🔔 Recent Pending Applications</h2>
                     <span class="teacher-badge"
-                          th:text="${pendingApplications == null ? 0 : #lists.size(pendingApplications)} + ' Pending'">
+                          th:text="${pendingTotal == null ? 0 : pendingTotal} + ' Pending'">
                         0 Pending
                     </span>
                 </div>
 
-                <div th:if="${#lists.isEmpty(pendingApplications)}" class="teacher-empty-state">
+                <div th:if="${#lists.isEmpty(pendingApplicationsPreview)}" class="teacher-empty-state">
                     <strong>No pending applications</strong>
-                    <span>When students apply for your projects, they will appear here.</span>
+                    <span>When students apply for your projects, the latest applications will appear here.</span>
                 </div>
 
-                <div th:if="${!#lists.isEmpty(pendingApplications)}" class="teacher-application-list">
+                <div th:if="${!#lists.isEmpty(pendingApplicationsPreview)}" class="teacher-application-list">
 
-                    <div th:each="app : ${pendingApplications}" class="teacher-application-item">
+                    <div th:each="app : ${pendingApplicationsPreview}" class="teacher-application-item">
 
                         <div class="teacher-application-main">
                             <h3 th:text="${app.project != null ? app.project.title : 'Project Title'}">
@@ -473,13 +478,13 @@
 
                             <p class="teacher-statement"
                                th:if="${app.personalStatement != null && !#strings.isEmpty(app.personalStatement)}"
-                               th:text="${#strings.abbreviate(app.personalStatement, 180)}">
+                               th:text="${#strings.abbreviate(app.personalStatement, 160)}">
                                 Personal statement preview
                             </p>
                         </div>
 
                         <div class="teacher-application-actions">
-                            <form th:action="@{/api/teacher/applications/{id}/approve(id=${app.id})}"
+                            <form th:action="@{/teacher/approvals/{id}/accept(id=${app.id}, redirect='/teacher/dashboard')}"
                                   method="post"
                                   class="inline-action-form">
                                 <button type="submit" class="teacher-btn teacher-approve-btn">
@@ -487,7 +492,7 @@
                                 </button>
                             </form>
 
-                            <form th:action="@{/api/teacher/applications/{id}/reject(id=${app.id})}"
+                            <form th:action="@{/teacher/approvals/{id}/reject(id=${app.id}, redirect='/teacher/dashboard')}"
                                   method="post"
                                   class="inline-action-form"
                                   onsubmit="return confirm('Are you sure you want to reject this application?');">
@@ -499,6 +504,12 @@
 
                     </div>
 
+                </div>
+
+                <div class="teacher-view-all">
+                    <a th:href="@{/teacher/approvals}" class="teacher-btn teacher-btn-outline">
+                        View All Applications →
+                    </a>
                 </div>
             </div>
 
@@ -525,19 +536,19 @@
                         </div>
                     </a>
 
-                    <a th:href="@{/teacher/projects(status='closed')}" class="teacher-side-link">
-                        <div class="teacher-side-icon">🔒</div>
+                    <a th:href="@{/teacher/projects(status='requested')}" class="teacher-side-link">
+                        <div class="teacher-side-icon">📥</div>
                         <div>
-                            <h3>Closed Projects</h3>
-                            <p>View projects that are no longer accepting changes.</p>
+                            <h3>Projects With Requests</h3>
+                            <p>View projects that already have student applications.</p>
                         </div>
                     </a>
 
-                    <a th:href="@{/teacher/projects(status='archived')}" class="teacher-side-link">
-                        <div class="teacher-side-icon">📦</div>
+                    <a th:href="@{/teacher/projects(status='agreed')}" class="teacher-side-link">
+                        <div class="teacher-side-icon">🤝</div>
                         <div>
-                            <h3>Archived Projects</h3>
-                            <p>View old projects kept for records.</p>
+                            <h3>Agreed Projects</h3>
+                            <p>View projects with accepted students.</p>
                         </div>
                     </a>
 
