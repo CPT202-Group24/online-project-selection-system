@@ -279,6 +279,7 @@
             margin-bottom: 8px;
         }
         .pss-app-meta strong { color: #28384a; }
+        .pss-app-submitted { font-size: 11.5px; color: #9aacc0; margin-top: 5px; }
         .pss-app-statement {
             font-size: 12.5px;
             color: #5a6878;
@@ -457,6 +458,10 @@
                                     </span>
                                     <span th:if="${app.student != null && app.student.email != null}"
                                           th:text="${app.student.email}">student@email.com</span>
+                                </div>
+                                <div class="pss-app-submitted"
+                                     th:if="${app.createdAt != null}"
+                                     th:text="'Submitted ' + ${#temporals.format(app.createdAt, 'yyyy-MM-dd HH:mm')}">
                                 </div>
                                 <p class="pss-app-statement"
                                    th:if="${app.personalStatement != null && !#strings.isEmpty(app.personalStatement)}"

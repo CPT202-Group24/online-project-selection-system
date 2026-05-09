@@ -2,9 +2,11 @@ package com.group24.projectselection.service;
 
 import com.group24.projectselection.model.Application;
 import com.group24.projectselection.model.Application.ApplicationStatus;
+import com.group24.projectselection.model.ConflictLog;
 import com.group24.projectselection.model.ProjectTopic;
 import com.group24.projectselection.model.User;
 import com.group24.projectselection.repository.ApplicationRepository;
+import com.group24.projectselection.repository.ConflictLogRepository;
 import com.group24.projectselection.repository.ProjectTopicRepository;
 import com.group24.projectselection.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -20,15 +22,18 @@ public class AdminManualAssignmentService {
     private final UserRepository userRepository;
     private final ProjectTopicRepository projectTopicRepository;
     private final ApplicationRepository applicationRepository;
+    private final ConflictLogRepository conflictLogRepository;
     private final NotificationService notificationService;
 
     public AdminManualAssignmentService(UserRepository userRepository,
                                         ProjectTopicRepository projectTopicRepository,
                                         ApplicationRepository applicationRepository,
+                                        ConflictLogRepository conflictLogRepository,
                                         NotificationService notificationService) {
         this.userRepository = userRepository;
         this.projectTopicRepository = projectTopicRepository;
         this.applicationRepository = applicationRepository;
+        this.conflictLogRepository = conflictLogRepository;
         this.notificationService = notificationService;
     }
 
@@ -120,6 +125,12 @@ public class AdminManualAssignmentService {
                 .forEach(a -> {
                     a.setStatus(ApplicationStatus.rejected);
                     applicationRepository.save(a);
+                    saveConflictLog(
+                            a.getStudent(),
+                            a.getProject(),
+                            "AUTO_REJECTED",
+                            "Student manually assigned to another project"
+                    );
                 });
 
         // Update project status if now full
@@ -138,5 +149,18 @@ public class AdminManualAssignmentService {
                         + project.getTitle() + "\" by an administrator.");
 
         return saved;
+    }
+
+    private void saveConflictLog(User student, ProjectTopic project, String actionTaken, String reason) {
+        if (student == null || project == null) {
+            return;
+        }
+
+        ConflictLog conflictLog = new ConflictLog();
+        conflictLog.setStudent(student);
+        conflictLog.setProject(project);
+        conflictLog.setActionTaken(actionTaken);
+        conflictLog.setReason(reason);
+        conflictLogRepository.save(conflictLog);
     }
 }

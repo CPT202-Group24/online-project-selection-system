@@ -127,10 +127,10 @@ public class TeacherApprovalController {
     })
     public ResponseEntity<List<Application>> getAcceptedApplications(
             @PathVariable("topicId") Long topicId,
-            @RequestParam("teacherId") Long currentTeacherId) {
+            Authentication authentication) {
         try {
             List<Application> acceptedApps =
-                    teacherApprovalService.getAcceptedApplications(topicId, currentTeacherId);
+                    teacherApprovalService.getAcceptedApplicationsByTeacherEmail(topicId, authentication.getName());
             return ResponseEntity.ok(acceptedApps);
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
@@ -140,11 +140,11 @@ public class TeacherApprovalController {
     @GetMapping("/api/teacher/applications/topics/{topicId}/export-csv")
     public void exportAcceptedStudentsCsv(
             @PathVariable("topicId") Long topicId,
-            @RequestParam("teacherId") Long currentTeacherId,
+            Authentication authentication,
             HttpServletResponse response) throws Exception {
 
         List<Application> acceptedApps =
-                teacherApprovalService.getAcceptedApplications(topicId, currentTeacherId);
+                teacherApprovalService.getAcceptedApplicationsByTeacherEmail(topicId, authentication.getName());
 
         response.setContentType("text/csv; charset=UTF-8");
         response.setHeader(

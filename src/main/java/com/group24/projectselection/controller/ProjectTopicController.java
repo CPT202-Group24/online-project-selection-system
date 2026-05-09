@@ -328,7 +328,10 @@ public class ProjectTopicController {
                                          Model model,
                                          RedirectAttributes redirectAttributes) {
         ProjectTopic topic = projectTopicRepository
-                .findByIdAndStatus(id, ProjectTopic.TopicStatus.available)
+                .findByIdAndStatusIn(
+                        id,
+                        List.of(ProjectTopic.TopicStatus.available, ProjectTopic.TopicStatus.requested)
+                )
                 .orElse(null);
 
         if (topic == null) {

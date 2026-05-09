@@ -42,7 +42,8 @@ public class ApplicationService {
             throw new IllegalStateException("Project not found.");
         }
 
-        if (project.getStatus() != ProjectTopic.TopicStatus.available) {
+        if (project.getStatus() != ProjectTopic.TopicStatus.available
+                && project.getStatus() != ProjectTopic.TopicStatus.requested) {
             throw new IllegalStateException("This project is not available for application.");
         }
 
@@ -65,6 +66,7 @@ public class ApplicationService {
                     app.setPersonalStatement(personalStatement);
                     app.setStatus(ApplicationStatus.pending);
                     Application saved = applicationRepository.save(app);
+                    markProjectAsRequested(project);
                     notifyTeacherAboutApplication(project, student);
                     return saved;
                 } else {
@@ -80,6 +82,7 @@ public class ApplicationService {
         application.setStatus(ApplicationStatus.pending);
 
         Application saved = applicationRepository.save(application);
+        markProjectAsRequested(project);
         notifyTeacherAboutApplication(project, student);
         return saved;
     }
@@ -120,5 +123,12 @@ public class ApplicationService {
                 project.getTeacher().getId(),
                 studentName + " submitted an application for \"" + topicTitle + "\"."
         );
+    }
+
+    private void markProjectAsRequested(ProjectTopic project) {
+        if (project.getStatus() == ProjectTopic.TopicStatus.available) {
+            project.setStatus(ProjectTopic.TopicStatus.requested);
+            projectTopicRepository.save(project);
+        }
     }
 }

@@ -13,5 +13,7 @@ public interface TeacherApprovalService {
 
     List<Application> getAcceptedApplications(Long topicId, Long currentTeacherId);
 
+    List<Application> getAcceptedApplicationsByTeacherEmail(Long topicId, String teacherEmail);
+
     List<Application> getPendingApplicationsByEmail(String email);
 }

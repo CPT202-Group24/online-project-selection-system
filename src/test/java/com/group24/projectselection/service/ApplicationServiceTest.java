@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class ApplicationServiceTest {
@@ -50,6 +51,8 @@ class ApplicationServiceTest {
         Application result = applicationService.submitApplication(student, 10L, "I am interested");
 
         assertEquals(ApplicationStatus.pending, result.getStatus());
+        assertEquals(ProjectTopic.TopicStatus.requested, project.getStatus());
+        verify(projectTopicRepository).save(project);
     }
 
     @Test
@@ -134,6 +137,8 @@ class ApplicationServiceTest {
 
         assertEquals(ApplicationStatus.pending, result.getStatus());
         assertEquals("New statement after rejection", result.getPersonalStatement());
+        assertEquals(ProjectTopic.TopicStatus.requested, project.getStatus());
+        verify(projectTopicRepository).save(project);
     }
 
     @Test
