@@ -44,6 +44,25 @@ public class TeacherApprovalServiceImpl implements TeacherApprovalService {
 
     @Override
     @Transactional(noRollbackFor = ResponseStatusException.class)
+    public void processApprovalByTeacherEmail(Long applicationId, boolean isAccepted, String teacherEmail) {
+        Application application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new RuntimeException("Application not found"));
+
+        ProjectTopic project = application.getProject();
+
+        if (project == null || project.getTeacher() == null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Project teacher not found.");
+        }
+
+        if (!project.getTeacher().getEmail().equals(teacherEmail)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to process this application.");
+        }
+
+        processApproval(applicationId, isAccepted, project.getTeacher().getId());
+    }
+
+    @Override
+    @Transactional(noRollbackFor = ResponseStatusException.class)
     public void processApproval(Long applicationId, boolean isAccepted, Long currentTeacherId) {
         Application application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new RuntimeException("Application not found"));

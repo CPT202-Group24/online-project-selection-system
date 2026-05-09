@@ -7,8 +7,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import java.util.List;
 
+import java.util.List;
 
 @Controller
 public class HomeController {
@@ -55,8 +55,15 @@ public class HomeController {
     @GetMapping("/teacher/dashboard")
     public String teacherDashboard(Authentication authentication, Model model) {
         String email = authentication.getName();
+
         List<Application> pendingApplications = teacherApprovalService.getPendingApplicationsByEmail(email);
-        model.addAttribute("pendingApplications", pendingApplications);
+        List<Application> pendingPreview = pendingApplications.stream()
+                .limit(3)
+                .toList();
+
+        model.addAttribute("pendingApplicationsPreview", pendingPreview);
+        model.addAttribute("pendingTotal", pendingApplications.size());
+
         return "teacher-dashboard";
     }
 
