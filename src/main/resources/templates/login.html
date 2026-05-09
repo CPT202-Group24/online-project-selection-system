@@ -2,85 +2,575 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Login - Project Selection System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In — Project Selection System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <style>
+        /* ============================================================
+           Login — fully self-contained, overrides global style.css
+           ============================================================ */
+
+        html, body.auth-body {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .auth-split {
+            display: flex !important;
+            min-height: 100vh !important;
+        }
+
+        /* ---------- Glow animations ---------- */
+
+        @keyframes lp-orb1 {
+            0%, 100% { transform: translate(0, 0) scale(1);    opacity: .68; }
+            38%       { transform: translate(7%, 11%) scale(1.09); opacity: .48; }
+            68%       { transform: translate(-4%, 7%) scale(.95); opacity: .58; }
+        }
+        @keyframes lp-orb2 {
+            0%, 100% { transform: translate(0, 0) scale(1);      opacity: .36; }
+            52%       { transform: translate(-9%, -12%) scale(1.13); opacity: .20; }
+        }
+
+        /* ---------- Left panel ---------- */
+
+        .auth-panel-left {
+            flex: 0 0 52% !important;
+            background-color: #0a1220 !important;
+            background-image: none !important;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .auth-panel-left::before {
+            content: '';
+            position: absolute;
+            top: -22%; left: -12%;
+            width: 72%; height: 72%;
+            background: radial-gradient(ellipse, rgba(46,78,196,.52) 0%, transparent 68%);
+            border-radius: 50%;
+            filter: blur(62px);
+            animation: lp-orb1 13s ease-in-out infinite;
+            pointer-events: none; z-index: 0;
+        }
+        .auth-panel-left::after {
+            content: '';
+            position: absolute;
+            bottom: -12%; right: -8%;
+            width: 62%; height: 56%;
+            background: radial-gradient(ellipse, rgba(20,52,150,.36) 0%, transparent 68%);
+            border-radius: 50%;
+            filter: blur(54px);
+            animation: lp-orb2 17s ease-in-out infinite;
+            pointer-events: none; z-index: 0;
+        }
+
+        .auth-panel-left-inner {
+            position: relative; z-index: 1;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding: 52px 60px !important;
+        }
+
+        .auth-brand-header { flex-shrink: 0; }
+
+        .auth-institution-tag {
+            display: inline-block !important;
+            border: 1.5px solid rgba(200,162,58,.72) !important;
+            color: #c8a23a !important;
+            background: transparent !important;
+            font-size: 11px !important;
+            font-weight: 700 !important;
+            letter-spacing: .13em !important;
+            padding: 5px 16px !important;
+            border-radius: 999px !important;
+            text-transform: uppercase !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+
+        /* Hero */
+        .auth-hero {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 40px 0 24px;
+        }
+
+        .auth-hero-title {
+            margin: 0 0 20px;
+            font-family: 'Playfair Display', Georgia, serif;
+            display: flex;
+            flex-direction: column;
+            line-height: .92;
+            letter-spacing: -.025em;
+        }
+
+        .auth-hero-project {
+            display: block;
+            font-size: clamp(60px, 6.6vw, 94px);
+            font-weight: 900;
+            color: #e6dfd4;
+        }
+        .auth-hero-selection {
+            display: block;
+            font-size: clamp(70px, 7.8vw, 112px);
+            font-style: italic;
+            font-weight: 700;
+            color: #c8a23a;
+        }
+        .auth-hero-system {
+            display: block;
+            font-size: clamp(54px, 6vw, 88px);
+            font-weight: 700;
+            color: #36506e;
+        }
+
+        .auth-hero-desc {
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.74;
+            color: rgba(255,255,255,.34);
+            max-width: 35ch;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Stats */
+        .auth-panel-footer { flex-shrink: 0; }
+
+        .auth-stats-row {
+            display: flex;
+            gap: 0;
+            margin-bottom: 26px;
+        }
+
+        .auth-stat-item {
+            flex: 1;
+            padding-right: 24px;
+        }
+        .auth-stat-item + .auth-stat-item {
+            padding-left: 24px;
+            border-left: 1px solid rgba(255,255,255,.07);
+        }
+        .auth-stat-item:last-child { padding-right: 0; }
+
+        .auth-stat-num {
+            display: block;
+            font-size: 42px;
+            font-weight: 900;
+            color: #ede8de;
+            line-height: 1;
+            font-family: 'Playfair Display', Georgia, serif;
+            letter-spacing: -.03em;
+        }
+        .auth-stat-label {
+            display: block;
+            font-size: 10.5px;
+            color: rgba(165,195,230,.46);
+            margin-top: 6px;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .auth-legal {
+            font-size: 10.5px;
+            color: rgba(120,160,205,.28);
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* ---------- Right panel ---------- */
+
+        .auth-panel-right {
+            flex: 1 !important;
+            /* Subtle warm off-white, distinct from pure white */
+            background-color: #f5f6f9 !important;
+            /* Thin divider line from the left panel */
+            box-shadow: -1px 0 0 rgba(0,0,0,.06) !important;
+            display: flex !important;
+            padding: 0 56px !important;
+            overflow-y: auto !important;
+            /* No align-items — use margin:auto on child to center */
+        }
+
+        /* Floating form card */
+        .auth-form-region {
+            width: 100%;
+            max-width: 390px;
+            margin: auto;           /* auto-centers vertically + horizontally */
+            padding: 48px 0;        /* breathing room when near viewport edges */
+        }
+
+        /* Decorative accent bar above form head */
+        .auth-form-accent {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .auth-form-accent-line {
+            width: 32px;
+            height: 2px;
+            background: #c8a23a;
+            border-radius: 1px;
+            flex-shrink: 0;
+        }
+        .auth-form-accent-text {
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: .13em;
+            text-transform: uppercase;
+            color: #c8a23a;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Form head */
+        .auth-form-head { margin-bottom: 28px; }
+
+        .auth-form-head h2 {
+            margin: 0 0 8px !important;
+            font-family: 'Playfair Display', Georgia, serif !important;
+            font-size: 38px !important;
+            font-weight: 700 !important;
+            color: #0a1220 !important;
+            letter-spacing: -.028em !important;
+            line-height: 1.05 !important;
+        }
+        .auth-form-head p {
+            margin: 0 !important;
+            font-size: 13.5px;
+            color: #6a7888;
+            line-height: 1.6;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Notices */
+        .auth-notice {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 12px 16px;
+            font-size: 13px;
+            line-height: 1.52;
+            margin-bottom: 22px;
+            border-width: 1px;
+            border-style: solid;
+            border-radius: 10px;
+            font-family: 'Inter', sans-serif;
+        }
+        .auth-notice-icon { flex-shrink: 0; margin-top: 2px; }
+        .auth-notice-info    { background: #e5eff9; color: #1a3e6a; border-color: #bad0eb; }
+        .auth-notice-error   { background: #fbe9e9; color: #7a1f1f; border-color: #eebebbe; }
+        .auth-notice-success { background: #e7f8ee; color: #14482a; border-color: #aedbbf; }
+
+        /* Form fields */
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .auth-field {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .auth-field label {
+            font-size: 10.5px !important;
+            font-weight: 700 !important;
+            letter-spacing: .11em !important;
+            text-transform: uppercase !important;
+            color: #28384a !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+
+        .auth-field-input {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .auth-input-icon {
+            position: absolute;
+            left: 15px;
+            color: #9aacc0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .auth-field-input input {
+            width: 100%;
+            padding: 13px 14px 13px 44px !important;
+            font-size: 14px !important;
+            border: 1.5px solid #dce5f0 !important;
+            border-radius: 12px !important;
+            background-color: #ffffff !important;
+            color: #0a1220 !important;
+            outline: none !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,.04) !important;
+            transition: border-color .18s, box-shadow .18s;
+            font-family: 'Inter', sans-serif !important;
+            box-sizing: border-box;
+        }
+        .auth-field-input input::placeholder { color: #a8b8cc; }
+        .auth-field-input input:focus {
+            border-color: #7898c0 !important;
+            box-shadow: 0 0 0 3px rgba(20,58,128,.07), 0 1px 3px rgba(0,0,0,.04) !important;
+            background-color: #fafcff !important;
+        }
+
+        #password { padding-right: 48px !important; }
+
+        /* Single SVG eye toggle — state driven by data-pw attribute */
+        .auth-pw-toggle {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #9aacc0;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            border-radius: 6px;
+            transition: color .15s;
+            z-index: 1;
+            line-height: 0;
+        }
+        .auth-pw-toggle:hover { color: #3a5270; }
+
+        /* eye-off path hidden when password is masked (showing eye-on) */
+        .pw-icon-off { display: none; }
+        /* when data-pw-visible is set → flip: hide eye-on, show eye-off */
+        .auth-pw-toggle[data-pw-visible] .pw-icon-on  { display: none; }
+        .auth-pw-toggle[data-pw-visible] .pw-icon-off { display: block; }
+
+        /* Submit */
+        .auth-submit {
+            width: 100% !important;
+            padding: 14.5px !important;
+            margin-top: 4px !important;
+            background-color: #0a1220 !important;
+            color: #ffffff !important;
+            border: none !important;
+            border-radius: 12px !important;
+            font-size: 15px !important;
+            font-weight: 600 !important;
+            letter-spacing: .03em !important;
+            cursor: pointer !important;
+            font-family: 'Inter', sans-serif !important;
+            transition: background-color .2s, box-shadow .2s !important;
+            box-shadow: 0 2px 8px rgba(10,18,32,.18) !important;
+        }
+        .auth-submit:hover {
+            background-color: #182840 !important;
+            box-shadow: 0 4px 16px rgba(10,18,32,.28) !important;
+        }
+        .auth-submit:active { transform: translateY(1px); }
+
+        /* Footer links */
+        .auth-form-links {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 22px;
+            font-size: 13px;
+            color: #6a7888;
+            flex-wrap: wrap;
+            font-family: 'Inter', sans-serif;
+        }
+        .auth-form-links a {
+            color: #0a1220 !important;
+            font-weight: 700;
+            text-decoration: none;
+        }
+        .auth-form-links a:hover { text-decoration: underline; }
+        .auth-link-sep { color: #c8d4e0; }
+
+        /* ---- Responsive ---- */
+        @media (max-width: 960px) {
+            .auth-panel-left { flex: 0 0 47% !important; }
+            .auth-panel-left-inner { padding: 44px 44px !important; }
+        }
+        @media (max-width: 720px) {
+            .auth-split { flex-direction: column !important; }
+            .auth-panel-left { flex: none !important; }
+            .auth-panel-left-inner { min-height: auto; padding: 36px 28px !important; }
+            .auth-hero { padding: 24px 0 20px; }
+            .auth-hero-project   { font-size: 48px !important; }
+            .auth-hero-selection { font-size: 56px !important; }
+            .auth-hero-system    { font-size: 42px !important; }
+            .auth-panel-right { padding: 36px 28px !important; }
+            .auth-form-region { padding: 36px 0; }
+        }
+        @media (max-width: 460px) {
+            .auth-panel-left-inner { padding: 28px 20px !important; }
+            .auth-panel-right { padding: 28px 18px !important; }
+            .auth-stats-row { gap: 0; }
+        }
+    </style>
 </head>
 <body class="auth-body">
 
-<div class="auth-shell">
-    <div class="auth-card">
+<div class="auth-split">
 
-        <div class="auth-brand">
-            <div class="auth-brand-icon">🎓</div>
-            <div>
-                <h1>Project Selection System</h1>
-                <p>Sign in to manage your project selection process</p>
-            </div>
+    <!-- ===== Left brand panel ===== -->
+    <div class="auth-panel-left">
+        <div class="auth-panel-left-inner">
+
+            <header class="auth-brand-header">
+                <span class="auth-institution-tag">XJTLU</span>
+            </header>
+
+            <main class="auth-hero">
+                <h1 class="auth-hero-title">
+                    <span class="auth-hero-project">Project</span>
+                    <em class="auth-hero-selection">Selection</em>
+                    <span class="auth-hero-system">System</span>
+                </h1>
+                <p class="auth-hero-desc">Where ambition meets opportunity. Discover, apply, and secure your ideal project within your university community.</p>
+            </main>
+
+            <footer class="auth-panel-footer">
+                <div class="auth-stats-row">
+                    <div class="auth-stat-item">
+                        <b class="auth-stat-num">120+</b>
+                        <span class="auth-stat-label">Active Projects</span>
+                    </div>
+                    <div class="auth-stat-item">
+                        <b class="auth-stat-num">3</b>
+                        <span class="auth-stat-label">Faculties</span>
+                    </div>
+                    <div class="auth-stat-item">
+                        <b class="auth-stat-num">500+</b>
+                        <span class="auth-stat-label">Students</span>
+                    </div>
+                </div>
+                <p class="auth-legal">© 2026 Xi'an Jiaotong-Liverpool University</p>
+            </footer>
+
         </div>
-
-        <div class="auth-header">
-            <h2>Login</h2>
-            <p>Use your university email and password to continue.</p>
-        </div>
-
-        <div th:if="${param.disabled}" class="alert alert-error">
-            Account disabled. Please contact an administrator.
-        </div>
-
-        <div th:if="${param.error}" class="alert alert-error">
-            Invalid email or password.
-        </div>
-
-        <div th:if="${param.registered}" class="alert alert-info">
-            Registration successful. You can sign in with your university email.
-        </div>
-
-        <div th:if="${param.logout}" class="alert alert-info">
-            You have been logged out.
-        </div>
-
-        <div th:if="${param.expired}" class="alert alert-error">
-            Your session has expired. Please log in again.
-        </div>
-
-        <div th:if="${param.reset}" class="alert alert-success">
-            Your password has been reset successfully. Please sign in with your new password.
-        </div>
-
-        <form th:action="@{/login}" method="post" class="auth-form">
-
-            <div class="modern-form-group">
-                <label for="username">Email</label>
-                <input id="username"
-                       type="email"
-                       name="username"
-                       class="modern-input"
-                       placeholder="your@student.xjtlu.edu.cn or your@xjtlu.edu.cn"
-                       required>
-            </div>
-
-            <div class="modern-form-group">
-                <label for="password">Password</label>
-                <input id="password"
-                       type="password"
-                       name="password"
-                       class="modern-input"
-                       placeholder="Enter your password"
-                       required>
-            </div>
-
-            <button type="submit" class="modern-btn modern-btn-primary auth-submit-btn">
-                Login
-            </button>
-        </form>
-
-        <div class="auth-links">
-            <a th:href="@{/forgot-password}">Forgot password?</a>
-            <span>Don't have an account? <a th:href="@{/register}">Register here</a></span>
-        </div>
-
     </div>
+
+    <!-- ===== Right form panel ===== -->
+    <div class="auth-panel-right">
+        <div class="auth-form-region">
+
+            <!-- Gold accent line + label -->
+            <div class="auth-form-accent">
+                <span class="auth-form-accent-line"></span>
+                <span class="auth-form-accent-text">University Portal</span>
+            </div>
+
+            <div class="auth-form-head">
+                <h2>Welcome back</h2>
+                <p>Sign in with your university credentials to continue.</p>
+            </div>
+
+            <!-- Status notices -->
+            <div th:if="${param.disabled}" class="auth-notice auth-notice-error">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="auth-notice-icon"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Account disabled. Please contact an administrator.
+            </div>
+
+            <div th:if="${param.error}" class="auth-notice auth-notice-error">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="auth-notice-icon"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Invalid email or password.
+            </div>
+
+            <div th:if="${param.registered}" class="auth-notice auth-notice-info">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="auth-notice-icon"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                Registration successful. You can now sign in.
+            </div>
+
+            <div th:if="${param.logout}" class="auth-notice auth-notice-info">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="auth-notice-icon"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                You have been logged out.
+            </div>
+
+            <div th:if="${param.expired}" class="auth-notice auth-notice-error">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="auth-notice-icon"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Your session has expired. Please log in again.
+            </div>
+
+            <div th:if="${param.reset}" class="auth-notice auth-notice-success">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="auth-notice-icon"><polyline points="20 6 9 17 4 12"/></svg>
+                Password reset successfully. Please sign in.
+            </div>
+
+            <form th:action="@{/login}" method="post" class="auth-form">
+
+                <div class="auth-field">
+                    <label for="username">Email Address</label>
+                    <div class="auth-field-input">
+                        <svg class="auth-input-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                        <input id="username" type="email" name="username"
+                               placeholder="you@xjtlu.edu.cn"
+                               autocomplete="email" required>
+                    </div>
+                </div>
+
+                <div class="auth-field">
+                    <label for="password">Password</label>
+                    <div class="auth-field-input">
+                        <svg class="auth-input-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <input id="password" type="password" name="password"
+                               placeholder="Enter your password"
+                               autocomplete="current-password" required>
+                        <!-- Eye toggle: data-pw-visible attribute drives CSS state -->
+                        <button type="button" class="auth-pw-toggle" id="pw-toggle-btn"
+                                onclick="togglePw()" aria-label="Show password">
+                            <!-- Eye-on: shown when password is masked (initial state) -->
+                            <svg class="pw-icon-on" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <!-- Eye-off: shown when password is visible (hidden initially via CSS) -->
+                            <svg class="pw-icon-off" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="auth-submit">Sign in &rarr;</button>
+
+            </form>
+
+            <div class="auth-form-links">
+                <a th:href="@{/forgot-password}">Forgot password?</a>
+                <span class="auth-link-sep">|</span>
+                <span>No account? <a th:href="@{/register}">Register</a></span>
+            </div>
+
+        </div>
+    </div>
+
 </div>
+
+<script>
+function togglePw() {
+    var pw  = document.getElementById('password');
+    var btn = document.getElementById('pw-toggle-btn');
+    var nowVisible = pw.type === 'password';   // about to become visible
+
+    pw.type = nowVisible ? 'text' : 'password';
+
+    if (nowVisible) {
+        btn.setAttribute('data-pw-visible', '');
+        btn.setAttribute('aria-label', 'Hide password');
+    } else {
+        btn.removeAttribute('data-pw-visible');
+        btn.setAttribute('aria-label', 'Show password');
+    }
+}
+</script>
 
 </body>
 </html>
