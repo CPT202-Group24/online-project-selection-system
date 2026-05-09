@@ -3,52 +3,156 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Audit Log - Project Selection System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Log — Project Selection System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        html, body { margin: 0 !important; padding: 0 !important; background: #f3f2ef !important; }
+
+        .pss-page {
+            min-height: calc(100vh - 64px);
+            background: #f3f2ef;
+            padding: 40px 32px 80px;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .pss-container { max-width: 1060px; margin: 0 auto; }
+
+        .pss-dash-header { margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid #dde5f0; }
+        .pss-dash-eyebrow {
+            display: inline-flex; align-items: center; gap: 10px;
+            font-size: 10.5px; font-weight: 700; letter-spacing: .13em;
+            text-transform: uppercase; color: #c8a23a; margin-bottom: 10px;
+        }
+        .pss-dash-eyebrow::before { content: ''; display: block; width: 20px; height: 1.5px; background: #c8a23a; }
+        .pss-dash-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(24px, 3vw, 34px); font-weight: 700;
+            color: #0a1220; margin: 0 0 6px; line-height: 1.1; letter-spacing: -.02em;
+        }
+        .pss-dash-subtitle { font-size: 13px; color: #6a7888; margin: 0; }
+
+        /* Search bar */
+        .pss-search-bar {
+            display: flex; align-items: center; gap: 10px;
+            background: #fff; border: 1px solid #dde5f0; border-radius: 12px;
+            padding: 12px 16px; margin-bottom: 16px; flex-wrap: wrap;
+        }
+        .pss-search-label { font-size: 12.5px; font-weight: 600; color: #6a7888; white-space: nowrap; }
+        .pss-search-input {
+            flex: 1; min-width: 200px; padding: 9px 14px; font-size: 13px;
+            border: 1px solid #dde5f0; border-radius: 9px; outline: none;
+            font-family: 'Inter', sans-serif; color: #0a1220; background: #f8f9fb;
+            transition: border-color .15s;
+        }
+        .pss-search-input:focus { border-color: #7898c0; background: #fff; }
+        .pss-btn-search {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: #0a1220; color: #fff; border: none; font-size: 13px; font-weight: 600;
+            padding: 9px 18px; border-radius: 9px; cursor: pointer; font-family: 'Inter', sans-serif;
+            transition: background .2s; white-space: nowrap;
+        }
+        .pss-btn-search:hover { background: #182840; }
+
+        .pss-alert {
+            display: flex; gap: 10px; align-items: flex-start;
+            padding: 11px 16px; border-radius: 9px; font-size: 13px;
+            line-height: 1.5; border: 1px solid transparent; margin-bottom: 16px;
+        }
+        .pss-alert-error { background: #fbe9e9; color: #7a1f1f; border-color: #f3b8b8; }
+
+        /* Table */
+        .pss-table-wrap {
+            background: #fff; border: 1px solid #dde5f0;
+            border-radius: 12px; overflow: hidden; margin-bottom: 0;
+        }
+        .pss-table { width: 100%; border-collapse: collapse; font-size: 13px; font-family: 'Inter', sans-serif; }
+        .pss-table thead tr { background: #0a1220; }
+        .pss-table thead th {
+            padding: 13px 14px; text-align: left; font-size: 10.5px; font-weight: 700;
+            letter-spacing: .09em; text-transform: uppercase; color: rgba(255,255,255,.65);
+            white-space: nowrap; border: none;
+        }
+        .pss-table tbody tr { border-bottom: 1px solid #f0f3f8; transition: background .12s; }
+        .pss-table tbody tr:last-child { border-bottom: none; }
+        .pss-table tbody tr:hover { background: #f8f9fb; }
+        .pss-table tbody td { padding: 12px 14px; color: #28384a; vertical-align: middle; }
+        .pss-time-cell { font-size: 12px; color: #6a7888; white-space: nowrap; }
+        .pss-admin-cell { font-size: 12.5px; color: #3a5a8a; }
+        .pss-entity-cell { font-size: 12.5px; color: #6a7888; }
+        .pss-id-cell { font-size: 12px; color: #9aacc0; font-weight: 600; }
+        .pss-td-center { text-align: center; padding: 40px 16px !important; color: #8898aa; font-size: 13px; }
+
+        /* Action badge */
+        .pss-action-badge {
+            display: inline-block; font-size: 10.5px; font-weight: 700;
+            background: rgba(200,162,58,.1); color: #7a5c10;
+            border-radius: 6px; padding: 3px 8px;
+            letter-spacing: .05em; font-family: 'Inter', monospace;
+        }
+
+        /* Pagination */
+        .pss-pagination {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px; border-top: 1px solid #f0f3f8;
+            background: #fff; border-radius: 0 0 12px 12px;
+            margin-bottom: 24px;
+        }
+        .pss-page-info { font-size: 12.5px; color: #8898aa; }
+        .pss-page-btn {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 12.5px; font-weight: 600; padding: 7px 14px;
+            border-radius: 8px; border: 1px solid #dde5f0; background: #fff;
+            color: #28384a; cursor: pointer; transition: background .15s; font-family: 'Inter', sans-serif;
+        }
+        .pss-page-btn:hover:not(:disabled) { background: #f3f2ef; }
+        .pss-page-btn:disabled { opacity: .4; cursor: default; }
+
+        .pss-bottom-row {
+            display: flex; align-items: center; justify-content: flex-start; gap: 12px;
+        }
+        .pss-back {
+            display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+            font-size: 13px; font-weight: 600; color: #6a7888; transition: color .15s;
+        }
+        .pss-back:hover { color: #0a1220; }
+
+        @media (max-width: 768px) {
+            .pss-page { padding: 24px 16px 60px; }
+            .pss-table-wrap { overflow-x: auto; }
+        }
+    </style>
 </head>
 <body>
 
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="page-shell">
-    <div class="modern-card admin-audit-card">
+<div class="pss-page">
+    <div class="pss-container">
 
-        <!-- Page Header -->
-        <div class="modern-page-header">
-            <div class="modern-page-icon">
-                🧾
-            </div>
-            <div>
-                <h1 class="modern-page-title">Audit Log</h1>
-                <p class="modern-page-subtitle">
-                    Search and review administrative operation records
-                </p>
-            </div>
+        <div class="pss-dash-header">
+            <div class="pss-dash-eyebrow">Admin Portal</div>
+            <h1 class="pss-dash-title">Audit Log</h1>
+            <p class="pss-dash-subtitle">Search and review administrative operation records.</p>
         </div>
 
-        <!-- Toolbar -->
-        <div class="modern-list-toolbar admin-audit-toolbar">
-            <div class="admin-audit-search-group">
-                <label for="q">Search</label>
-                <input type="text"
-                       id="q"
-                       class="modern-input admin-audit-search"
-                       placeholder="e.g. USER_STATUS_TOGGLE or admin@test.com">
-            </div>
-
-            <button type="button"
-                    class="modern-btn modern-btn-primary"
-                    onclick="loadPage(0)">
+        <div class="pss-search-bar">
+            <span class="pss-search-label">Search</span>
+            <input type="text" id="q" class="pss-search-input"
+                   placeholder="e.g. USER_STATUS_TOGGLE or admin@test.com"
+                   onkeydown="if(event.key==='Enter') loadPage(0)">
+            <button type="button" class="pss-btn-search" onclick="loadPage(0)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 Search
             </button>
         </div>
 
-        <!-- Message Area -->
         <div id="msg"></div>
 
-        <!-- Table -->
-        <div class="modern-table-wrapper">
-            <table class="modern-table project-table admin-audit-table">
+        <div class="pss-table-wrap">
+            <table class="pss-table">
                 <thead>
                 <tr>
                     <th>Time</th>
@@ -58,40 +162,27 @@
                     <th>Entity ID</th>
                 </tr>
                 </thead>
-
                 <tbody id="tbody">
-                <tr>
-                    <td colspan="5" class="muted table-loading-cell">
-                        Loading...
-                    </td>
-                </tr>
+                <tr><td colspan="5" class="pss-td-center">Loading...</td></tr>
                 </tbody>
             </table>
+            <div class="pss-pagination">
+                <button type="button" id="btnPrev" class="pss-page-btn" onclick="prevPage()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                    Previous
+                </button>
+                <span class="pss-page-info" id="pageInfo"></span>
+                <button type="button" id="btnNext" class="pss-page-btn" onclick="nextPage()">
+                    Next
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+            </div>
         </div>
 
-        <!-- Pagination -->
-        <div class="modern-pagination admin-audit-pagination">
-            <button type="button"
-                    id="btnPrev"
-                    class="modern-btn modern-btn-outline table-action-btn"
-                    onclick="prevPage()">
-                Previous
-            </button>
-
-            <span id="pageInfo"></span>
-
-            <button type="button"
-                    id="btnNext"
-                    class="modern-btn modern-btn-outline table-action-btn"
-                    onclick="nextPage()">
-                Next
-            </button>
-        </div>
-
-        <!-- Bottom Actions -->
-        <div class="page-bottom-actions">
-            <a th:href="@{/admin/dashboard}" class="modern-btn modern-btn-outline">
-                ← Back to Dashboard
+        <div class="pss-bottom-row">
+            <a th:href="@{/admin/dashboard}" class="pss-back">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                Back to Dashboard
             </a>
         </div>
 
@@ -105,27 +196,20 @@
 
     function showMsg(text, err) {
         const el = document.getElementById('msg');
-        el.innerHTML = '<div class="alert alert-' + (err ? 'error' : 'info') + '">' + text + '</div>';
+        el.innerHTML = '<div class="pss-alert pss-alert-error">' + text + '</div>';
         if (!err) setTimeout(function () { el.innerHTML = ''; }, 3000);
     }
 
     function esc(s) {
         return String(s == null ? '' : s)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;');
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
     function loadPage(page) {
         currentPage = page;
-
         const q = document.getElementById('q').value.trim();
         const params = new URLSearchParams({ page: String(page), size: String(pageSize) });
-
-        if (q) {
-            params.set('q', q);
-        }
+        if (q) params.set('q', q);
 
         fetch('/api/admin/audit-logs?' + params.toString(), { credentials: 'same-origin' })
             .then(function (r) {
@@ -137,7 +221,6 @@
 
                 document.getElementById('pageInfo').textContent =
                     'Page ' + (data.page + 1) + ' / ' + totalPages + ' (' + data.totalItems + ' entries)';
-
                 document.getElementById('btnPrev').disabled = data.page <= 0;
                 document.getElementById('btnNext').disabled = data.page >= totalPages - 1;
 
@@ -145,19 +228,18 @@
                 const tbody = document.getElementById('tbody');
 
                 if (!items.length) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="muted table-loading-cell">No audit entries found.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" class="pss-td-center">No audit entries found.</td></tr>';
                     return;
                 }
 
                 tbody.innerHTML = items.map(function (row) {
                     const t = row.createdAt ? String(row.createdAt).replace('T', ' ') : '';
-
                     return '<tr>' +
-                        '<td>' + esc(t) + '</td>' +
-                        '<td>' + esc(row.adminEmail) + '</td>' +
-                        '<td><span class="audit-action-badge">' + esc(row.actionType) + '</span></td>' +
-                        '<td>' + esc(row.entityType) + '</td>' +
-                        '<td>' + esc(row.entityId) + '</td>' +
+                        '<td class="pss-time-cell">' + esc(t) + '</td>' +
+                        '<td class="pss-admin-cell">' + esc(row.adminEmail) + '</td>' +
+                        '<td><span class="pss-action-badge">' + esc(row.actionType) + '</span></td>' +
+                        '<td class="pss-entity-cell">' + esc(row.entityType) + '</td>' +
+                        '<td class="pss-id-cell">' + esc(row.entityId) + '</td>' +
                         '</tr>';
                 }).join('');
             })
@@ -166,17 +248,8 @@
             });
     }
 
-    function prevPage() {
-        if (currentPage > 0) {
-            loadPage(currentPage - 1);
-        }
-    }
-
-    function nextPage() {
-        if (currentPage < totalPages - 1) {
-            loadPage(currentPage + 1);
-        }
-    }
+    function prevPage() { if (currentPage > 0) loadPage(currentPage - 1); }
+    function nextPage() { if (currentPage < totalPages - 1) loadPage(currentPage + 1); }
 
     loadPage(0);
 </script>

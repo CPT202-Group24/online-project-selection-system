@@ -192,22 +192,21 @@
 
         .auth-panel-right {
             flex: 1 !important;
-            /* Subtle warm off-white, distinct from pure white */
-            background-color: #f5f6f9 !important;
-            /* Thin divider line from the left panel */
+            /* Just a whisper of warmth — barely off-white */
+            background-color: #f3f2ef !important;
+            background-image: none !important;
             box-shadow: -1px 0 0 rgba(0,0,0,.06) !important;
             display: flex !important;
             padding: 0 56px !important;
             overflow-y: auto !important;
-            /* No align-items — use margin:auto on child to center */
         }
 
         /* Floating form card */
         .auth-form-region {
             width: 100%;
             max-width: 390px;
-            margin: auto;           /* auto-centers vertically + horizontally */
-            padding: 48px 0;        /* breathing room when near viewport edges */
+            margin: auto;
+            padding: 48px 0;
         }
 
         /* Decorative accent bar above form head */
@@ -318,7 +317,7 @@
             color: #0a1220 !important;
             outline: none !important;
             box-shadow: 0 1px 3px rgba(0,0,0,.04) !important;
-            transition: border-color .18s, box-shadow .18s;
+            transition: border-color .18s, box-shadow .18s, background-color .18s;
             font-family: 'Inter', sans-serif !important;
             box-sizing: border-box;
         }
@@ -330,8 +329,10 @@
         }
 
         #password { padding-right: 48px !important; }
+        /* Hide Edge/IE native password-reveal button — we have our own toggle */
+        #password::-ms-reveal,
+        #password::-ms-clear { display: none !important; }
 
-        /* Single SVG eye toggle — state driven by data-pw attribute */
         .auth-pw-toggle {
             position: absolute;
             right: 12px;
@@ -348,12 +349,6 @@
             line-height: 0;
         }
         .auth-pw-toggle:hover { color: #3a5270; }
-
-        /* eye-off path hidden when password is masked (showing eye-on) */
-        .pw-icon-off { display: none; }
-        /* when data-pw-visible is set → flip: hide eye-on, show eye-off */
-        .auth-pw-toggle[data-pw-visible] .pw-icon-on  { display: none; }
-        .auth-pw-toggle[data-pw-visible] .pw-icon-off { display: block; }
 
         /* Submit */
         .auth-submit {
@@ -528,13 +523,10 @@
                         <input id="password" type="password" name="password"
                                placeholder="Enter your password"
                                autocomplete="current-password" required>
-                        <!-- Eye toggle: data-pw-visible attribute drives CSS state -->
                         <button type="button" class="auth-pw-toggle" id="pw-toggle-btn"
                                 onclick="togglePw()" aria-label="Show password">
-                            <!-- Eye-on: shown when password is masked (initial state) -->
-                            <svg class="pw-icon-on" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                            <!-- Eye-off: shown when password is visible (hidden initially via CSS) -->
-                            <svg class="pw-icon-off" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                            <!-- single SVG — innerHTML swapped by JS; no dual-icon issue -->
+                            <svg id="pw-eye-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"></svg>
                         </button>
                     </div>
                 </div>
@@ -555,18 +547,27 @@
 </div>
 
 <script>
+/* SVG path sets — swap innerHTML on the single <svg> element */
+var PW_ICON = {
+    closed: '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>',
+    open:   '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
+};
+
+/* Set closed-eye (password masked) as initial state */
+document.getElementById('pw-eye-svg').innerHTML = PW_ICON.closed;
+
 function togglePw() {
     var pw  = document.getElementById('password');
+    var svg = document.getElementById('pw-eye-svg');
     var btn = document.getElementById('pw-toggle-btn');
-    var nowVisible = pw.type === 'password';   // about to become visible
 
-    pw.type = nowVisible ? 'text' : 'password';
-
-    if (nowVisible) {
-        btn.setAttribute('data-pw-visible', '');
+    if (pw.type === 'password') {
+        pw.type = 'text';
+        svg.innerHTML = PW_ICON.open;
         btn.setAttribute('aria-label', 'Hide password');
     } else {
-        btn.removeAttribute('data-pw-visible');
+        pw.type = 'password';
+        svg.innerHTML = PW_ICON.closed;
         btn.setAttribute('aria-label', 'Show password');
     }
 }

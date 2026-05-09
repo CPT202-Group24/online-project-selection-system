@@ -2,101 +2,193 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Notifications - Project Selection System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications — Project Selection System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        html, body { margin: 0 !important; padding: 0 !important; background: #f3f2ef !important; }
+
+        .pss-page {
+            min-height: calc(100vh - 64px);
+            background: #f3f2ef;
+            padding: 40px 32px 80px;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .pss-container { max-width: 860px; margin: 0 auto; }
+
+        .pss-dash-header {
+            display: flex; align-items: flex-start; justify-content: space-between;
+            gap: 16px; margin-bottom: 28px; padding-bottom: 24px;
+            border-bottom: 1px solid #dde5f0; flex-wrap: wrap;
+        }
+        .pss-dash-eyebrow {
+            display: inline-flex; align-items: center; gap: 10px;
+            font-size: 10.5px; font-weight: 700; letter-spacing: .13em;
+            text-transform: uppercase; color: #c8a23a; margin-bottom: 10px;
+        }
+        .pss-dash-eyebrow::before { content: ''; display: block; width: 20px; height: 1.5px; background: #c8a23a; }
+        .pss-dash-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(24px, 3vw, 34px); font-weight: 700;
+            color: #0a1220; margin: 0 0 6px; line-height: 1.1; letter-spacing: -.02em;
+        }
+        .pss-dash-subtitle { font-size: 13px; color: #6a7888; margin: 0; }
+
+        /* Alerts */
+        .pss-alert {
+            display: flex; gap: 10px; align-items: flex-start;
+            padding: 11px 16px; border-radius: 9px; font-size: 13px;
+            line-height: 1.5; border: 1px solid transparent; margin-bottom: 16px;
+        }
+        .pss-alert-success { background: #e7f8ee; color: #14482a; border-color: #aedbbf; }
+        .pss-alert-error   { background: #fbe9e9; color: #7a1f1f; border-color: #f3b8b8; }
+
+        /* Mark all btn */
+        .pss-btn-mark-all {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: #0a1220; color: #fff; border: none; font-size: 13px; font-weight: 600;
+            padding: 9px 18px; border-radius: 9px; cursor: pointer; font-family: 'Inter', sans-serif;
+            transition: background .2s; text-decoration: none; white-space: nowrap;
+        }
+        .pss-btn-mark-all:hover { background: #182840; }
+
+        /* Empty state */
+        .pss-empty {
+            background: #fff; border: 1px solid #dde5f0; border-radius: 12px;
+            text-align: center; padding: 64px 32px; margin-bottom: 24px;
+        }
+        .pss-empty-icon {
+            width: 48px; height: 48px; background: #f3f2ef; border: 1px solid #dde5f0;
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            color: #9aacc0; margin: 0 auto 16px;
+        }
+        .pss-empty-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 20px; font-weight: 700; color: #0a1220; margin-bottom: 8px;
+        }
+        .pss-empty-desc { font-size: 13.5px; color: #6a7888; }
+
+        /* Notification list */
+        .pss-notif-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+
+        .pss-notif-item {
+            display: flex; align-items: flex-start; gap: 14px;
+            background: #fff; border: 1px solid #dde5f0; border-radius: 10px;
+            padding: 16px 18px; transition: border-color .15s;
+        }
+        .pss-notif-item.unread { border-color: rgba(200,162,58,.3); background: #fffdf5; }
+        .pss-notif-item:hover  { border-color: #b8c8da; }
+
+        .pss-notif-dot {
+            width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px;
+        }
+        .pss-notif-dot.unread-dot { background: #c8a23a; }
+        .pss-notif-dot.read-dot   { background: #dde5f0; }
+
+        .pss-notif-body { flex: 1; }
+        .pss-notif-message { font-size: 13.5px; color: #0a1220; line-height: 1.55; margin-bottom: 6px; }
+        .pss-notif-message.read-msg { color: #6a7888; }
+
+        .pss-notif-meta {
+            display: flex; align-items: center; gap: 12px; font-size: 12px; color: #9aacc0;
+        }
+        .pss-read-badge {
+            display: inline-block; font-size: 10px; font-weight: 700;
+            border-radius: 999px; padding: 2px 8px; letter-spacing: .04em; text-transform: uppercase;
+        }
+        .pss-read-badge.unread { background: rgba(200,162,58,.12); color: #7a5c10; }
+        .pss-read-badge.read   { background: #f0f3f8; color: #8898aa; }
+
+        .pss-notif-action { flex-shrink: 0; }
+        .pss-btn-read {
+            display: inline-flex; align-items: center; font-size: 12px; font-weight: 600;
+            padding: 5px 12px; border-radius: 7px; border: 1px solid #dde5f0; background: #fff;
+            color: #28384a; cursor: pointer; font-family: 'Inter', sans-serif; transition: background .15s;
+        }
+        .pss-btn-read:hover { background: #f3f2ef; }
+        .pss-inline-form { display: inline; margin: 0; }
+        .pss-muted { font-size: 12px; color: #b0bccc; }
+
+        @media (max-width: 640px) {
+            .pss-page { padding: 24px 16px 60px; }
+            .pss-notif-item { flex-direction: column; gap: 10px; }
+            .pss-notif-action { align-self: flex-start; }
+        }
+    </style>
 </head>
 <body>
 
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="page-shell">
-    <div class="modern-card">
+<div class="pss-page">
+    <div class="pss-container">
 
-        <!-- Page Header -->
-        <div class="modern-page-header">
-            <div class="modern-page-icon">
-                🔔
-            </div>
+        <div class="pss-dash-header">
             <div>
-                <h1 class="modern-page-title">Notifications</h1>
-                <p class="modern-page-subtitle">
-                    View system messages and updates related to your project selection activities
-                </p>
+                <div class="pss-dash-eyebrow">Inbox</div>
+                <h1 class="pss-dash-title">Notifications</h1>
+                <p class="pss-dash-subtitle">View system messages and updates related to your project selection activities.</p>
             </div>
-        </div>
-
-        <!-- Messages -->
-        <div th:if="${successMessage}" class="alert alert-success">
-            <span th:text="${successMessage}"></span>
-        </div>
-
-        <div th:if="${errorMessage}" class="alert alert-error">
-            <span th:text="${errorMessage}"></span>
-        </div>
-
-        <!-- Empty State -->
-        <div th:if="${#lists.isEmpty(notifications)}" class="modern-empty-state">
-            <div class="modern-empty-icon">✅</div>
-            <h3>No notifications</h3>
-            <p>You have no notifications at the moment. New updates will appear here.</p>
-        </div>
-
-        <!-- Toolbar -->
-        <div th:if="${not #lists.isEmpty(notifications)}" class="modern-list-toolbar">
-            <p class="result-summary notification-summary">
-                Notification list
-            </p>
-
-            <form th:action="@{/notifications/read-all}" method="post" class="inline-action-form">
-                <button type="submit" class="modern-btn modern-btn-primary">
+            <form th:if="${not #lists.isEmpty(notifications)}"
+                  th:action="@{/notifications/read-all}" method="post" class="pss-inline-form">
+                <button type="submit" class="pss-btn-mark-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                     Mark all as read
                 </button>
             </form>
         </div>
 
-        <!-- Notification Table -->
-        <div th:if="${not #lists.isEmpty(notifications)}" class="modern-table-wrapper">
-            <table class="modern-table project-table notification-table">
-                <thead>
-                <tr>
-                    <th>Status</th>
-                    <th>Message</th>
-                    <th>Created At</th>
-                    <th>Action</th>
-                </tr>
-                </thead>
+        <!-- Alerts -->
+        <div th:if="${successMessage}" class="pss-alert pss-alert-success">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><polyline points="20 6 9 17 4 12"/></svg>
+            <span th:text="${successMessage}"></span>
+        </div>
+        <div th:if="${errorMessage}" class="pss-alert pss-alert-error">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span th:text="${errorMessage}"></span>
+        </div>
 
-                <tbody>
-                <tr th:each="n : ${notifications}">
-                    <td>
-                        <span class="status-badge"
-                              th:classappend="${n.isRead} ? ' status-archived' : ' status-requested'"
-                              th:text="${n.isRead} ? 'Read' : 'Unread'">
+        <!-- Empty state -->
+        <div th:if="${#lists.isEmpty(notifications)}" class="pss-empty">
+            <div class="pss-empty-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            </div>
+            <h3 class="pss-empty-title">No notifications</h3>
+            <p class="pss-empty-desc">You have no notifications at the moment. New updates will appear here.</p>
+        </div>
+
+        <!-- Notification list -->
+        <div th:if="${not #lists.isEmpty(notifications)}" class="pss-notif-list">
+            <div th:each="n : ${notifications}"
+                 th:class="${'pss-notif-item' + (!n.isRead ? ' unread' : '')}">
+
+                <div th:class="${!n.isRead ? 'pss-notif-dot unread-dot' : 'pss-notif-dot read-dot'}"></div>
+
+                <div class="pss-notif-body">
+                    <p th:class="${'pss-notif-message' + (n.isRead ? ' read-msg' : '')}"
+                       th:text="${n.message}"></p>
+                    <div class="pss-notif-meta">
+                        <span class="pss-read-badge"
+                              th:class="${!n.isRead ? 'pss-read-badge unread' : 'pss-read-badge read'}"
+                              th:text="${n.isRead ? 'Read' : 'Unread'}">
                         </span>
-                    </td>
+                        <span th:text="${n.createdAt != null ? #temporals.format(n.createdAt, 'yyyy-MM-dd HH:mm') : '—'}"></span>
+                    </div>
+                </div>
 
-                    <td class="notification-message" th:text="${n.message}"></td>
+                <div class="pss-notif-action">
+                    <form th:if="${!n.isRead}"
+                          th:action="@{/notifications/{id}/read(id=${n.id})}"
+                          method="post" class="pss-inline-form">
+                        <button type="submit" class="pss-btn-read">Mark as read</button>
+                    </form>
+                    <span th:if="${n.isRead}" class="pss-muted">—</span>
+                </div>
 
-                    <td th:text="${n.createdAt != null ? #temporals.format(n.createdAt, 'yyyy-MM-dd HH:mm') : '-'}"></td>
-
-                    <td>
-                        <form th:if="${!n.isRead}"
-                              th:action="@{/notifications/{id}/read(id=${n.id})}"
-                              method="post"
-                              class="inline-action-form">
-                            <button type="submit"
-                                    class="modern-btn modern-btn-outline table-action-btn">
-                                Mark as read
-                            </button>
-                        </form>
-
-                        <span th:if="${n.isRead}" class="muted">
-                            No action
-                        </span>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+            </div>
         </div>
 
     </div>

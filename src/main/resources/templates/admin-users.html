@@ -1,87 +1,288 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>User Management - Project Selection System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management — Project Selection System</title>
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        html, body { margin: 0 !important; padding: 0 !important; background: #f3f2ef !important; }
+
+        .pss-page {
+            min-height: calc(100vh - 64px);
+            background: #f3f2ef;
+            padding: 40px 32px 80px;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .pss-container { max-width: 1100px; margin: 0 auto; }
+
+        /* Header */
+        .pss-dash-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 28px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #dde5f0;
+            flex-wrap: wrap;
+        }
+        .pss-dash-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: .13em;
+            text-transform: uppercase;
+            color: #c8a23a;
+            margin-bottom: 10px;
+        }
+        .pss-dash-eyebrow::before {
+            content: '';
+            display: block;
+            width: 20px; height: 1.5px;
+            background: #c8a23a;
+        }
+        .pss-dash-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(24px, 3vw, 34px);
+            font-weight: 700;
+            color: #0a1220;
+            margin: 0 0 6px;
+            line-height: 1.1;
+            letter-spacing: -.02em;
+        }
+        .pss-dash-subtitle { font-size: 13px; color: #6a7888; margin: 0; }
+
+        /* Alerts */
+        .pss-alert {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            padding: 11px 16px;
+            border-radius: 9px;
+            font-size: 13px;
+            line-height: 1.5;
+            border: 1px solid transparent;
+            margin-bottom: 16px;
+        }
+        .pss-alert-info    { background: #e8f0fb; color: #1e3a6a; border-color: #b6cff5; }
+        .pss-alert-success { background: #e7f8ee; color: #14482a; border-color: #aedbbf; }
+        .pss-alert-error   { background: #fbe9e9; color: #7a1f1f; border-color: #f3b8b8; }
+
+        /* Toolbar */
+        .pss-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            background: #fff;
+            border: 1px solid #dde5f0;
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .pss-result-label { font-size: 12.5px; color: #8898aa; font-weight: 500; }
+        .pss-search-wrap { position: relative; }
+        .pss-search-input {
+            width: 260px;
+            padding: 9px 14px 9px 36px;
+            font-size: 13px;
+            border: 1px solid #dde5f0;
+            border-radius: 9px;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            color: #0a1220;
+            background: #f8f9fb url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238898aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat 11px center;
+            transition: border-color .15s;
+        }
+        .pss-search-input:focus { border-color: #7898c0; background-color: #fff; }
+
+        /* Table */
+        .pss-table-wrap {
+            background: #fff;
+            border: 1px solid #dde5f0;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+        .pss-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+        }
+        .pss-table thead tr { background: #0a1220; }
+        .pss-table thead th {
+            padding: 13px 14px;
+            text-align: left;
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: .09em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,.65);
+            white-space: nowrap;
+            border: none;
+        }
+        .pss-table thead th.sortable { cursor: pointer; user-select: none; }
+        .pss-table thead th.sortable:hover { color: rgba(255,255,255,.9); }
+        .sort-icon { margin-left: 5px; opacity: .6; font-size: 11px; }
+        .pss-table tbody tr { border-bottom: 1px solid #f0f3f8; transition: background .12s; }
+        .pss-table tbody tr:last-child { border-bottom: none; }
+        .pss-table tbody tr:hover { background: #f8f9fb; }
+        .pss-table tbody td { padding: 13px 14px; color: #28384a; vertical-align: middle; }
+        .pss-id { font-size: 12px; color: #9aacc0; font-weight: 600; }
+        .pss-name { font-weight: 600; color: #0a1220; }
+        .pss-email-cell { font-size: 12.5px; color: #4a6080; }
+        .pss-muted-cell { font-size: 12.5px; color: #8898aa; }
+
+        /* Role badge */
+        .pss-role {
+            display: inline-block;
+            font-size: 10.5px;
+            font-weight: 700;
+            border-radius: 999px;
+            padding: 3px 10px;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+        }
+        .pss-role-student  { background: #e8f0fb; color: #1e3a6a; }
+        .pss-role-teacher  { background: rgba(200,162,58,.12); color: #7a5c10; }
+        .pss-role-admin    { background: #f3e8fb; color: #5a1e7a; }
+
+        /* Status badge */
+        .pss-user-status {
+            display: inline-block;
+            font-size: 10.5px;
+            font-weight: 700;
+            border-radius: 999px;
+            padding: 3px 10px;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+        }
+        .pss-status-active   { background: #dcfce7; color: #14532d; }
+        .pss-status-disabled { background: #fee2e2; color: #7f1d1d; }
+        .pss-status-default  { background: #f0f3f8; color: #6a7888; }
+
+        /* Action cell */
+        .pss-action-cell { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .pss-btn-sm {
+            display: inline-flex;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 7px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            white-space: nowrap;
+            transition: background .15s;
+        }
+        .pss-btn-enable  { background: #14532d; color: #fff; }
+        .pss-btn-enable:hover  { background: #166534; }
+        .pss-btn-disable { background: #7f1d1d; color: #fff; }
+        .pss-btn-disable:hover { background: #991b1b; }
+        .pss-role-select {
+            font-size: 12px;
+            font-family: 'Inter', sans-serif;
+            padding: 5px 10px;
+            border: 1px solid #dde5f0;
+            border-radius: 7px;
+            background: #fff;
+            color: #0a1220;
+            cursor: pointer;
+            outline: none;
+        }
+        .pss-role-select:focus { border-color: #7898c0; }
+
+        /* Loading/empty row */
+        .pss-td-center { text-align: center; padding: 40px 16px !important; color: #8898aa; font-size: 13px; }
+
+        /* Back */
+        .pss-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            color: #6a7888;
+            transition: color .15s;
+        }
+        .pss-back:hover { color: #0a1220; }
+
+        @media (max-width: 768px) {
+            .pss-page { padding: 24px 16px 60px; }
+            .pss-table-wrap { overflow-x: auto; }
+            .pss-search-input { width: 200px; }
+        }
+    </style>
 </head>
 <body>
 
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="page-shell">
-    <div class="modern-card admin-users-card">
+<div class="pss-page">
+    <div class="pss-container">
 
-        <!-- Page Header -->
-        <div class="modern-page-header">
-            <div class="modern-page-icon">
-                &#128101;
-            </div>
+        <div class="pss-dash-header">
             <div>
-                <h1 class="modern-page-title">User Account Management</h1>
-                <p class="modern-page-subtitle">
-                    Search users, update account status and manage user roles
-                </p>
+                <div class="pss-dash-eyebrow">Admin Portal</div>
+                <h1 class="pss-dash-title">User Management</h1>
+                <p class="pss-dash-subtitle">Search users, update account status and manage user roles.</p>
             </div>
         </div>
 
-        <!-- Toolbar -->
-        <div class="modern-list-toolbar admin-user-toolbar">
-            <div>
-                <p class="result-summary notification-summary">
-                    User list
-                </p>
-            </div>
+        <div id="messageBox"></div>
 
+        <div class="pss-toolbar">
+            <span class="pss-result-label">User list</span>
             <input id="searchInput"
-                   class="modern-input admin-user-search"
+                   class="pss-search-input"
                    type="text"
                    placeholder="Search by name / email / role..."
                    oninput="renderRows()">
         </div>
 
-        <!-- Messages -->
-        <div id="messageBox"></div>
-
-        <!-- Table -->
-        <div class="modern-table-wrapper">
-            <table class="modern-table project-table admin-user-table">
+        <div class="pss-table-wrap">
+            <table class="pss-table">
                 <thead>
                 <tr>
                     <th>ID</th>
-                    <th onclick="sortBy('name')" class="sortable-th">
-                        Name <span id="sort-name">&#8597;</span>
+                    <th class="sortable" onclick="sortBy('name')">
+                        Name <span id="sort-name" class="sort-icon">&#8597;</span>
                     </th>
                     <th>Email</th>
-                    <th onclick="sortBy('role')" class="sortable-th">
-                        Role <span id="sort-role">&#8597;</span>
+                    <th class="sortable" onclick="sortBy('role')">
+                        Role <span id="sort-role" class="sort-icon">&#8597;</span>
                     </th>
-                    <th onclick="sortBy('status')" class="sortable-th">
-                        Status <span id="sort-status">&#8597;</span>
+                    <th class="sortable" onclick="sortBy('status')">
+                        Status <span id="sort-status" class="sort-icon">&#8597;</span>
                     </th>
                     <th>Phone</th>
                     <th>Department</th>
                     <th>Action</th>
                 </tr>
                 </thead>
-
                 <tbody id="userTableBody">
-                <tr>
-                    <td colspan="8" class="muted">Loading users...</td>
-                </tr>
+                <tr><td colspan="8" class="pss-td-center">Loading users...</td></tr>
                 </tbody>
             </table>
         </div>
 
-        <!-- Bottom Actions -->
-        <div class="page-bottom-actions">
-            <a th:href="@{/admin/dashboard}" class="modern-btn modern-btn-outline">
-                &larr; Back to Dashboard
-            </a>
-        </div>
+        <a th:href="@{/admin/dashboard}" class="pss-back">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            Back to Dashboard
+        </a>
 
     </div>
 </div>
@@ -101,7 +302,8 @@
 
     function showMessage(text, type = 'info') {
         const box = document.getElementById('messageBox');
-        box.innerHTML = `<div class="alert alert-${type === 'error' ? 'error' : 'info'}">${text}</div>`;
+        const cls = type === 'error' ? 'pss-alert-error' : type === 'success' ? 'pss-alert-success' : 'pss-alert-info';
+        box.innerHTML = `<div class="pss-alert ${cls}">${text}</div>`;
         setTimeout(() => box.innerHTML = '', 3500);
     }
 
@@ -122,26 +324,21 @@
             sortKey = key;
             sortAsc = true;
         }
-
         ['name', 'role', 'status'].forEach(k => {
             const el = document.getElementById('sort-' + k);
             if (el) el.textContent = '↕';
         });
-
         const el = document.getElementById('sort-' + key);
         if (el) el.textContent = sortAsc ? '↑' : '↓';
-
         renderRows();
     }
 
     function renderRows() {
         const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
-
         let filtered = users.filter(u => {
             const txt = `${u.name || ''} ${u.email || ''} ${u.role || ''}`.toLowerCase();
             return txt.includes(keyword);
         });
-
         if (sortKey) {
             filtered = [...filtered].sort((a, b) => {
                 const va = String(a[sortKey] || '').toLowerCase();
@@ -149,66 +346,54 @@
                 return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
             });
         }
-
         const tbody = document.getElementById('userTableBody');
-
         if (!filtered.length) {
-            tbody.innerHTML = '<tr><td colspan="8" class="muted">No users found.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="pss-td-center">No users found.</td></tr>';
             return;
         }
-
-        tbody.innerHTML = filtered.map(u => `
+        tbody.innerHTML = filtered.map(u => {
+            const roleClass = u.role === 'student' ? 'pss-role-student' : u.role === 'teacher' ? 'pss-role-teacher' : 'pss-role-admin';
+            const statusClass = u.status === 'active' ? 'pss-status-active' : u.status === 'disabled' ? 'pss-status-disabled' : 'pss-status-default';
+            return `
             <tr>
-                <td>${u.id}</td>
-                <td>${escapeHtml(u.name || '')}</td>
-                <td>${escapeHtml(u.email || '')}</td>
+                <td class="pss-id">${u.id}</td>
+                <td class="pss-name">${escapeHtml(u.name || '')}</td>
+                <td class="pss-email-cell">${escapeHtml(u.email || '')}</td>
+                <td><span class="pss-role ${roleClass}">${escapeHtml(u.role)}</span></td>
+                <td><span class="pss-user-status ${statusClass}">${escapeHtml(u.status)}</span></td>
+                <td class="pss-muted-cell">${escapeHtml(u.phone || '—')}</td>
+                <td class="pss-muted-cell">${escapeHtml(u.department || '—')}</td>
                 <td>
-                    <span class="role-badge role-${escapeHtml(u.role)}">${escapeHtml(u.role)}</span>
-                </td>
-                <td>
-                    <span class="user-status-badge ${u.status === 'active' ? 'status-active' : 'status-disabled'}">
-                        ${escapeHtml(u.status)}
-                    </span>
-                </td>
-                <td>${escapeHtml(u.phone || '-')}</td>
-                <td>${escapeHtml(u.department || '-')}</td>
-                <td>
-                    <div class="admin-user-actions">
-                        <button class="modern-btn table-action-btn ${u.status === 'active' ? 'admin-danger-btn' : 'modern-btn-primary'}"
+                    <div class="pss-action-cell">
+                        <button class="pss-btn-sm ${u.status === 'active' ? 'pss-btn-disable' : 'pss-btn-enable'}"
                                 onclick="toggleStatus(${u.id}, '${escapeJs(u.name || u.email)}', '${u.status}')">
                             ${u.status === 'active' ? 'Disable' : 'Enable'}
                         </button>
-
-                        <select class="admin-role-select"
+                        <select class="pss-role-select"
                                 onchange="changeRole(${u.id}, '${escapeJs(u.name || u.email)}', this.value)">
                             ${['student','teacher','admin'].map(r => `<option value="${r}" ${u.role === r ? 'selected' : ''}>${r}</option>`).join('')}
                         </select>
                     </div>
                 </td>
-            </tr>
-        `).join('');
+            </tr>`;
+        }).join('');
     }
 
     async function toggleStatus(id, userLabel, currentStatus) {
         const action = currentStatus === 'active' ? 'disable' : 'enable';
-
         if (!confirm(`Are you sure you want to ${action} ${userLabel}?`)) return;
-
         try {
             const res = await fetch(`/api/admin/users/${id}/status`, {
                 method: 'PUT',
                 headers: headers()
             });
-
             const data = res.status === 204 ? null : await res.json();
-
             if (!res.ok) {
                 showMessage((data && data.error) || 'Failed to update status.', 'error');
                 await loadUsers();
                 return;
             }
-
-            showMessage('User status updated successfully.');
+            showMessage('User status updated successfully.', 'success');
             users = users.map(u => u.id === id ? data : u);
             renderRows();
         } catch (e) {
@@ -221,23 +406,19 @@
             await loadUsers();
             return;
         }
-
         try {
             const res = await fetch(`/api/admin/users/${id}/role`, {
                 method: 'PUT',
                 headers: headers(true),
                 body: JSON.stringify({ role: newRole })
             });
-
             const data = await res.json();
-
             if (!res.ok) {
                 showMessage(data.error || 'Failed to update role.', 'error');
                 await loadUsers();
                 return;
             }
-
-            showMessage(`Role updated to ${newRole}.`);
+            showMessage(`Role updated to ${newRole}.`, 'success');
             users = users.map(u => u.id === id ? data : u);
             renderRows();
         } catch (e) {

@@ -2,235 +2,402 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-  <meta charset="UTF-8">
-  <title>Project Topic Detail - Project Selection System</title>
-  <link rel="stylesheet" th:href="@{/css/style.css}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Topic Detail — Project Selection System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        html, body { margin: 0 !important; padding: 0 !important; background: #f3f2ef !important; }
+
+        .pss-page {
+            min-height: calc(100vh - 64px);
+            background: #f3f2ef;
+            padding: 40px 32px 80px;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .pss-container { max-width: 960px; margin: 0 auto; }
+
+        /* Breadcrumb */
+        .pss-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12.5px;
+            color: #8898aa;
+            margin-bottom: 24px;
+            font-weight: 500;
+        }
+        .pss-breadcrumb a { color: #6a7888; text-decoration: none; }
+        .pss-breadcrumb a:hover { color: #0a1220; }
+        .pss-breadcrumb-sep { color: #c8d4e0; }
+
+        /* Header */
+        .pss-detail-header {
+            margin-bottom: 28px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #dde5f0;
+        }
+        .pss-detail-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: .13em;
+            text-transform: uppercase;
+            color: #c8a23a;
+            margin-bottom: 10px;
+        }
+        .pss-detail-label::before {
+            content: '';
+            display: block;
+            width: 20px; height: 1.5px;
+            background: #c8a23a;
+        }
+        .pss-title-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .pss-detail-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(22px, 3vw, 34px);
+            font-weight: 700;
+            color: #0a1220;
+            margin: 0;
+            line-height: 1.15;
+            letter-spacing: -.02em;
+            flex: 1;
+        }
+        .pss-badge-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+        .pss-status {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 999px;
+            padding: 4px 12px;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .pss-status-available { background: #dcfce7; color: #14532d; }
+        .pss-status-requested { background: rgba(200,162,58,.15); color: #7a5c10; }
+        .pss-status-agreed    { background: #dbeafe; color: #1e3a8a; }
+        .pss-status-default   { background: #f0f3f8; color: #6a7888; }
+        .pss-draft-badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 999px;
+            padding: 4px 12px;
+            letter-spacing: .04em;
+            background: #f0f3f8;
+            color: #6a7888;
+            white-space: nowrap;
+        }
+
+        /* Alerts */
+        .pss-alert {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            padding: 11px 16px;
+            border-radius: 9px;
+            font-size: 13px;
+            line-height: 1.5;
+            border: 1px solid transparent;
+            margin-bottom: 20px;
+        }
+        .pss-alert-success { background: #e7f8ee; color: #14482a; border-color: #aedbbf; }
+        .pss-alert-error   { background: #fbe9e9; color: #7a1f1f; border-color: #f3b8b8; }
+
+        /* Cards */
+        .pss-card {
+            background: #fff;
+            border: 1px solid #dde5f0;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+        .pss-card-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 17px;
+            font-weight: 700;
+            color: #0a1220;
+            margin: 0 0 18px;
+        }
+
+        /* Info grid */
+        .pss-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px 24px;
+        }
+        .pss-info-label {
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: #8898aa;
+            margin-bottom: 4px;
+        }
+        .pss-info-value { font-size: 14px; font-weight: 600; color: #0a1220; }
+        .pss-body-text { font-size: 14px; color: #3a4e62; line-height: 1.75; margin: 0; }
+
+        .pss-two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .pss-kw-list { display: flex; flex-wrap: wrap; gap: 6px; }
+        .pss-kw {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 500;
+            color: #36506e;
+            background: #edf2f8;
+            border: 1px solid #d4dff0;
+            border-radius: 5px;
+            padding: 4px 10px;
+        }
+
+        /* Applications table */
+        .pss-table-wrap {
+            overflow-x: auto;
+        }
+        .pss-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+        }
+        .pss-table thead tr { background: #0a1220; }
+        .pss-table thead th {
+            padding: 12px 14px;
+            text-align: left;
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: .09em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,.65);
+            white-space: nowrap;
+            border: none;
+        }
+        .pss-table tbody tr { border-bottom: 1px solid #f0f3f8; }
+        .pss-table tbody tr:last-child { border-bottom: none; }
+        .pss-table tbody tr:hover { background: #f8f9fb; }
+        .pss-table tbody td { padding: 13px 14px; color: #28384a; vertical-align: middle; }
+        .pss-table-badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 999px;
+            padding: 3px 10px;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+        }
+        .pss-table-badge-pending  { background: rgba(200,162,58,.15); color: #7a5c10; }
+        .pss-table-badge-accepted { background: #dcfce7; color: #14532d; }
+        .pss-table-badge-rejected { background: #fee2e2; color: #7f1d1d; }
+        .pss-table-badge-default  { background: #f0f3f8; color: #6a7888; }
+
+        /* Action buttons in table */
+        .pss-action-group { display: flex; gap: 6px; flex-wrap: wrap; }
+        .pss-btn {
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 13px;
+            border-radius: 7px;
+            border: none;
+            cursor: pointer;
+            transition: background .15s;
+        }
+        .pss-btn-approve { background: #14532d; color: #fff; width: auto !important; }
+        .pss-btn-approve:hover { background: #166534; }
+        .pss-btn-reject  { background: #7f1d1d; color: #fff; width: auto !important; }
+        .pss-btn-reject:hover  { background: #991b1b; }
+        .pss-muted { font-size: 12px; color: #b0bccc; }
+
+        .pss-empty-msg { font-size: 13.5px; color: #8898aa; padding: 8px 0; }
+
+        /* Back */
+        .pss-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            color: #6a7888;
+            transition: color .15s;
+        }
+        .pss-back:hover { color: #0a1220; }
+
+        @media (max-width: 640px) {
+            .pss-page { padding: 24px 16px 60px; }
+            .pss-two-col { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
 
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="page-shell">
-  <div class="modern-card detail-modern-card">
+<div class="pss-page">
+    <div class="pss-container">
 
-    <!-- Page Header -->
-    <div class="modern-page-header detail-modern-header">
-      <div class="modern-page-icon">
-        📄
-      </div>
+        <!-- Breadcrumb -->
+        <nav class="pss-breadcrumb">
+            <a th:href="@{/teacher/dashboard}">Dashboard</a>
+            <span class="pss-breadcrumb-sep">/</span>
+            <a th:href="@{/teacher/projects}">Projects</a>
+            <span class="pss-breadcrumb-sep">/</span>
+            <span th:text="${projectTopic.title}">Topic Detail</span>
+        </nav>
 
-      <div class="detail-title-area">
-        <p class="detail-page-label">Project Topic Detail</p>
-        <h1 class="modern-page-title" th:text="${projectTopic.title}">
-          Project Title
-        </h1>
-        <p class="modern-page-subtitle">
-          View project information, current status and related student applications
-        </p>
-      </div>
-
-      <div class="detail-status-area modern-detail-status-area">
-                <span class="status-badge"
-                      th:classappend="'status-' + ${projectTopic.status.name()}"
-                      th:text="${projectTopic.status}">
-                </span>
-
-        <span th:if="${projectTopic.draft}" class="draft-badge">
-                    Draft
-                </span>
-      </div>
-    </div>
-
-    <!-- Messages -->
-    <div th:if="${successMessage}" class="alert alert-success">
-      <span th:text="${successMessage}"></span>
-    </div>
-
-    <div th:if="${errorMessage}" class="alert alert-error">
-      <span th:text="${errorMessage}"></span>
-    </div>
-
-    <!-- Basic Information -->
-    <div class="modern-detail-card">
-      <h3 class="modern-detail-title">Basic Information</h3>
-
-      <div class="modern-detail-grid">
-        <div class="modern-detail-item">
-          <span class="detail-label">Category</span>
-          <span class="detail-value"
-                th:text="${projectTopic.category != null ? projectTopic.category.name : 'N/A'}">
-                        N/A
-                    </span>
+        <!-- Header -->
+        <div class="pss-detail-header">
+            <div class="pss-detail-label">Project Topic Detail</div>
+            <div class="pss-title-row">
+                <h1 class="pss-detail-title" th:text="${projectTopic.title}">Project Title</h1>
+                <div class="pss-badge-row">
+                    <span th:class="${'pss-status ' + (#strings.toLowerCase(projectTopic.status.name()) == 'available' ? 'pss-status-available' : (#strings.toLowerCase(projectTopic.status.name()) == 'requested' ? 'pss-status-requested' : (#strings.toLowerCase(projectTopic.status.name()) == 'agreed' ? 'pss-status-agreed' : 'pss-status-default')))}"
+                          th:text="${projectTopic.status}"></span>
+                    <span th:if="${projectTopic.draft}" class="pss-draft-badge">Draft</span>
+                </div>
+            </div>
         </div>
 
-        <div class="modern-detail-item">
-          <span class="detail-label">Max Students</span>
-          <span class="detail-value"
-                th:text="${projectTopic.maxStudents != null ? projectTopic.maxStudents : 'N/A'}">
-                        N/A
-                    </span>
+        <!-- Alerts -->
+        <div th:if="${successMessage}" class="pss-alert pss-alert-success">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><polyline points="20 6 9 17 4 12"/></svg>
+            <span th:text="${successMessage}"></span>
+        </div>
+        <div th:if="${errorMessage}" class="pss-alert pss-alert-error">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span th:text="${errorMessage}"></span>
         </div>
 
-        <div class="modern-detail-item">
-          <span class="detail-label">Teacher</span>
-          <span class="detail-value"
-                th:text="${projectTopic.teacher != null ? projectTopic.teacher.name : 'N/A'}">
-                        Teacher
-                    </span>
+        <!-- Basic info -->
+        <div class="pss-card">
+            <h3 class="pss-card-title">Project Information</h3>
+            <div class="pss-info-grid">
+                <div>
+                    <div class="pss-info-label">Category</div>
+                    <div class="pss-info-value" th:text="${projectTopic.category != null ? projectTopic.category.name : 'N/A'}"></div>
+                </div>
+                <div>
+                    <div class="pss-info-label">Max Students</div>
+                    <div class="pss-info-value" th:text="${projectTopic.maxStudents != null ? projectTopic.maxStudents : 'N/A'}"></div>
+                </div>
+                <div>
+                    <div class="pss-info-label">Supervisor</div>
+                    <div class="pss-info-value" th:text="${projectTopic.teacher != null ? projectTopic.teacher.name : 'N/A'}"></div>
+                </div>
+                <div>
+                    <div class="pss-info-label">Supervisor Email</div>
+                    <div class="pss-info-value" th:text="${projectTopic.teacher != null ? projectTopic.teacher.email : 'N/A'}"></div>
+                </div>
+                <div>
+                    <div class="pss-info-label">Created</div>
+                    <div class="pss-info-value" th:text="${projectTopic.createdAt != null ? #temporals.format(projectTopic.createdAt,'yyyy-MM-dd HH:mm') : 'N/A'}"></div>
+                </div>
+                <div>
+                    <div class="pss-info-label">Updated</div>
+                    <div class="pss-info-value" th:text="${projectTopic.updatedAt != null ? #temporals.format(projectTopic.updatedAt,'yyyy-MM-dd HH:mm') : 'N/A'}"></div>
+                </div>
+            </div>
         </div>
 
-        <div class="modern-detail-item">
-          <span class="detail-label">Teacher Email</span>
-          <span class="detail-value"
-                th:text="${projectTopic.teacher != null ? projectTopic.teacher.email : 'N/A'}">
-                        Email
-                    </span>
+        <!-- Description -->
+        <div class="pss-card">
+            <h3 class="pss-card-title">Project Description</h3>
+            <p class="pss-body-text"
+               th:text="${projectTopic.description != null and !projectTopic.description.isEmpty() ? projectTopic.description : 'No description provided.'}">
+            </p>
         </div>
 
-        <div class="modern-detail-item">
-          <span class="detail-label">Created At</span>
-          <span class="detail-value"
-                th:text="${projectTopic.createdAt != null ? #temporals.format(projectTopic.createdAt, 'yyyy-MM-dd HH:mm') : 'N/A'}">
-                        Created At
-                    </span>
-        </div>
-
-        <div class="modern-detail-item">
-          <span class="detail-label">Updated At</span>
-          <span class="detail-value"
-                th:text="${projectTopic.updatedAt != null ? #temporals.format(projectTopic.updatedAt, 'yyyy-MM-dd HH:mm') : 'N/A'}">
-                        Updated At
-                    </span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Description -->
-    <div class="modern-detail-card">
-      <h3 class="modern-detail-title">Project Description</h3>
-
-      <p class="detail-text"
-         th:text="${projectTopic.description != null and !projectTopic.description.isEmpty()
-                        ? projectTopic.description
-                        : 'No description provided.'}">
-        Description
-      </p>
-    </div>
-
-    <!-- Required Skills and Keywords -->
-    <div class="detail-two-column">
-      <div class="modern-detail-card">
-        <h3 class="modern-detail-title">Required Skills</h3>
-
-        <p class="detail-text"
-           th:text="${projectTopic.requiredSkills != null and !projectTopic.requiredSkills.isEmpty()
-                            ? projectTopic.requiredSkills
-                            : 'No required skills provided.'}">
-          Required Skills
-        </p>
-      </div>
-
-      <div class="modern-detail-card">
-        <h3 class="modern-detail-title">Keywords</h3>
-
-        <div th:if="${projectTopic.keywords != null and !projectTopic.keywords.isEmpty()}"
-             class="keyword-preview-row">
+        <!-- Skills + Keywords -->
+        <div class="pss-two-col">
+            <div class="pss-card" style="margin-bottom:0;">
+                <h3 class="pss-card-title">Required Skills</h3>
+                <p class="pss-body-text"
+                   th:text="${projectTopic.requiredSkills != null and !projectTopic.requiredSkills.isEmpty() ? projectTopic.requiredSkills : 'Not specified.'}">
+                </p>
+            </div>
+            <div class="pss-card" style="margin-bottom:0;">
+                <h3 class="pss-card-title">Keywords</h3>
+                <div class="pss-kw-list" th:if="${projectTopic.keywords != null and !projectTopic.keywords.isEmpty()}">
                     <span th:each="kw : ${#strings.arraySplit(projectTopic.keywords, ',')}"
                           th:if="${#strings.trim(kw) != ''}"
                           th:text="${#strings.trim(kw)}"
-                          class="keyword-tag">
-                    </span>
+                          class="pss-kw"></span>
+                </div>
+                <p class="pss-body-text" th:if="${projectTopic.keywords == null or projectTopic.keywords.isEmpty()}">No keywords listed.</p>
+            </div>
         </div>
 
-        <p th:if="${projectTopic.keywords == null or projectTopic.keywords.isEmpty()}"
-           class="detail-text">
-          No keywords provided.
-        </p>
-      </div>
-    </div>
+        <!-- Applications -->
+        <div class="pss-card" style="margin-top:16px;">
+            <h3 class="pss-card-title">Student Applications</h3>
 
-    <!-- Student Applications -->
-    <div class="modern-detail-card">
-      <div class="section-title-row">
-        <h3 class="modern-detail-title">Student Applications</h3>
-      </div>
+            <p class="pss-empty-msg" th:if="${#lists.isEmpty(applications)}">No student applications for this topic yet.</p>
 
-      <div th:if="${#lists.isEmpty(applications)}" class="empty-message">
-        No student applications for this topic yet.
-      </div>
-
-      <div th:if="${not #lists.isEmpty(applications)}" class="modern-table-wrapper">
-        <table class="modern-table project-table">
-          <thead>
-          <tr>
-            <th>Student</th>
-            <th>Email</th>
-            <th>Personal Statement</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-          </thead>
-
-          <tbody>
-          <tr th:each="app : ${applications}">
-            <td th:text="${app.student != null ? app.student.name : 'N/A'}">Student</td>
-
-            <td th:text="${app.student != null ? app.student.email : 'N/A'}">Email</td>
-
-            <td th:text="${app.personalStatement}">Statement</td>
-
-            <td>
-                            <span class="status-badge"
-                                  th:classappend="'status-' + ${app.status.name()}"
+            <div class="pss-table-wrap" th:if="${!#lists.isEmpty(applications)}">
+                <table class="pss-table">
+                    <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Email</th>
+                        <th>Personal Statement</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="app : ${applications}">
+                        <td th:text="${app.student != null ? app.student.name : 'N/A'}"></td>
+                        <td th:text="${app.student != null ? app.student.email : 'N/A'}"></td>
+                        <td style="max-width:280px;font-size:12.5px;color:#3a4e62;" th:text="${app.personalStatement}"></td>
+                        <td>
+                            <span th:class="${'pss-table-badge pss-table-badge-' + #strings.toLowerCase(app.status.name())}"
                                   th:text="${app.status}">
-                                pending
                             </span>
-            </td>
+                        </td>
+                        <td>
+                            <div class="pss-action-group" th:if="${app.status.name() == 'pending'}">
+                                <form th:action="@{/teacher/applications/{id}/approve(id=${app.id})}" method="post">
+                                    <input type="hidden" name="topicId" th:value="${projectTopic.id}">
+                                    <input type="hidden" name="teacherId" th:value="${currentTeacherId}">
+                                    <button type="submit" class="pss-btn pss-btn-approve">Approve</button>
+                                </form>
+                                <form th:action="@{/teacher/applications/{id}/reject(id=${app.id})}" method="post">
+                                    <input type="hidden" name="topicId" th:value="${projectTopic.id}">
+                                    <input type="hidden" name="teacherId" th:value="${currentTeacherId}">
+                                    <button type="submit" class="pss-btn pss-btn-reject">Reject</button>
+                                </form>
+                            </div>
+                            <span class="pss-muted" th:if="${app.status.name() != 'pending'}">Processed</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-            <td>
-              <div th:if="${app.status.name() == 'pending'}"
-                   class="application-action-group">
-                <form th:action="@{/teacher/applications/{id}/approve(id=${app.id})}"
-                      method="post">
-                  <input type="hidden" name="topicId" th:value="${projectTopic.id}">
-                  <input type="hidden" name="teacherId" th:value="${currentTeacherId}">
+        <a th:href="@{/teacher/projects}" class="pss-back">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            Back to Project List
+        </a>
 
-                  <button type="submit"
-                          class="modern-btn modern-btn-primary table-action-btn">
-                    Approve
-                  </button>
-                </form>
-
-                <form th:action="@{/teacher/applications/{id}/reject(id=${app.id})}"
-                      method="post">
-                  <input type="hidden" name="topicId" th:value="${projectTopic.id}">
-                  <input type="hidden" name="teacherId" th:value="${currentTeacherId}">
-
-                  <button type="submit"
-                          class="modern-btn modern-btn-outline table-action-btn">
-                    Reject
-                  </button>
-                </form>
-              </div>
-
-              <span th:if="${app.status.name() != 'pending'}" class="muted">
-                                Processed
-                            </span>
-            </td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
     </div>
-
-    <!-- Bottom Actions -->
-    <div class="page-bottom-actions detail-bottom-actions">
-      <a th:href="@{/teacher/projects}" class="modern-btn modern-btn-outline">
-        ← Back to Project List
-      </a>
-    </div>
-
-  </div>
 </div>
 
 </body>

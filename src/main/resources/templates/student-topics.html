@@ -3,182 +3,456 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Available Topics - Project Selection System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Topics — Project Selection System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        html, body { margin: 0 !important; padding: 0 !important; background: #f3f2ef !important; }
+
+        .pss-page {
+            min-height: calc(100vh - 64px);
+            background: #f3f2ef;
+            padding: 40px 32px 80px;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .pss-container { max-width: 1200px; margin: 0 auto; }
+
+        /* Header */
+        .pss-dash-header {
+            margin-bottom: 28px;
+        }
+        .pss-dash-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: .13em;
+            text-transform: uppercase;
+            color: #c8a23a;
+            margin-bottom: 10px;
+        }
+        .pss-dash-eyebrow::before {
+            content: '';
+            display: block;
+            width: 20px; height: 1.5px;
+            background: #c8a23a;
+        }
+        .pss-dash-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(26px, 3vw, 38px);
+            font-weight: 700;
+            color: #0a1220;
+            margin: 0 0 6px;
+            line-height: 1.1;
+            letter-spacing: -.02em;
+        }
+        .pss-dash-subtitle { font-size: 13px; color: #6a7888; margin: 0; }
+
+        /* Filter bar */
+        .pss-filter-bar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background: #fff;
+            border: 1px solid #dde5f0;
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .pss-filter-input {
+            flex: 1;
+            min-width: 180px;
+            padding: 9px 14px 9px 38px !important;
+            font-size: 13.5px !important;
+            border: 1.5px solid #dde5f0 !important;
+            border-radius: 9px !important;
+            background-color: #fafbfc !important;
+            color: #0a1220 !important;
+            outline: none !important;
+            font-family: 'Inter', sans-serif !important;
+            box-sizing: border-box;
+            transition: border-color .15s;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239aacc0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") !important;
+            background-repeat: no-repeat !important;
+            background-position: 12px center !important;
+        }
+        .pss-filter-input:focus {
+            border-color: #7898c0 !important;
+            background-color: #fff !important;
+        }
+        .pss-filter-select {
+            padding: 9px 32px 9px 12px !important;
+            font-size: 13px !important;
+            border: 1.5px solid #dde5f0 !important;
+            border-radius: 9px !important;
+            background-color: #fafbfc !important;
+            color: #28384a !important;
+            outline: none !important;
+            font-family: 'Inter', sans-serif !important;
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239aacc0' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") !important;
+            background-repeat: no-repeat !important;
+            background-position: right 10px center !important;
+            transition: border-color .15s;
+        }
+        .pss-filter-select:focus { border-color: #7898c0 !important; }
+        .pss-filter-btn {
+            padding: 9px 18px !important;
+            background: #0a1220 !important;
+            color: #fff !important;
+            border: none !important;
+            border-radius: 9px !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            font-family: 'Inter', sans-serif !important;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background .2s;
+        }
+        .pss-filter-btn:hover { background: #182840 !important; }
+
+        /* Alerts */
+        .pss-alert {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            padding: 11px 16px;
+            border-radius: 9px;
+            font-size: 13px;
+            line-height: 1.5;
+            border: 1px solid transparent;
+            margin-bottom: 16px;
+            font-family: 'Inter', sans-serif;
+        }
+        .pss-alert-info    { background: #e5eff9; color: #1a3e6a; border-color: #bad0eb; }
+        .pss-alert-error   { background: #fbe9e9; color: #7a1f1f; border-color: #f3b8b8; }
+
+        /* Result count */
+        .pss-result-count {
+            font-size: 12.5px;
+            color: #8898aa;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        /* Table wrapper */
+        .pss-table-wrap {
+            background: #fff;
+            border: 1px solid #dde5f0;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+        .pss-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+        }
+        .pss-table thead tr {
+            background: #0a1220;
+        }
+        .pss-table thead th {
+            padding: 13px 16px;
+            text-align: left;
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: .09em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,.65);
+            white-space: nowrap;
+            border: none;
+        }
+        .pss-table tbody tr {
+            border-bottom: 1px solid #f0f3f8;
+            transition: background .12s;
+        }
+        .pss-table tbody tr:last-child { border-bottom: none; }
+        .pss-table tbody tr:hover { background: #f8f9fb; }
+        .pss-table tbody td {
+            padding: 14px 16px;
+            color: #28384a;
+            vertical-align: middle;
+        }
+
+        /* Title cell */
+        .pss-project-title {
+            font-weight: 600;
+            color: #0a1220;
+            font-size: 13.5px;
+            line-height: 1.3;
+            margin-bottom: 3px;
+        }
+        .pss-project-desc {
+            font-size: 11.5px;
+            color: #8898aa;
+            line-height: 1.4;
+        }
+
+        /* Keyword tags */
+        .pss-kw-list { display: flex; flex-wrap: wrap; gap: 4px; }
+        .pss-kw {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 500;
+            color: #36506e;
+            background: #edf2f8;
+            border: 1px solid #d4dff0;
+            border-radius: 4px;
+            padding: 2px 8px;
+            white-space: nowrap;
+        }
+
+        /* Status badge */
+        .pss-status {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 999px;
+            padding: 3px 10px;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+        }
+        .pss-status-available { background: #dcfce7; color: #14532d; }
+        .pss-status-requested { background: rgba(200,162,58,.15); color: #7a5c10; }
+        .pss-status-agreed    { background: #dbeafe; color: #1e3a8a; }
+        .pss-status-default   { background: #f0f3f8; color: #6a7888; }
+
+        /* Action button */
+        .pss-view-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0a1220;
+            padding: 6px 13px;
+            border: 1px solid #dde5f0;
+            border-radius: 7px;
+            background: #fff;
+            transition: background .15s, border-color .15s;
+            white-space: nowrap;
+        }
+        .pss-view-btn:hover {
+            background: #f3f2ef;
+            border-color: #b8c8da;
+        }
+
+        /* Empty state */
+        .pss-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6a7888;
+            font-size: 14px;
+        }
+        .pss-empty-title { font-weight: 600; color: #28384a; margin-bottom: 6px; }
+
+        /* Pagination */
+        .pss-pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 32px;
+            font-family: 'Inter', sans-serif;
+        }
+        .pss-pg-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            color: #0a1220;
+            padding: 8px 16px;
+            border: 1px solid #dde5f0;
+            border-radius: 8px;
+            background: #fff;
+            transition: background .15s;
+        }
+        .pss-pg-btn:hover { background: #f3f2ef; }
+        .pss-pg-info {
+            font-size: 12.5px;
+            color: #8898aa;
+            font-weight: 500;
+        }
+
+        /* Back link */
+        .pss-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            color: #6a7888;
+            transition: color .15s;
+        }
+        .pss-back:hover { color: #0a1220; }
+
+        @media (max-width: 768px) {
+            .pss-page { padding: 24px 16px 60px; }
+            .pss-filter-bar { flex-direction: column; align-items: stretch; }
+            .pss-filter-input, .pss-filter-select { width: 100%; }
+            .pss-table-wrap { overflow-x: auto; }
+        }
+    </style>
 </head>
 <body>
 
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="page-shell">
-    <div class="modern-card">
+<div class="pss-page">
+    <div class="pss-container">
 
-        <!-- Page Header -->
-        <div class="modern-page-header">
-            <div class="modern-page-icon">
-                📋
-            </div>
-            <div>
-                <h1 class="modern-page-title">Available Topics</h1>
-                <p class="modern-page-subtitle">Browse and search available project topics</p>
-            </div>
+        <div class="pss-dash-header">
+            <div class="pss-dash-eyebrow">Student Portal</div>
+            <h1 class="pss-dash-title">Available Topics</h1>
+            <p class="pss-dash-subtitle">Browse and search project topics available for application.</p>
         </div>
 
-        <!-- Search / Filter Toolbar -->
-        <form class="modern-toolbar" method="get" th:action="@{/student/topics}">
-            <input class="modern-input"
-                   type="text"
-                   name="keyword"
-                   placeholder="Search by keyword"
+        <!-- Filter bar -->
+        <form class="pss-filter-bar" method="get" th:action="@{/student/topics}">
+            <input class="pss-filter-input"
+                   type="text" name="keyword"
+                   placeholder="Search by title or keyword..."
                    th:value="${keyword}">
 
-            <select class="modern-select" name="category">
+            <select class="pss-filter-select" name="category">
                 <option value="">All Categories</option>
-                <option th:each="category : ${categories}"
-                        th:value="${category.id}"
-                        th:text="${category.name}"
-                        th:selected="${selectedCategory != null and selectedCategory == category.id}">
+                <option th:each="cat : ${categories}"
+                        th:value="${cat.id}"
+                        th:text="${cat.name}"
+                        th:selected="${selectedCategory != null and selectedCategory == cat.id}">
                 </option>
             </select>
 
-            <select class="modern-select" name="sort">
+            <select class="pss-filter-select" name="sort">
                 <option value="newest" th:selected="${sort == 'newest'}">Newest first</option>
-                <option value="az" th:selected="${sort == 'az'}">A-Z</option>
+                <option value="az"     th:selected="${sort == 'az'}">A to Z</option>
             </select>
 
             <input type="hidden" name="page" value="0">
             <input type="hidden" name="size" th:value="${size}">
 
-            <button class="modern-btn modern-btn-primary" type="submit">
-                Search
-            </button>
+            <button class="pss-filter-btn" type="submit">Search</button>
         </form>
 
-        <!-- Messages -->
-        <div th:if="${successMessage}" class="alert alert-info">
+        <!-- Alerts -->
+        <div th:if="${successMessage}" class="pss-alert pss-alert-info">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
             <span th:text="${successMessage}"></span>
         </div>
-
-        <div th:if="${errorMessage}" class="alert alert-error">
+        <div th:if="${errorMessage}" class="pss-alert pss-alert-error">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             <span th:text="${errorMessage}"></span>
         </div>
 
-        <!-- Result Summary -->
-        <p class="result-summary" th:if="${!projects.isEmpty()}">
-            Showing available project topics
-        </p>
+        <!-- Results -->
+        <div th:if="${!projects.isEmpty()}">
 
-        <!-- Table -->
-        <div class="modern-table-wrapper" th:if="${!projects.isEmpty()}">
-            <table class="modern-table project-table">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Title</th>
-                    <th>Teacher</th>
-                    <th>Category</th>
-                    <th>Description</th>
-                    <th>Required Skills</th>
-                    <th>Keywords</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-                </thead>
+            <p class="pss-result-count">
+                Showing available project topics
+            </p>
 
-                <tbody>
-                <tr th:each="project : ${projects}">
-                    <td th:text="${project.id}"></td>
+            <div class="pss-table-wrap">
+                <table class="pss-table">
+                    <thead>
+                    <tr>
+                        <th style="width:35%">Project</th>
+                        <th>Supervisor</th>
+                        <th>Category</th>
+                        <th>Keywords</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="project : ${projects}">
 
-                    <td class="title-cell">
-                        <span th:text="${project.title != null and !project.title.isEmpty() ? project.title : 'Untitled'}"></span>
-                    </td>
+                        <td>
+                            <div class="pss-project-title"
+                                 th:text="${project.title != null and !project.title.isEmpty() ? project.title : 'Untitled'}">
+                            </div>
+                            <div class="pss-project-desc"
+                                 th:if="${project.description != null and #strings.length(project.description) > 0}"
+                                 th:text="${#strings.length(project.description) > 80
+                                     ? #strings.substring(project.description,0,80) + '…'
+                                     : project.description}">
+                            </div>
+                        </td>
 
-                    <td th:text="${project.teacher != null ? project.teacher.name : 'N/A'}"></td>
+                        <td th:text="${project.teacher != null ? project.teacher.name : 'N/A'}"></td>
 
-                    <td th:text="${project.category != null ? project.category.name : 'N/A'}"></td>
+                        <td th:text="${project.category != null ? project.category.name : 'N/A'}"></td>
 
-                    <td class="desc-cell"
-                        th:text="${project.description != null and #strings.length(project.description) > 20
-                        ? #strings.substring(project.description, 0, 20) + '...'
-                        : project.description}">
-                    </td>
+                        <td>
+                            <div class="pss-kw-list" th:if="${project.keywords != null and !project.keywords.isEmpty()}">
+                                <span th:each="kw : ${#strings.arraySplit(project.keywords, ',')}"
+                                      th:text="${#strings.trim(kw)}"
+                                      class="pss-kw"></span>
+                            </div>
+                            <span th:if="${project.keywords == null or project.keywords.isEmpty()}"
+                                  style="color:#aab8c8;font-size:12px;">—</span>
+                        </td>
 
-                    <td class="skill-cell"
-                        th:text="${project.requiredSkills != null and !project.requiredSkills.isEmpty() ? project.requiredSkills : 'N/A'}">
-                    </td>
-
-                    <td>
-                        <span th:if="${project.keywords != null and !project.keywords.isEmpty()}">
-                            <span th:each="kw : ${#strings.arraySplit(project.keywords, ',')}"
-                                  th:text="${#strings.trim(kw)}"
-                                  class="keyword-tag">
+                        <td>
+                            <span th:class="${'pss-status ' + (#strings.toLowerCase(project.status) == 'available' ? 'pss-status-available' : (#strings.toLowerCase(project.status) == 'requested' ? 'pss-status-requested' : (#strings.toLowerCase(project.status) == 'agreed' ? 'pss-status-agreed' : 'pss-status-default')))}"
+                                  th:text="${project.status}">
                             </span>
-                        </span>
-                        <span th:if="${project.keywords == null or project.keywords.isEmpty()}">N/A</span>
-                    </td>
+                        </td>
 
-                    <td>
-                        <span class="status-badge status-available"
-                              th:text="${project.status}">
-                        </span>
-                    </td>
-
-                    <td>
-                        <div class="action-group">
-                            <a th:href="@{/student/topics/{id}(id=${project.id})}"
-                               class="modern-btn modern-btn-dark">
-                                View Details
+                        <td>
+                            <a th:href="@{/student/topics/{id}(id=${project.id})}" class="pss-view-btn">
+                                View
+                                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                             </a>
-                        </div>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+                        </td>
+
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pss-pagination" th:if="${totalPages > 1}">
+                <a class="pss-pg-btn"
+                   th:if="${currentPage > 0}"
+                   th:href="@{/student/topics(page=${currentPage-1},size=${size},sort=${sort},keyword=${keyword},category=${selectedCategory})}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                    Previous
+                </a>
+                <span class="pss-pg-info">
+                    Page <span th:text="${currentPage + 1}"></span> of <span th:text="${totalPages}"></span>
+                </span>
+                <a class="pss-pg-btn"
+                   th:if="${currentPage + 1 < totalPages}"
+                   th:href="@{/student/topics(page=${currentPage+1},size=${size},sort=${sort},keyword=${keyword},category=${selectedCategory})}">
+                    Next
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+            </div>
+
         </div>
 
-        <!-- Empty State -->
-        <p th:if="${projects.isEmpty()}" class="empty-message">
-            No results found.
-        </p>
-
-        <!-- Pagination -->
-        <div class="modern-pagination" th:if="${totalPages > 1}">
-            <a th:if="${currentPage > 0}"
-               th:href="@{/student/topics(
-               page=${currentPage - 1},
-               size=${size},
-               sort=${sort},
-               keyword=${keyword},
-               category=${selectedCategory}
-           )}">
-                Previous
-            </a>
-
-            <span>
-                <span th:text="${currentPage + 1}"></span>
-                of
-                <span th:text="${totalPages}"></span>
-            </span>
-
-            <a th:if="${currentPage + 1 < totalPages}"
-               th:href="@{/student/topics(
-               page=${currentPage + 1},
-               size=${size},
-               sort=${sort},
-               keyword=${keyword},
-               category=${selectedCategory}
-           )}">
-                Next
-            </a>
+        <!-- Empty state -->
+        <div th:if="${projects.isEmpty()}" class="pss-empty">
+            <div class="pss-empty-title">No topics found</div>
+            <div>Try adjusting your search terms or clearing the filters.</div>
         </div>
 
-        <!-- Bottom Actions -->
-        <div class="page-bottom-actions">
-            <a class="modern-btn modern-btn-outline"
-               th:href="@{/student/dashboard}">
-                ← Back to Student Dashboard
-            </a>
-        </div>
+        <a th:href="@{/student/dashboard}" class="pss-back">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            Back to Dashboard
+        </a>
 
     </div>
 </div>
