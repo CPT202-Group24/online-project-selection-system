@@ -46,8 +46,8 @@ public class RegistrationController {
             @RequestParam String name,
             @RequestParam String email,
             @RequestParam String password,
-            @RequestParam String confirmPassword,
-            @RequestParam String verificationCode,
+            @RequestParam(value = "confirmPassword", required = false) String confirmPassword,
+            @RequestParam(value = "verificationCode", required = false) String verificationCode,
             RedirectAttributes redirectAttributes) {
 
         if (!StringUtils.hasText(name)) {
@@ -57,6 +57,11 @@ public class RegistrationController {
 
         if (!StringUtils.hasText(password)) {
             redirectAttributes.addFlashAttribute("errorMessage", "Please enter a password.");
+            return "redirect:/register";
+        }
+
+        if (!StringUtils.hasText(confirmPassword)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Please confirm your password.");
             return "redirect:/register";
         }
 
@@ -82,6 +87,11 @@ public class RegistrationController {
         if (registrationService.emailExists(normalizedEmail)) {
             redirectAttributes.addFlashAttribute(
                     "errorMessage", "An account with this email already exists.");
+            return "redirect:/register";
+        }
+
+        if (!StringUtils.hasText(verificationCode)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Please enter the verification code.");
             return "redirect:/register";
         }
 

@@ -2,185 +2,337 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Teacher Approval Dashboard - Project Selection System</title>
+    <title>Teacher Approvals - Project Selection System</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <style>
+        .approval-page-shell {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .approval-header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .approval-count-badge {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border-radius: 999px;
+            padding: 8px 14px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .approval-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .approval-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 20px;
+            background: #ffffff;
+            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+        }
+
+        .approval-card-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+            align-items: flex-start;
+        }
+
+        .approval-card h3 {
+            margin: 0 0 8px;
+            color: #0f172a;
+            font-size: 1.15rem;
+        }
+
+        .approval-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            color: #64748b;
+            font-size: 0.92rem;
+            margin-bottom: 12px;
+        }
+
+        .approval-statement {
+            margin: 12px 0 0;
+            color: #475569;
+            line-height: 1.6;
+            background: #f8fafc;
+            border-radius: 14px;
+            padding: 14px;
+        }
+
+        .approval-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .approval-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .approval-btn-outline {
+            background: #ffffff;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+
+        .approval-btn-outline:hover {
+            background: #eff6ff;
+        }
+
+        .approval-btn-accept {
+            background: #16a34a;
+            color: #ffffff;
+        }
+
+        .approval-btn-accept:hover {
+            background: #15803d;
+        }
+
+        .approval-btn-reject {
+            background: #ef4444;
+            color: #ffffff;
+        }
+
+        .approval-btn-reject:hover {
+            background: #dc2626;
+        }
+
+        .approval-details {
+            display: none;
+            margin-top: 16px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 16px;
+        }
+
+        .approval-details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .approval-detail-item {
+            background: #f8fafc;
+            border-radius: 14px;
+            padding: 12px;
+        }
+
+        .approval-detail-label {
+            display: block;
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-bottom: 4px;
+            font-weight: 700;
+        }
+
+        .approval-detail-value {
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+        .inline-action-form {
+            display: inline;
+        }
+
+        @media (max-width: 800px) {
+            .approval-header-actions,
+            .approval-card-top {
+                flex-direction: column;
+            }
+
+            .approval-actions {
+                justify-content: flex-start;
+            }
+
+            .approval-details-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
 <div class="page-shell">
-    <div class="modern-card teacher-approvals-card">
+    <div class="modern-card approval-page-shell">
 
-        <!-- Page Header -->
-        <div class="modern-page-header">
-            <div class="modern-page-icon">
-                ✅
+        <div class="approval-header-actions">
+            <div class="modern-page-header" style="margin-bottom:0;">
+                <div class="modern-page-icon">✅</div>
+                <div>
+                    <h1 class="modern-page-title">Teacher Approvals</h1>
+                    <p class="modern-page-subtitle">
+                        Review all pending student applications in one place.
+                    </p>
+                </div>
             </div>
-            <div>
-                <h1 class="modern-page-title">Teacher Approval Dashboard</h1>
-                <p class="modern-page-subtitle">
-                    Review pending student applications and approve or reject requests
-                </p>
-            </div>
+
+            <span class="approval-count-badge"
+                  th:text="${pendingTotal == null ? 0 : pendingTotal} + ' Pending'">
+                0 Pending
+            </span>
         </div>
 
-        <!-- Messages -->
         <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
         <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
 
-        <!-- Empty State -->
         <div th:if="${#lists.isEmpty(applications)}" class="modern-empty-state">
             <div class="modern-empty-icon">📭</div>
             <h3>No pending applications</h3>
-            <p>There are no student applications waiting for approval at the moment.</p>
+            <p>There are no student applications waiting for approval right now.</p>
 
             <a th:href="@{/teacher/dashboard}" class="modern-btn modern-btn-outline">
                 ← Back to Teacher Dashboard
             </a>
         </div>
 
-        <!-- Applications Table -->
-        <div th:if="${!#lists.isEmpty(applications)}">
-            <p class="result-summary">
-                Pending student applications
-            </p>
+        <div th:if="${!#lists.isEmpty(applications)}" class="approval-list">
 
-            <div class="modern-table-wrapper">
-                <table class="modern-table project-table teacher-approval-table">
-                    <thead>
-                    <tr>
-                        <th>Student Name</th>
-                        <th>Project Applied</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                    </thead>
+            <div th:each="app : ${applications}" class="approval-card">
 
-                    <tbody th:each="app : ${applications}">
-                    <tr>
-                        <td th:text="${app.student != null ? app.student.name : 'N/A'}">
-                            Student Name
-                        </td>
+                <div class="approval-card-top">
+                    <div>
+                        <h3 th:text="${app.project != null ? app.project.title : 'Project Title'}">
+                            Project Title
+                        </h3>
 
-                        <td>
-                            <strong th:text="${app.project != null ? app.project.title : 'N/A'}">
-                                Project Title
-                            </strong>
-                        </td>
+                        <div class="approval-meta">
+                            <span>
+                                👤
+                                <strong th:text="${app.student != null ? app.student.name : 'Student Name'}">
+                                    Student Name
+                                </strong>
+                            </span>
 
-                        <td>
-                            <span class="status-badge"
-                                  th:classappend="'status-' + ${app.status.name()}"
-                                  th:text="${app.status}">
+                            <span th:if="${app.student != null && app.student.email != null}"
+                                  th:text="'📧 ' + ${app.student.email}">
+                                student@email.com
+                            </span>
+
+                            <span th:text="'📌 ' + ${app.status}">
                                 pending
                             </span>
-                        </td>
+                        </div>
+                    </div>
 
-                        <td>
-                            <div class="teacher-approval-actions">
+                    <div class="approval-actions">
+                        <button type="button"
+                                class="approval-btn approval-btn-outline"
+                                th:onclick="'toggleApprovalDetails(' + ${app.id} + ')'">
+                            View Details
+                        </button>
 
-                                <button type="button"
-                                        class="modern-btn modern-btn-outline table-action-btn"
-                                        th:onclick="'toggleDetails(' + ${app.id} + ')'">
-                                    View Details
-                                </button>
+                        <form th:action="@{/teacher/approvals/{id}/accept(id=${app.id})}"
+                              method="post"
+                              class="inline-action-form">
+                            <button type="submit" class="approval-btn approval-btn-accept">
+                                Accept
+                            </button>
+                        </form>
 
-                                <form th:action="@{/teacher/approvals/{id}/accept(id=${app.id})}"
-                                      method="post"
-                                      class="inline-action-form"
-                                      onsubmit="handleAccept(this)">
-                                    <button type="submit"
-                                            class="modern-btn modern-btn-primary table-action-btn">
-                                        Accept
-                                    </button>
-                                </form>
+                        <form th:action="@{/teacher/approvals/{id}/reject(id=${app.id})}"
+                              method="post"
+                              class="inline-action-form"
+                              onsubmit="return confirm('Are you sure you want to reject this application?');">
+                            <button type="submit" class="approval-btn approval-btn-reject">
+                                Reject
+                            </button>
+                        </form>
+                    </div>
+                </div>
 
-                                <form th:action="@{/teacher/approvals/{id}/reject(id=${app.id})}"
-                                      method="post"
-                                      class="inline-action-form"
-                                      onsubmit="return confirm('Are you sure you want to reject this student?');">
-                                    <button type="submit"
-                                            class="modern-btn admin-danger-btn table-action-btn">
-                                        Reject
-                                    </button>
-                                </form>
+                <p class="approval-statement"
+                   th:if="${app.personalStatement != null && !#strings.isEmpty(app.personalStatement)}"
+                   th:text="${app.personalStatement}">
+                    Personal statement
+                </p>
 
-                            </div>
-                        </td>
-                    </tr>
+                <div th:id="'approval-details-' + ${app.id}" class="approval-details">
+                    <div class="approval-details-grid">
 
-                    <!-- Student Details Row -->
-                    <tr th:id="'details-' + ${app.id}" class="approval-details-row">
-                        <td colspan="4">
-                            <div class="approval-details-card">
+                        <div class="approval-detail-item">
+                            <span class="approval-detail-label">Student Name</span>
+                            <span class="approval-detail-value"
+                                  th:text="${app.student != null ? app.student.name : 'N/A'}">
+                                N/A
+                            </span>
+                        </div>
 
-                                <div class="approval-detail-item">
-                                    <span class="detail-label">Name</span>
-                                    <span class="detail-value"
-                                          th:text="${app.student != null ? app.student.name : 'N/A'}">
-                                        Name
-                                    </span>
-                                </div>
+                        <div class="approval-detail-item">
+                            <span class="approval-detail-label">Student Email</span>
+                            <span class="approval-detail-value"
+                                  th:text="${app.student != null ? app.student.email : 'N/A'}">
+                                N/A
+                            </span>
+                        </div>
 
-                                <div class="approval-detail-item">
-                                    <span class="detail-label">Email</span>
-                                    <span class="detail-value"
-                                          th:text="${app.student != null ? app.student.email : 'N/A'}">
-                                        Email
-                                    </span>
-                                </div>
+                        <div class="approval-detail-item">
+                            <span class="approval-detail-label">Department</span>
+                            <span class="approval-detail-value"
+                                  th:text="${app.student != null && app.student.department != null ? app.student.department : 'N/A'}">
+                                N/A
+                            </span>
+                        </div>
 
-                                <div class="approval-detail-item">
-                                    <span class="detail-label">Department</span>
-                                    <span class="detail-value"
-                                          th:text="${app.student != null ? app.student.department : 'N/A'}">
-                                        Department
-                                    </span>
-                                </div>
+                        <div class="approval-detail-item">
+                            <span class="approval-detail-label">Phone</span>
+                            <span class="approval-detail-value"
+                                  th:text="${app.student != null && app.student.phone != null ? app.student.phone : 'N/A'}">
+                                N/A
+                            </span>
+                        </div>
 
-                                <div class="approval-detail-item">
-                                    <span class="detail-label">Phone</span>
-                                    <span class="detail-value"
-                                          th:text="${app.student != null ? app.student.phone : 'N/A'}">
-                                        Phone
-                                    </span>
-                                </div>
+                    </div>
+                </div>
 
-                            </div>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
             </div>
 
-            <!-- Bottom Actions -->
-            <div class="page-bottom-actions">
+            <div style="margin-top:22px;">
                 <a th:href="@{/teacher/dashboard}" class="modern-btn modern-btn-outline">
                     ← Back to Teacher Dashboard
                 </a>
             </div>
+
         </div>
 
     </div>
 </div>
 
 <script>
-    function toggleDetails(id) {
-        const row = document.getElementById('details-' + id);
-        if (!row) return;
+    function toggleApprovalDetails(id) {
+        const target = document.getElementById('approval-details-' + id);
+        if (!target) {
+            return;
+        }
 
-        row.style.display = row.style.display === 'table-row' ? 'none' : 'table-row';
-    }
-
-    function handleAccept(form) {
-        const btn = form.querySelector('button');
-        if (!btn) return true;
-
-        btn.disabled = true;
-        btn.innerText = 'Processing...';
-
-        return true;
+        target.style.display = target.style.display === 'block' ? 'none' : 'block';
     }
 </script>
 

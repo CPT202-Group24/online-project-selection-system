@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,10 +26,53 @@ public class TeacherApprovalController {
         this.teacherApprovalService = teacherApprovalService;
     }
 
-    @PostMapping("/api/teacher/applications/{id}/approve")
-    public String approveApplication(@PathVariable Long id, RedirectAttributes ra) {
+    @GetMapping("/teacher/approvals")
+    public String showApprovals(Authentication authentication, Model model) {
+        String email = authentication.getName();
+        List<Application> applications = teacherApprovalService.getPendingApplicationsByEmail(email);
+
+        model.addAttribute("applications", applications);
+        model.addAttribute("pendingTotal", applications.size());
+
+        return "teacher-approvals";
+    }
+
+    @PostMapping("/teacher/approvals/{id}/accept")
+    public String acceptApplication(@PathVariable Long id,
+                                    @RequestParam(value = "redirect", required = false) String redirect,
+                                    Authentication authentication,
+                                    RedirectAttributes ra) {
         try {
-            teacherApprovalService.processApproval(id, true, null);
+            teacherApprovalService.processApprovalByTeacherEmail(id, true, authentication.getName());
+            ra.addFlashAttribute("successMessage", "Application approved successfully!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", e.getMessage());
+        }
+
+        return "redirect:" + safeRedirect(redirect);
+    }
+
+    @PostMapping("/teacher/approvals/{id}/reject")
+    public String rejectApplication(@PathVariable Long id,
+                                    @RequestParam(value = "redirect", required = false) String redirect,
+                                    Authentication authentication,
+                                    RedirectAttributes ra) {
+        try {
+            teacherApprovalService.processApprovalByTeacherEmail(id, false, authentication.getName());
+            ra.addFlashAttribute("successMessage", "Application rejected.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", e.getMessage());
+        }
+
+        return "redirect:" + safeRedirect(redirect);
+    }
+
+    @PostMapping("/api/teacher/applications/{id}/approve")
+    public String approveApplication(@PathVariable Long id,
+                                     Authentication authentication,
+                                     RedirectAttributes ra) {
+        try {
+            teacherApprovalService.processApprovalByTeacherEmail(id, true, authentication.getName());
             ra.addFlashAttribute("successMessage", "Application approved successfully!");
         } catch (Exception e) {
             ra.addFlashAttribute("errorMessage", e.getMessage());
@@ -37,9 +81,11 @@ public class TeacherApprovalController {
     }
 
     @PostMapping("/api/teacher/applications/{id}/reject")
-    public String rejectApplication(@PathVariable Long id, RedirectAttributes ra) {
+    public String rejectApplicationApi(@PathVariable Long id,
+                                       Authentication authentication,
+                                       RedirectAttributes ra) {
         try {
-            teacherApprovalService.processApproval(id, false, null);
+            teacherApprovalService.processApprovalByTeacherEmail(id, false, authentication.getName());
             ra.addFlashAttribute("successMessage", "Application rejected.");
         } catch (Exception e) {
             ra.addFlashAttribute("errorMessage", e.getMessage());
@@ -47,12 +93,44 @@ public class TeacherApprovalController {
         return "redirect:/teacher/dashboard";
     }
 
-    @GetMapping("/api/teacher/applications/topics/{topicId}/accepted")
+    @PostMapping("/teacher/applications/{id}/approve")
+    public String approveApplicationFromTopic(@PathVariable Long id,
+                                              @RequestParam(value = "topicId", required = false) Long topicId,
+                                              Authentication authentication,
+                                              RedirectAttributes ra) {
+        try {
+            teacherApprovalService.processApprovalByTeacherEmail(id, true, authentication.getName());
+            ra.addFlashAttribute("successMessage", "Application approved successfully!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:" + safeTopicRedirect(topicId);
+    }
+
+    @PostMapping("/teacher/applications/{id}/reject")
+    public String rejectApplicationFromTopic(@PathVariable Long id,
+                                             @RequestParam(value = "topicId", required = false) Long topicId,
+                                             Authentication authentication,
+                                             RedirectAttributes ra) {
+        try {
+            teacherApprovalService.processApprovalByTeacherEmail(id, false, authentication.getName());
+            ra.addFlashAttribute("successMessage", "Application rejected.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:" + safeTopicRedirect(topicId);
+    }
+
+    @GetMapping({
+            "/api/teacher/applications/topics/{topicId}/accepted",
+            "/api/teacher/applications/topics/{topicId}/students"
+    })
     public ResponseEntity<List<Application>> getAcceptedApplications(
             @PathVariable("topicId") Long topicId,
             @RequestParam("teacherId") Long currentTeacherId) {
         try {
-            List<Application> acceptedApps = teacherApprovalService.getAcceptedApplications(topicId, currentTeacherId);
+            List<Application> acceptedApps =
+                    teacherApprovalService.getAcceptedApplications(topicId, currentTeacherId);
             return ResponseEntity.ok(acceptedApps);
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
@@ -65,10 +143,14 @@ public class TeacherApprovalController {
             @RequestParam("teacherId") Long currentTeacherId,
             HttpServletResponse response) throws Exception {
 
-        List<Application> acceptedApps = teacherApprovalService.getAcceptedApplications(topicId, currentTeacherId);
+        List<Application> acceptedApps =
+                teacherApprovalService.getAcceptedApplications(topicId, currentTeacherId);
 
         response.setContentType("text/csv; charset=UTF-8");
-        response.setHeader("Content-Disposition", "attachment; filename=\"accepted_students_topic_" + topicId + ".csv\"");
+        response.setHeader(
+                "Content-Disposition",
+                "attachment; filename=\"accepted_students_topic_" + topicId + ".csv\""
+        );
 
         PrintWriter writer = response.getWriter();
         writer.write('\ufeff');
@@ -82,5 +164,21 @@ public class TeacherApprovalController {
 
         writer.flush();
         writer.close();
+    }
+
+    private String safeRedirect(String redirect) {
+        if ("/teacher/dashboard".equals(redirect)) {
+            return "/teacher/dashboard";
+        }
+
+        return "/teacher/approvals";
+    }
+
+    private String safeTopicRedirect(Long topicId) {
+        if (topicId == null || topicId <= 0) {
+            return "/teacher/projects";
+        }
+
+        return "/teacher/topics/" + topicId;
     }
 }

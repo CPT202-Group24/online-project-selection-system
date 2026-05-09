@@ -9,7 +9,9 @@ public interface TeacherApprovalService {
 
     void processApproval(Long applicationId, boolean isAccepted, Long currentTeacherId);
 
+    void processApprovalByTeacherEmail(Long applicationId, boolean isAccepted, String teacherEmail);
+
     List<Application> getAcceptedApplications(Long topicId, Long currentTeacherId);
-    
+
     List<Application> getPendingApplicationsByEmail(String email);
 }
