@@ -393,6 +393,112 @@
         .auth-form-links a:hover { text-decoration: underline; }
         .auth-link-sep { color: #c8d4e0; }
 
+        /* ---- Demo accounts ---- */
+        .demo-trigger {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+            margin-top: 24px;
+            padding: 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            color: #9aacc0;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            transition: color .15s;
+        }
+        .demo-trigger:hover { color: #4a6a8a; }
+        .demo-trigger svg { transition: transform .2s; flex-shrink: 0; }
+        .demo-trigger.open svg { transform: rotate(180deg); }
+        .demo-trigger-line {
+            flex: 1;
+            height: 1px;
+            background: #dde5f0;
+        }
+
+        .demo-panel {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .demo-panel.open { display: flex; }
+
+        .demo-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: #fff;
+            border: 1.5px solid #dde5f0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: border-color .15s, box-shadow .15s;
+        }
+        .demo-row:hover {
+            border-color: #b0c4dc;
+            box-shadow: 0 2px 8px rgba(10,18,32,.07);
+        }
+        .demo-row:active { transform: translateY(1px); }
+
+        .demo-badge {
+            font-size: 9.5px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 4px;
+            flex-shrink: 0;
+            font-family: 'Inter', sans-serif;
+        }
+        .demo-badge-admin   { background: #0a1220; color: #c8a23a; }
+        .demo-badge-teacher { background: #1e3a5f; color: #a8c8f0; }
+        .demo-badge-student { background: #1a3d25; color: #7dd9a0; }
+
+        .demo-creds {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+        .demo-email {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #0a1220;
+            font-family: 'Inter', sans-serif;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .demo-pass {
+            font-size: 11px;
+            color: #8898aa;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .demo-use-hint {
+            font-size: 10.5px;
+            color: #b0bec8;
+            font-family: 'Inter', sans-serif;
+            flex-shrink: 0;
+        }
+        .demo-row:hover .demo-use-hint { color: #6a7888; }
+
+        .demo-copied {
+            font-size: 10.5px;
+            color: #2e7d50;
+            font-family: 'Inter', sans-serif;
+            flex-shrink: 0;
+            display: none;
+        }
+
         /* ---- Responsive ---- */
         @media (max-width: 960px) {
             .auth-panel-left { flex: 0 0 47% !important; }
@@ -440,16 +546,16 @@
             <footer class="auth-panel-footer">
                 <div class="auth-stats-row">
                     <div class="auth-stat-item">
-                        <b class="auth-stat-num">120+</b>
-                        <span class="auth-stat-label">Active Projects</span>
+                        <b class="auth-stat-num">50</b>
+                        <span class="auth-stat-label">Project Topics</span>
+                    </div>
+                    <div class="auth-stat-item">
+                        <b class="auth-stat-num">10</b>
+                        <span class="auth-stat-label">Categories</span>
                     </div>
                     <div class="auth-stat-item">
                         <b class="auth-stat-num">3</b>
-                        <span class="auth-stat-label">Faculties</span>
-                    </div>
-                    <div class="auth-stat-item">
-                        <b class="auth-stat-num">500+</b>
-                        <span class="auth-stat-label">Students</span>
+                        <span class="auth-stat-label">User Roles</span>
                     </div>
                 </div>
                 <p class="auth-legal">© 2026 Xi'an Jiaotong-Liverpool University</p>
@@ -541,12 +647,77 @@
                 <span>No account? <a th:href="@{/register}">Register</a></span>
             </div>
 
+            <!-- Demo accounts -->
+            <button type="button" class="demo-trigger" id="demoTrigger" onclick="toggleDemo()">
+                <span class="demo-trigger-line"></span>
+                Demo Accounts
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                <span class="demo-trigger-line"></span>
+            </button>
+
+            <div class="demo-panel" id="demoPanel">
+
+                <div class="demo-row" onclick="fillLogin('admin@xjtlu.edu.cn','test123',this)">
+                    <span class="demo-badge demo-badge-admin">Admin</span>
+                    <div class="demo-creds">
+                        <span class="demo-email">admin@xjtlu.edu.cn</span>
+                        <span class="demo-pass">test123</span>
+                    </div>
+                    <span class="demo-use-hint">click to fill</span>
+                    <span class="demo-copied">Filled ✓</span>
+                </div>
+
+                <div class="demo-row" onclick="fillLogin('james.harrison@xjtlu.edu.cn','test123',this)">
+                    <span class="demo-badge demo-badge-teacher">Teacher</span>
+                    <div class="demo-creds">
+                        <span class="demo-email">james.harrison@xjtlu.edu.cn</span>
+                        <span class="demo-pass">test123</span>
+                    </div>
+                    <span class="demo-use-hint">click to fill</span>
+                    <span class="demo-copied">Filled ✓</span>
+                </div>
+
+                <div class="demo-row" onclick="fillLogin('bella.zhang@student.xjtlu.edu.cn','test123',this)">
+                    <span class="demo-badge demo-badge-student">Student</span>
+                    <div class="demo-creds">
+                        <span class="demo-email">bella.zhang@student.xjtlu.edu.cn</span>
+                        <span class="demo-pass">test123</span>
+                    </div>
+                    <span class="demo-use-hint">click to fill</span>
+                    <span class="demo-copied">Filled ✓</span>
+                </div>
+
+            </div>
+
         </div>
     </div>
 
 </div>
 
 <script>
+function toggleDemo() {
+    var btn   = document.getElementById('demoTrigger');
+    var panel = document.getElementById('demoPanel');
+    btn.classList.toggle('open');
+    panel.classList.toggle('open');
+}
+
+function fillLogin(email, password, row) {
+    document.getElementById('username').value = email;
+    document.getElementById('password').value = password;
+    /* swap hint → filled feedback */
+    var hint    = row.querySelector('.demo-use-hint');
+    var copied  = row.querySelector('.demo-copied');
+    hint.style.display   = 'none';
+    copied.style.display = 'block';
+    setTimeout(function() {
+        hint.style.display   = '';
+        copied.style.display = '';
+    }, 1800);
+    /* scroll up to form */
+    document.getElementById('username').focus();
+}
+
 /* SVG path sets — swap innerHTML on the single <svg> element */
 var PW_ICON = {
     closed: '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>',
