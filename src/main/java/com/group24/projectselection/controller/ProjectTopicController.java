@@ -340,6 +340,11 @@ public class ProjectTopicController {
         }
 
         model.addAttribute("projectTopic", topic);
+
+        if (topic.getTeacher() != null) {
+            model.addAttribute("teacher", topic.getTeacher());
+        }
+
         return "student-topic-detail";
     }
 

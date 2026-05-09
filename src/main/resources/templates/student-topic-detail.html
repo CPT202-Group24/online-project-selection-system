@@ -290,12 +290,40 @@
             </div>
         </div>
 
-        <!-- Description -->
-        <div class="pss-card">
-            <h3 class="pss-card-title">Project Description</h3>
-            <p class="pss-body-text"
-               th:text="${projectTopic.description != null and !projectTopic.description.isEmpty() ? projectTopic.description : 'No description available.'}">
-            </p>
+        <!-- Description + Teacher Info -->
+        <div class="pss-card" style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom:16px;">
+
+            <!-- Left: Project Description -->
+            <div>
+                <h3 class="pss-card-title">Project Description</h3>
+                <p class="pss-body-text"
+                   th:text="${projectTopic.description != null and !projectTopic.description.isEmpty() ? projectTopic.description : 'No description available.'}">
+                </p>
+            </div>
+
+            <!-- Right: Teacher Info -->
+            <div class="pss-card" style="margin-bottom:0;">
+                <h3 class="pss-card-title">Supervisor Info</h3>
+                <div class="pss-info-grid">
+                    <div class="pss-info-item">
+                        <div class="pss-info-label">Name</div>
+                        <div class="pss-info-value" th:text="${teacher != null ? teacher.name : 'N/A'}"></div>
+                    </div>
+                    <div class="pss-info-item">
+                        <div class="pss-info-label">Email</div>
+                        <div class="pss-info-value" th:text="${teacher != null ? teacher.email : 'N/A'}"></div>
+                    </div>
+                    <div class="pss-info-item">
+                        <div class="pss-info-label">Phone</div>
+                        <div class="pss-info-value" th:text="${teacher != null ? teacher.phone : 'N/A'}"></div>
+                    </div>
+                    <div class="pss-info-item">
+                        <div class="pss-info-label">Department</div>
+                        <div class="pss-info-value" th:text="${teacher != null ? teacher.department : 'N/A'}"></div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <!-- Skills + Keywords -->
