@@ -2899,3 +2899,9 @@ form .modern-btn,
     gap: 12px;
     flex-wrap: wrap;
 }
+
+.project-table th:first-child,
+.project-table td:first-child {
+    min-width: 130px;
+    white-space: nowrap;
+}

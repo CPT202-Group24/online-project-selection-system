@@ -255,7 +255,7 @@
                 </thead>
                 <tbody>
                 <tr th:each="project : ${projects}">
-                    <td class="pss-id" th:text="${project.id}"></td>
+                    <td class="pss-id" th:text="${project.displayCode}"></td>
                     <td class="pss-title-cell">
                         <span th:text="${project.title != null and !project.title.isEmpty() ? project.title : 'Untitled Project'}"></span>
                         <span th:if="${project.status.name() == 'unpublished' and project.draft}"
@@ -265,12 +265,16 @@
                         th:text="${project.teacher != null ? project.teacher.id : 'N/A'}"></td>
                     <td th:text="${project.category != null ? project.category.name : 'N/A'}"></td>
                     <td class="pss-desc-cell"
-                        th:text="${project.description != null and #strings.length(project.description) > 20
-                            ? #strings.substring(project.description, 0, 20) + '...'
+                        th:text="${project.description != null and #strings.length(project.description) > 15
+                            ? #strings.substring(project.description, 0, 15) + '...'
                             : project.description}">
                     </td>
                     <td class="pss-skill-cell"
-                        th:text="${project.requiredSkills != null and !project.requiredSkills.isEmpty() ? project.requiredSkills : 'N/A'}">
+                        th:text="${project.requiredSkills != null and !project.requiredSkills.isEmpty()
+                            ? (#strings.length(project.requiredSkills) > 15
+                            ? #strings.substring(project.requiredSkills, 0, 15) + '...'
+                            : project.requiredSkills)
+                            : 'N/A'}">
                     </td>
                     <td>
                         <span th:if="${project.keywords != null and !project.keywords.isEmpty()}">
