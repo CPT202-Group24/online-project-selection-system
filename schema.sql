@@ -37,6 +37,7 @@ CREATE TABLE project_topics (
     keywords VARCHAR(500),
     max_students INT DEFAULT NULL CHECK (max_students IS NULL OR max_students > 0),
     status ENUM('unpublished','available','requested','agreed','closed','archived') NOT NULL DEFAULT 'unpublished',
+    previous_status ENUM('unpublished','available','requested','agreed','closed','archived') DEFAULT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     is_draft TINYINT(1) NOT NULL DEFAULT 0,
@@ -101,4 +102,15 @@ CREATE TABLE password_reset_tokens (
     used BOOLEAN NOT NULL DEFAULT FALSE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE verification_codes (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    code VARCHAR(255) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    used BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_verification_email (email),
+    INDEX idx_verification_code (code)
 );

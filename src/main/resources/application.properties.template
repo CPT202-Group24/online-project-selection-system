@@ -13,8 +13,8 @@ spring.thymeleaf.cache=false
 # Mail (configure with your SMTP credentials)
 spring.mail.host=smtp.qq.com
 spring.mail.port=587
-spring.mail.username=209498863@qq.com
-spring.mail.password=mzjzgxmlygcibjdb
+spring.mail.username=YOUR_SMTP_EMAIL_HERE
+spring.mail.password=YOUR_SMTP_AUTH_CODE_HERE
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
 
