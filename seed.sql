@@ -20,7 +20,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- CATEGORIES (10)
 -- ============================================================
 INSERT INTO categories (id, name, description, is_active, created_at) VALUES
-(1,  'Artificial Intelligence & Machine Learning', 'AI/ML research including deep learning, NLP, computer vision and reinforcement learning', 1, '2026-01-10 09:00:00'),
+(1,  'Machine Learning', 'Machine learning research including deep learning, NLP, computer vision and reinforcement learning', 1, '2026-01-10 09:00:00'),
 (2,  'Web & Cloud Computing',                      'Full-stack web development, cloud-native architectures, microservices and DevOps',       1, '2026-01-10 09:00:00'),
 (3,  'Data Science & Analytics',                   'Big data processing, statistical modelling, visualisation and business intelligence',    1, '2026-01-10 09:00:00'),
 (4,  'Cybersecurity & Network Security',           'Threat detection, cryptography, secure systems design and privacy-enhancing tech',      1, '2026-01-10 09:00:00'),
@@ -63,16 +63,16 @@ INSERT INTO users (id, email, password_hash, name, role, phone, department, stat
 -- ============================================================
 INSERT INTO project_topics (id, teacher_id, category_id, title, description, required_skills, keywords, max_students, is_draft, status, created_at, updated_at) VALUES
 
--- === Dr. James Harrison (AI/ML) === --
+-- === Dr. James Harrison (Machine Learning) === --
 (1,  2, 1, 'Deep Learning for Medical Image Segmentation',
  'This project investigates the use of convolutional neural networks and transformer-based architectures for semantic segmentation of MRI and CT scan images. The goal is to automate the delineation of anatomical structures and tumour boundaries, reducing radiologist workload and improving diagnostic consistency. Students will work with public medical imaging datasets and implement state-of-the-art segmentation models including U-Net, nnU-Net, and Swin-UNETR.',
  'Python, PyTorch or TensorFlow, basic understanding of CNNs, familiarity with medical imaging (desirable)',
  'deep learning, medical imaging, segmentation, CNN, transformer', 2, 0, 'available', '2026-02-10 09:00:00', '2026-02-10 09:00:00'),
 
-(2,  2, 1, 'Explainable AI for Credit Risk Assessment',
+(2,  2, 1, 'Explainable Machine Learning for Credit Risk Assessment',
  'Financial institutions increasingly rely on black-box machine learning models for credit scoring, raising concerns about fairness and regulatory compliance. This project develops explainability methods (SHAP, LIME, attention mechanisms) applied to gradient-boosted tree models and neural networks trained on credit risk datasets. The outcome will be an interpretable dashboard that highlights key risk factors for individual loan decisions.',
  'Python, scikit-learn, XGBoost, basic statistics, interest in fintech',
- 'explainable AI, XAI, credit risk, SHAP, fairness', 1, 0, 'available', '2026-02-12 09:00:00', '2026-02-12 09:00:00'),
+ 'explainable machine learning, model interpretability, credit risk, SHAP, fairness', 1, 0, 'available', '2026-02-12 09:00:00', '2026-02-12 09:00:00'),
 
 (3,  2, 1, 'Federated Learning for Privacy-Preserving Healthcare Data Analysis',
  'Centralising patient data across hospitals raises serious privacy and legal barriers. This project implements a federated learning framework that trains shared models across distributed hospital nodes without raw data leaving each site. Students will implement FedAvg and differential-privacy variants, evaluate convergence on disease prediction tasks, and benchmark against centralised baselines.',
@@ -86,7 +86,7 @@ INSERT INTO project_topics (id, teacher_id, category_id, title, description, req
 
 (5,  2, 7, 'Reinforcement Learning for Autonomous Traffic Signal Control',
  'Urban traffic congestion costs billions annually. This project trains deep reinforcement learning agents (PPO, SAC) to control traffic signal timings across multi-intersection road networks using the SUMO traffic simulator. The agent learns to minimise average vehicle waiting time and CO2 emissions. Students will compare centralised, decentralised, and multi-agent approaches.',
- 'Python, reinforcement learning basics, experience with OpenAI Gym or similar',
+ 'Python, reinforcement learning basics, experience with simulation environments',
  'reinforcement learning, traffic control, autonomous systems, multi-agent', 2, 0, 'available', '2026-02-20 09:00:00', '2026-02-20 09:00:00'),
 
 (6,  2, 1, 'Generative Adversarial Networks for Synthetic Training Data Augmentation',
@@ -201,9 +201,9 @@ INSERT INTO project_topics (id, teacher_id, category_id, title, description, req
  'Python, statistics, basic cryptography, interest in privacy',
  'differential privacy, federated analytics, privacy, statistics', 2, 0, 'requested', '2026-02-22 10:00:00', '2026-03-12 10:00:00'),
 
-(28, 4, 4, 'AI-Assisted Penetration Testing Automation Platform',
- 'Manual penetration testing is expensive and hard to scale. This project develops an AI-assisted pentest automation framework that uses reinforcement learning to guide vulnerability scanning, exploit selection, and post-exploitation actions in a controlled virtual lab (HackTheBox-style machines). Students will compare AI-guided vs random vs human-guided approaches on a standardised testbed.',
- 'Linux, basic networking, Python, interest in offensive security and AI',
+(28, 4, 4, 'Automated Penetration Testing Platform',
+ 'Manual penetration testing is expensive and hard to scale. This project develops a pentest automation framework that uses reinforcement learning to guide vulnerability scanning, exploit selection, and post-exploitation actions in a controlled virtual lab (HackTheBox-style machines). Students will compare automated, random, and human-guided approaches on a standardised testbed.',
+ 'Linux, basic networking, Python, interest in offensive security and automation',
  'penetration testing, automation, reinforcement learning, offensive security', 2, 0, 'available', '2026-02-24 10:00:00', '2026-02-24 10:00:00'),
 
 (29, 4, 4, 'Post-Quantum Cryptography: Implementation and Performance Benchmarking',
@@ -227,10 +227,10 @@ INSERT INTO project_topics (id, teacher_id, category_id, title, description, req
  'React, JavaScript, REST APIs, basic backend development',
  'PWA, React, Service Workers, campus management, mobile-first', 2, 0, 'available', '2026-02-12 10:30:00', '2026-02-12 10:30:00'),
 
-(33, 5, 10, 'Cognitive Load in AI-Assisted Code Editors: A Mixed-Methods Evaluation',
- 'AI pair programmers (GitHub Copilot, Cursor) promise productivity gains but may also increase cognitive load for novice developers. This project conducts a mixed-methods study combining eye-tracking, EEG-based cognitive load measurement, and think-aloud protocols to evaluate how different AI suggestion styles affect novice and expert programmers. Findings will inform design guidelines.',
+(33, 5, 10, 'Cognitive Load in Code Suggestion Editors: A Mixed-Methods Evaluation',
+ 'Code suggestion tools promise productivity gains but may also increase cognitive load for novice developers. This project conducts a mixed-methods study combining eye-tracking, EEG-based cognitive load measurement, and think-aloud protocols to evaluate how different suggestion styles affect novice and expert programmers. Findings will inform design guidelines.',
  'Interest in HCI research methods, basic programming experience, willingness to conduct user studies',
- 'cognitive load, AI code assistant, eye-tracking, HCI, developer tools', 2, 0, 'requested', '2026-02-14 10:30:00', '2026-03-06 10:00:00'),
+ 'cognitive load, code suggestion, eye-tracking, HCI, developer tools', 2, 0, 'requested', '2026-02-14 10:30:00', '2026-03-06 10:00:00'),
 
 (34, 5, 10, 'Affective Computing Interface for Student Mental Health Monitoring',
  'Student mental health crises are often detected too late. This project develops a passive affect recognition system that analyses facial action units (OpenFace), voice prosody, and typing dynamics to infer student stress levels during study sessions. A privacy-preserving on-device processing architecture will ensure data never leaves the student device. An alert system for welfare officers will be prototyped.',
@@ -326,7 +326,7 @@ INSERT INTO applications (id, student_id, project_id, personal_statement, status
 
 -- Project 3 (Federated Learning — requested) — 2 pending
 (1,  7,  3,
- 'I am deeply interested in the intersection of machine learning and healthcare privacy, which is why this project resonates strongly with me. In my third year, I completed a self-directed study of differential privacy mechanisms and implemented a basic federated learning prototype using PyTorch and the Flower framework. I believe that federated approaches will be essential for enabling AI in regulated healthcare environments, and I am eager to work on real convergence challenges across non-IID data distributions.',
+ 'I am deeply interested in the intersection of machine learning and healthcare privacy, which is why this project resonates strongly with me. In my third year, I completed a self-directed study of differential privacy mechanisms and implemented a basic federated learning prototype using PyTorch and the Flower framework. I believe that federated approaches will be essential for regulated healthcare environments, and I am eager to work on real convergence challenges across non-IID data distributions.',
  'pending', '2026-03-01 14:22:00', '2026-03-01 14:22:00'),
 
 (2,  12, 3,
@@ -335,7 +335,7 @@ INSERT INTO applications (id, student_id, project_id, personal_statement, status
 
 -- Project 4 (NLP Essay Scoring — agreed) — 1 accepted, 1 rejected
 (3,  8,  4,
- 'Automated essay scoring sits at the intersection of my two core interests: NLP and education technology. I have completed Andrew Ng''s NLP Specialisation and independently fine-tuned a BERT model for sentiment classification on an Amazon review dataset, achieving 93.5% accuracy. My final-year plan is to pursue educational AI research, and this project would provide ideal grounding. I am comfortable with the HuggingFace ecosystem and have basic Flask experience for the web interface prototype.',
+ 'Automated essay scoring sits at the intersection of my two core interests: NLP and education technology. I have completed Andrew Ng''s NLP Specialisation and independently fine-tuned a BERT model for sentiment classification on an Amazon review dataset, achieving 93.5% accuracy. My final-year plan is to pursue educational technology research, and this project would provide ideal grounding. I am comfortable with the HuggingFace ecosystem and have basic Flask experience for the web interface prototype.',
  'accepted', '2026-03-05 11:30:00', '2026-03-18 09:00:00'),
 
 (4,  9,  4,
@@ -397,14 +397,14 @@ INSERT INTO applications (id, student_id, project_id, personal_statement, status
  'I completed a module on privacy engineering last semester and wrote a literature review on differential privacy applications in federated learning. I am confident in the mathematical background required and have Python experience with data analysis libraries. I am keen to extend my theoretical understanding into a practical implementation, and the comparison of central vs local DP mechanisms on real datasets would be an ideal vehicle for this.',
  'pending', '2026-03-14 15:00:00', '2026-03-14 15:00:00'),
 
--- Project 33 (HCI code editors — requested) — 1 pending
+-- Project 33 (HCI code editors - requested) - 1 pending
 (17, 14, 33,
- 'I have a strong interest in human-computer interaction research, particularly the cognitive aspects of programmer experience. I completed a module on research methods and have basic experience with eye-tracking equipment from a lab demonstration session. I use AI coding assistants daily and have formed qualitative impressions about their effects on my own problem-solving, which I would like to examine rigorously. I am willing to recruit participants and manage the mixed-methods study protocol under Dr. Roberts'' supervision.',
+ 'I have a strong interest in human-computer interaction research, particularly the cognitive aspects of programmer experience. I completed a module on research methods and have basic experience with eye-tracking equipment from a lab demonstration session. I use code suggestion tools daily and have formed qualitative impressions about their effects on my own problem-solving, which I would like to examine rigorously. I am willing to recruit participants and manage the mixed-methods study protocol under Dr. Roberts'' supervision.',
  'pending', '2026-03-06 14:10:00', '2026-03-06 14:10:00'),
 
 -- Project 34 (Affective Computing — agreed) — 1 accepted
 (18, 8,  34,
- 'Mental health technology is an area I am deeply committed to, having volunteered as a peer mental health supporter for two years. I have studied affective computing through academic papers and a Coursera specialisation on emotion AI. My technical skills include Python, OpenCV for facial landmark detection, and librosa for audio feature extraction. I am especially attracted to the on-device processing architecture, which addresses the privacy concerns that I believe are central to the ethical deployment of this kind of system.',
+ 'Mental health technology is an area I am deeply committed to, having volunteered as a peer mental health supporter for two years. I have studied affective computing through academic papers and a Coursera specialisation on emotion recognition. My technical skills include Python, OpenCV for facial landmark detection, and librosa for audio feature extraction. I am especially attracted to the on-device processing architecture, which addresses the privacy concerns that I believe are central to the ethical deployment of this kind of system.',
  'accepted', '2026-03-12 09:30:00', '2026-03-25 08:45:00'),
 
 -- Project 37 (AR Navigation — requested) — 2 pending

@@ -46,10 +46,10 @@ class ProjectTopicServiceTest {
         category.setId(1L);
 
         ProjectTopic projectTopic = new ProjectTopic();
-        projectTopic.setTitle("AI Research");
-        projectTopic.setDescription("Study AI methods");
+        projectTopic.setTitle("ML Research");
+        projectTopic.setDescription("Study ML methods");
         projectTopic.setRequiredSkills("Java, Spring");
-        projectTopic.setKeywords("AI, Java");
+        projectTopic.setKeywords("ML, Java");
         projectTopic.setMaxStudents(3);
         projectTopic.setCategory(category);
 

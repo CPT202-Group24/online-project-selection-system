@@ -53,7 +53,7 @@ class ProjectTopicControllerStudentTest {
         topic.setTitle("test");
         topic.setDescription("1234");
         topic.setRequiredSkills("1234");
-        topic.setKeywords("AI");
+        topic.setKeywords("ML");
         topic.setMaxStudents(10);
         topic.setStatus(ProjectTopic.TopicStatus.available);
 
@@ -90,7 +90,7 @@ class ProjectTopicControllerStudentTest {
         topic.setTitle("test");
         topic.setDescription("1234");
         topic.setRequiredSkills("1234");
-        topic.setKeywords("AI");
+        topic.setKeywords("ML");
         topic.setMaxStudents(10);
         topic.setStatus(ProjectTopic.TopicStatus.available);
 

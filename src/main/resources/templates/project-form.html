@@ -191,8 +191,8 @@
                     <div class="pss-form-group pss-full">
                         <label class="pss-form-label" for="keywords">Keywords</label>
                         <input id="keywords" type="text" th:field="*{keywords}"
-                               class="pss-form-input" placeholder="Example: AI, Java, Spring">
-                        <span class="pss-field-hint">Separate keywords with commas, for example: AI, Java, Spring</span>
+                               class="pss-form-input" placeholder="Example: ML, Java, Spring">
+                        <span class="pss-field-hint">Separate keywords with commas, for example: ML, Java, Spring</span>
                         <div th:if="${projectTopic.keywords != null and !projectTopic.keywords.isEmpty()}"
                              class="pss-keyword-row">
                             <span th:each="kw : ${#strings.arraySplit(projectTopic.keywords, ',')}"

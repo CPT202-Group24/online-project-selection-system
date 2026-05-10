@@ -36,10 +36,10 @@ class ProjectTopicServiceImplTest {
         category.setId(10L);
 
         ProjectTopic topic = new ProjectTopic();
-        topic.setTitle("AI Project");
+        topic.setTitle("ML Project");
         topic.setDescription("Test description");
         topic.setRequiredSkills("Java");
-        topic.setKeywords("AI, Java, AI, Spring ");
+        topic.setKeywords("ML, Java, ML, Spring ");
         topic.setCategory(category);
         topic.setMaxStudents(2);
 
@@ -49,7 +49,7 @@ class ProjectTopicServiceImplTest {
         ProjectTopic saved = projectTopicService.createProjectTopic(topic, teacher);
 
         assertNotNull(saved);
-        assertEquals("AI, Java, Spring", saved.getKeywords());
+        assertEquals("ML, Java, Spring", saved.getKeywords());
         assertEquals(ProjectTopic.TopicStatus.unpublished, saved.getStatus());
         assertFalse(saved.isDraft());
         assertEquals(teacher, saved.getTeacher());
@@ -92,7 +92,7 @@ class ProjectTopicServiceImplTest {
         topic.setTitle("No Category Topic");
         topic.setDescription("Test");
         topic.setRequiredSkills("Java");
-        topic.setKeywords("AI, Java");
+        topic.setKeywords("ML, Java");
         topic.setMaxStudents(1);
         topic.setCategory(null);
 
