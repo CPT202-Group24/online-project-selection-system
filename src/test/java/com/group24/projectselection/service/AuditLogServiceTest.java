@@ -14,9 +14,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
-/**
- * Sprint 3 — M8 PBI 8.3（审计日志）Service 层单元测试（指南方式 A：Mockito mock 仓储）。
- */
 @ExtendWith(MockitoExtension.class)
 class AuditLogServiceTest {
 
@@ -27,7 +24,7 @@ class AuditLogServiceTest {
     private AuditLogService auditLogService;
 
     @Test
-    void log_正常情况_合法管理员应写入一条审计记录() {
+    void log_shouldSaveAuditLogForValidAdmin() {
         User admin = new User();
         admin.setId(42L);
         admin.setEmail("admin@test.com");
@@ -44,7 +41,7 @@ class AuditLogServiceTest {
     }
 
     @Test
-    void log_异常情况_admin为null时不应调用save() {
+    void log_shouldNotSaveWhenAdminIsNull() {
         auditLogService.log(null, AuditLogService.ACTION_CATEGORY_DELETE, AuditLogService.ENTITY_CATEGORY, 1L);
 
         verifyNoInteractions(auditLogRepository);

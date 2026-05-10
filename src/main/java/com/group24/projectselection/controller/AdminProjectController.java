@@ -82,6 +82,20 @@ public class AdminProjectController {
         }
     }
 
+    @PostMapping("/api/admin/projects/{id}/delete")
+    @ResponseBody
+    public ResponseEntity<?> deletePermanently(@PathVariable Long id, Authentication authentication) {
+        try {
+            adminProjectService.deletePermanently(id);
+            logAction(authentication, AuditLogService.ACTION_PROJECT_DELETE, id);
+            return ResponseEntity.ok(Map.of("deleted", true));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
     private void logAction(Authentication authentication, String action, Long entityId) {
         if (authentication != null && authentication.isAuthenticated()) {
             User admin = userRepository.findByEmail(authentication.getName()).orElse(null);

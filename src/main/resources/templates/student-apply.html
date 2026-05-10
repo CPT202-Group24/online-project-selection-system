@@ -317,5 +317,24 @@
     </div>
 </div>
 
+<script>
+    const statementInput = document.getElementById('personalStatement');
+
+    function updateStatementValidity() {
+        const length = statementInput.value.trim().length;
+        if (length === 0) {
+            statementInput.setCustomValidity('Please enter your personal statement.');
+        } else if (length < 50) {
+            statementInput.setCustomValidity('Personal statement must be at least 50 characters.');
+        } else {
+            statementInput.setCustomValidity('');
+        }
+    }
+
+    statementInput.addEventListener('input', updateStatementValidity);
+    statementInput.addEventListener('invalid', updateStatementValidity);
+    updateStatementValidity();
+</script>
+
 </body>
 </html>

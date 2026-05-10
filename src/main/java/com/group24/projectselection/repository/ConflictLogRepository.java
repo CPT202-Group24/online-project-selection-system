@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ConflictLogRepository extends JpaRepository<ConflictLog, Long> {
+
+    void deleteByProjectId(Long projectId);
 }

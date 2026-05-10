@@ -13,6 +13,8 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
 
     List<Application> findByProjectId(Long projectId);
 
+    void deleteByProjectId(Long projectId);
+
     List<Application> findByStatus(Application.ApplicationStatus status);
 
     @Query("""
