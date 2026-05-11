@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -112,22 +113,25 @@ public class ProjectTopicServiceImpl implements ProjectTopicService {
 
     @Override
     public Page<ProjectTopic> searchAvailableTopics(String keyword, Long categoryId, int page, int size, String sort) {
-        Sort sortOption;
 
+        Sort sortOption;
         if ("az".equalsIgnoreCase(sort)) {
             sortOption = Sort.by("title").ascending();
         } else {
             sortOption = Sort.by("id").descending();
         }
-
         Pageable pageable = PageRequest.of(page, size, sortOption);
 
-        return projectTopicRepository.searchTopicsByKeywordAndCategory(
-                List.of(ProjectTopic.TopicStatus.available, ProjectTopic.TopicStatus.requested),
-                keyword,
-                categoryId,
-                pageable
-        );
+        // split keyword into words, trim and filter out empty ones
+        String[] words = keyword == null ? new String[0] : keyword.trim().split("\\s+");
+
+        // Specification
+        Specification<ProjectTopic> spec = Specification
+                .where(ProjectTopicSpecification.allKeywordsMatch(words))
+                .and(ProjectTopicSpecification.statusIn(ProjectTopic.TopicStatus.available, ProjectTopic.TopicStatus.requested))
+                .and(ProjectTopicSpecification.categoryIs(categoryId));
+
+        return projectTopicRepository.findAll(spec, pageable);
     }
 
     private void validateCategoryForNormalSave(ProjectTopic projectTopic) {
