@@ -15,9 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-/**
- * Sprint 3 — M8 PBI 8.4（系统统计）Service 层单元测试（指南方式 A：Mockito mock 仓储）。
- */
 @ExtendWith(MockitoExtension.class)
 class AdminStatsServiceTest {
 
@@ -34,7 +31,7 @@ class AdminStatsServiceTest {
     private AdminStatsService adminStatsService;
 
     @Test
-    void getCounts_正常情况_三个仓储返回值应正确汇总() {
+    void getCounts_shouldAggregateRepositoryCounts() {
         when(userRepository.count()).thenReturn(12L);
         when(projectTopicRepository.count()).thenReturn(5L);
         when(applicationRepository.count()).thenReturn(8L);
@@ -47,7 +44,7 @@ class AdminStatsServiceTest {
     }
 
     @Test
-    void getCounts_异常情况_user仓储抛异常应向上抛出() {
+    void getCounts_shouldPropagateRepositoryException() {
         when(userRepository.count()).thenThrow(new RuntimeException("Simulated DB failure"));
 
         assertThrows(RuntimeException.class, () -> adminStatsService.getCounts());

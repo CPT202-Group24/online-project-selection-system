@@ -3,96 +3,187 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>My Profile - Project Selection System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile — Project Selection System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        html, body { margin: 0 !important; padding: 0 !important; background: #f3f2ef !important; }
+
+        .pss-page {
+            min-height: calc(100vh - 64px);
+            background: #f3f2ef;
+            padding: 40px 32px 80px;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .pss-container { max-width: 740px; margin: 0 auto; }
+
+        /* Avatar block */
+        .pss-profile-top {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 32px;
+            padding-bottom: 28px;
+            border-bottom: 1px solid #dde5f0;
+            flex-wrap: wrap;
+        }
+        .pss-avatar {
+            width: 72px; height: 72px; border-radius: 50%;
+            background: #0a1220; color: #c8a23a;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 26px; font-weight: 700; flex-shrink: 0;
+            border: 2px solid rgba(200,162,58,.3);
+        }
+        .pss-profile-info {}
+        .pss-dash-eyebrow {
+            display: inline-flex; align-items: center; gap: 10px;
+            font-size: 10.5px; font-weight: 700; letter-spacing: .13em;
+            text-transform: uppercase; color: #c8a23a; margin-bottom: 8px;
+        }
+        .pss-dash-eyebrow::before { content: ''; display: block; width: 20px; height: 1.5px; background: #c8a23a; }
+        .pss-profile-name {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 24px; font-weight: 700; color: #0a1220; margin: 0 0 4px; line-height: 1.1;
+        }
+        .pss-profile-email { font-size: 13px; color: #6a7888; margin: 0; }
+
+        /* Alerts */
+        .pss-alert {
+            display: flex; gap: 10px; align-items: flex-start;
+            padding: 11px 16px; border-radius: 9px; font-size: 13px;
+            line-height: 1.5; border: 1px solid transparent; margin-bottom: 20px;
+        }
+        .pss-alert-success { background: #e7f8ee; color: #14482a; border-color: #aedbbf; }
+        .pss-alert-error   { background: #fbe9e9; color: #7a1f1f; border-color: #f3b8b8; }
+
+        /* Form cards */
+        .pss-card {
+            background: #fff; border: 1px solid #dde5f0; border-radius: 12px;
+            padding: 24px; margin-bottom: 16px;
+        }
+        .pss-card-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 15px; font-weight: 700; color: #0a1220; margin: 0 0 20px;
+        }
+        .pss-form-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+        }
+        .pss-full { grid-column: 1 / -1; }
+
+        .pss-form-group { display: flex; flex-direction: column; gap: 6px; }
+        .pss-form-label {
+            font-size: 10.5px; font-weight: 700; letter-spacing: .1em;
+            text-transform: uppercase; color: #28384a;
+        }
+        .pss-form-input {
+            padding: 10px 14px; font-size: 14px; border: 1.5px solid #dce5f0;
+            border-radius: 10px; font-family: 'Inter', sans-serif; color: #0a1220;
+            outline: none; background: #fff; transition: border-color .18s, box-shadow .18s;
+        }
+        .pss-form-input:focus { border-color: #7898c0; box-shadow: 0 0 0 3px rgba(20,58,128,.07); }
+        .pss-form-input.readonly {
+            background: #f8f9fb; color: #8898aa; cursor: not-allowed; border-color: #e8eef6;
+        }
+        .pss-field-hint { font-size: 12px; color: #9aacc0; line-height: 1.4; }
+        .pss-field-error { font-size: 12px; color: #c0392b; margin-top: 2px; }
+
+        /* Actions */
+        .pss-form-actions {
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            margin-top: 4px;
+        }
+        .pss-back {
+            display: inline-flex; align-items: center; gap: 6px;
+            text-decoration: none; font-size: 13px; font-weight: 600;
+            color: #6a7888; transition: color .15s;
+        }
+        .pss-back:hover { color: #0a1220; }
+        .pss-btn-submit {
+            display: inline-flex !important; align-items: center; gap: 8px;
+            background: #0a1220; color: #fff; border: none; font-size: 14px;
+            font-weight: 600; padding: 11px 24px; border-radius: 10px; cursor: pointer;
+            font-family: 'Inter', sans-serif; transition: background .2s;
+            box-shadow: 0 2px 8px rgba(10,18,32,.16);
+            width: auto !important; flex-shrink: 0;
+        }
+        .pss-btn-submit:hover { background: #182840; }
+
+        @media (max-width: 640px) {
+            .pss-page { padding: 24px 16px 60px; }
+            .pss-form-grid { grid-template-columns: 1fr; }
+            .pss-full { grid-column: 1; }
+            .pss-profile-top { flex-direction: column; gap: 16px; }
+        }
+    </style>
 </head>
 <body>
 
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="page-shell">
-    <div class="modern-card profile-modern-card">
+<div class="pss-page">
+    <div class="pss-container">
 
-        <!-- Page Header -->
-        <div class="modern-page-header">
-            <div class="modern-page-icon">
-                👤
-            </div>
-            <div>
-                <h1 class="modern-page-title">My Profile</h1>
-                <p class="modern-page-subtitle">
-                    View your account email and update your personal information
-                </p>
+        <div class="pss-profile-top">
+            <div class="pss-avatar" id="profileAvatar">?</div>
+            <div class="pss-profile-info">
+                <div class="pss-dash-eyebrow">Account</div>
+                <h1 class="pss-profile-name" id="profileName">My Profile</h1>
+                <p class="pss-profile-email" th:text="${currentEmail}"></p>
             </div>
         </div>
 
-        <!-- Success Message -->
-        <div th:if="${saveSuccess}" class="alert alert-success">
-            Profile updated successfully.
+        <!-- Success alert -->
+        <div th:if="${saveSuccess}" class="pss-alert pss-alert-success">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Profile updated successfully.</span>
         </div>
 
-        <!-- Profile Form -->
-        <form th:action="@{/profile}"
-              th:object="${profileForm}"
-              method="post"
-              class="modern-form">
+        <form th:action="@{/profile}" th:object="${profileForm}" method="post">
 
-            <div class="form-section-card">
-                <h3 class="form-section-title">Account Information</h3>
-
-                <div class="modern-form-grid">
-                    <div class="modern-form-group full-width">
-                        <label for="email">Email</label>
-                        <input id="email"
-                               type="email"
-                               th:value="${currentEmail}"
-                               class="modern-input readonly-input"
-                               readonly>
-                        <p class="field-hint">
-                            Email is linked to your account and cannot be edited here.
-                        </p>
+            <!-- Account info -->
+            <div class="pss-card">
+                <h3 class="pss-card-title">Account Information</h3>
+                <div class="pss-form-grid">
+                    <div class="pss-form-group pss-full">
+                        <label class="pss-form-label" for="email">Email</label>
+                        <input id="email" type="email" th:value="${currentEmail}"
+                               class="pss-form-input readonly" readonly>
+                        <span class="pss-field-hint">Email is linked to your account and cannot be edited here.</span>
                     </div>
                 </div>
             </div>
 
-            <div class="form-section-card">
-                <h3 class="form-section-title">Personal Information</h3>
-
-                <div class="modern-form-grid">
-                    <div class="modern-form-group">
-                        <label for="name">Name</label>
-                        <input id="name"
-                               type="text"
-                               th:field="*{name}"
-                               class="modern-input"
-                               placeholder="Enter your name">
-                        <div class="field-error"
+            <!-- Personal info -->
+            <div class="pss-card">
+                <h3 class="pss-card-title">Personal Information</h3>
+                <div class="pss-form-grid">
+                    <div class="pss-form-group">
+                        <label class="pss-form-label" for="name">Name</label>
+                        <input id="name" type="text" th:field="*{name}"
+                               class="pss-form-input" placeholder="Enter your name">
+                        <div class="pss-field-error"
                              th:if="${#fields.hasErrors('name')}"
                              th:errors="*{name}">
                         </div>
                     </div>
-
-                    <div class="modern-form-group">
-                        <label for="phone">Phone Number</label>
-                        <input id="phone"
-                               type="text"
-                               th:field="*{phone}"
-                               class="modern-input"
-                               placeholder="Enter your phone number">
-                        <div class="field-error"
+                    <div class="pss-form-group">
+                        <label class="pss-form-label" for="phone">Phone Number</label>
+                        <input id="phone" type="text" th:field="*{phone}"
+                               class="pss-form-input" placeholder="Enter your phone number">
+                        <div class="pss-field-error"
                              th:if="${#fields.hasErrors('phone')}"
                              th:errors="*{phone}">
                         </div>
                     </div>
-
-                    <div class="modern-form-group full-width">
-                        <label for="department">Department</label>
-                        <input id="department"
-                               type="text"
-                               th:field="*{department}"
-                               class="modern-input"
-                               placeholder="Enter your department">
-                        <div class="field-error"
+                    <div class="pss-form-group pss-full">
+                        <label class="pss-form-label" for="department">Department</label>
+                        <input id="department" type="text" th:field="*{department}"
+                               class="pss-form-input" placeholder="Enter your department">
+                        <div class="pss-field-error"
                              th:if="${#fields.hasErrors('department')}"
                              th:errors="*{department}">
                         </div>
@@ -100,9 +191,10 @@
                 </div>
             </div>
 
-            <div class="modern-form-actions">
-                <button type="submit" class="modern-btn modern-btn-primary">
+            <div class="pss-form-actions">
+                <button type="submit" class="pss-btn-submit">
                     Save Profile
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                 </button>
             </div>
 
@@ -110,6 +202,23 @@
 
     </div>
 </div>
+
+<script>
+(function() {
+    var nameInput = document.getElementById('name');
+    var avatar = document.getElementById('profileAvatar');
+    var profileName = document.getElementById('profileName');
+    function updateAvatar() {
+        var n = nameInput.value.trim();
+        avatar.textContent = n ? n.charAt(0).toUpperCase() : '?';
+        profileName.textContent = n || 'My Profile';
+    }
+    if (nameInput) {
+        updateAvatar();
+        nameInput.addEventListener('input', updateAvatar);
+    }
+})();
+</script>
 
 </body>
 </html>

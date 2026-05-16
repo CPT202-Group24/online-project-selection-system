@@ -29,6 +29,7 @@ public class AuditLogService {
     public static final String ACTION_CATEGORY_DELETE        = "CATEGORY_DELETE";
     public static final String ACTION_PROJECT_FORCE_ARCHIVE  = "PROJECT_FORCE_ARCHIVE";
     public static final String ACTION_PROJECT_RESTORE        = "PROJECT_RESTORE";
+    public static final String ACTION_PROJECT_DELETE         = "PROJECT_DELETE";
     public static final String ACTION_ADMIN_MANUAL_ASSIGN    = "ADMIN_MANUAL_ASSIGN";
 
     public static final String ENTITY_USER         = "User";

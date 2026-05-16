@@ -94,7 +94,11 @@ class ProjectTopicControllerStudentTest {
         topic.setMaxStudents(10);
         topic.setStatus(ProjectTopic.TopicStatus.available);
 
-        when(projectTopicRepository.findByIdAndStatus(1L, ProjectTopic.TopicStatus.available))
+        when(projectTopicRepository.findByIdAndStatusIn(
+                eq(1L),
+                org.mockito.ArgumentMatchers.argThat(statuses ->
+                        statuses.contains(ProjectTopic.TopicStatus.available)
+                                && statuses.contains(ProjectTopic.TopicStatus.requested))))
                 .thenReturn(Optional.of(topic));
 
         mockMvc.perform(get("/student/topics/1"))

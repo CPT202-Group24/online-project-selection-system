@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -82,16 +83,6 @@ public class TeacherApprovalServiceImpl implements TeacherApprovalService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to process this application.");
         }
 
-        if (project == null) {
-            throw new RuntimeException("Application project not found");
-        }
-
-        if (currentTeacherId != null
-                && project.getTeacher() != null
-                && !project.getTeacher().getId().equals(currentTeacherId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to process this application.");
-        }
-
         if (isAccepted) {
             Long studentId = application.getStudent().getId();
 
@@ -137,11 +128,6 @@ public class TeacherApprovalServiceImpl implements TeacherApprovalService {
             }
 
             application.setStatus(Application.ApplicationStatus.accepted);
-            notifyStudent(
-                    application.getStudent(),
-                    "Your application for \"" + safeProjectTitle(project) + "\" has been accepted."
-            );
-
             notifyStudent(
                     application.getStudent(),
                     "Your application for \"" + safeProjectTitle(project) + "\" has been accepted."
@@ -229,12 +215,40 @@ public class TeacherApprovalServiceImpl implements TeacherApprovalService {
     }
 
     @Override
+    public List<Application> getAcceptedApplicationsByTeacherEmail(Long topicId, String teacherEmail) {
+        ProjectTopic topic = projectTopicRepository.findById(topicId)
+                .orElseThrow(() -> new RuntimeException("Topic not found"));
+
+        if (topic.getTeacher() == null || !teacherEmail.equals(topic.getTeacher().getEmail())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to view this topic.");
+        }
+
+        return applicationRepository.findByProjectId(topicId).stream()
+                .filter(app -> app.getStatus() == Application.ApplicationStatus.accepted)
+                .sorted(applicationNewestFirst())
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Application> getPendingApplicationsByEmail(String email) {
         return applicationRepository.findAll().stream()
                 .filter(app -> app.getStatus() != null && "pending".equalsIgnoreCase(app.getStatus().toString()))
                 .filter(app -> app.getProject() != null && app.getProject().getTeacher() != null)
                 .filter(app -> email.equals(app.getProject().getTeacher().getEmail()))
+                .sorted(applicationNewestFirst())
                 .collect(Collectors.toList());
+    }
+
+    private Comparator<Application> applicationNewestFirst() {
+        return Comparator
+                .comparing(
+                        Application::getCreatedAt,
+                        Comparator.nullsLast(Comparator.reverseOrder())
+                )
+                .thenComparing(
+                        Application::getId,
+                        Comparator.nullsLast(Comparator.reverseOrder())
+                );
     }
 
     private void saveConflictLog(User student, ProjectTopic project, String actionTaken, String reason) {

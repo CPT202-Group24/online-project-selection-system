@@ -3,16 +3,19 @@ package com.group24.projectselection.repository;
 import com.group24.projectselection.model.ProjectTopic;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ProjectTopicRepository extends JpaRepository<ProjectTopic, Long> {
+public interface ProjectTopicRepository extends JpaRepository<ProjectTopic, Long>,
+        JpaSpecificationExecutor<ProjectTopic> {
 
     List<ProjectTopic> findByTeacherId(Long teacherId);
 
@@ -25,9 +28,12 @@ public interface ProjectTopicRepository extends JpaRepository<ProjectTopic, Long
     //List<ProjectTopic> findByKeywordsContainingIgnoreCase(String keyword);
 
     Optional<ProjectTopic> findByIdAndStatus(Long id, ProjectTopic.TopicStatus status);
+
+    Optional<ProjectTopic> findByIdAndStatusIn(Long id, Collection<ProjectTopic.TopicStatus> statuses);
+
     @Query("""
 SELECT p FROM ProjectTopic p
-WHERE p.status = :status
+WHERE p.status IN :statuses
 AND (
     :keyword IS NULL OR TRIM(:keyword) = '' OR
     LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
@@ -40,7 +46,7 @@ AND (
 )
 """)
     Page<ProjectTopic> searchTopicsByKeywordAndCategory(
-            @Param("status") ProjectTopic.TopicStatus status,
+            @Param("statuses") Collection<ProjectTopic.TopicStatus> statuses,
             @Param("keyword") String keyword,
             @Param("categoryId") Long categoryId,
             Pageable pageable

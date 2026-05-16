@@ -3,119 +3,312 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Apply - Project Selection System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply for Project — Project Selection System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        html, body { margin: 0 !important; padding: 0 !important; background: #f3f2ef !important; }
+
+        .pss-page {
+            min-height: calc(100vh - 64px);
+            background: #f3f2ef;
+            padding: 40px 32px 80px;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .pss-container { max-width: 760px; margin: 0 auto; }
+
+        /* Breadcrumb */
+        .pss-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12.5px;
+            color: #8898aa;
+            margin-bottom: 24px;
+            font-weight: 500;
+        }
+        .pss-breadcrumb a { color: #6a7888; text-decoration: none; }
+        .pss-breadcrumb a:hover { color: #0a1220; }
+        .pss-breadcrumb-sep { color: #c8d4e0; }
+
+        /* Header */
+        .pss-dash-header { margin-bottom: 28px; }
+        .pss-dash-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: .13em;
+            text-transform: uppercase;
+            color: #c8a23a;
+            margin-bottom: 10px;
+        }
+        .pss-dash-eyebrow::before {
+            content: '';
+            display: block;
+            width: 20px; height: 1.5px;
+            background: #c8a23a;
+        }
+        .pss-dash-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(26px, 3vw, 36px);
+            font-weight: 700;
+            color: #0a1220;
+            margin: 0 0 6px;
+            line-height: 1.1;
+            letter-spacing: -.02em;
+        }
+        .pss-dash-subtitle { font-size: 13px; color: #6a7888; margin: 0; }
+
+        /* Alert */
+        .pss-alert {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            line-height: 1.5;
+            border: 1px solid transparent;
+            margin-bottom: 20px;
+        }
+        .pss-alert-error { background: #fbe9e9; color: #7a1f1f; border-color: #f3b8b8; }
+
+        /* Card */
+        .pss-card {
+            background: #fff;
+            border: 1px solid #dde5f0;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+        .pss-card-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 17px;
+            font-weight: 700;
+            color: #0a1220;
+            margin: 0 0 18px;
+        }
+
+        /* Project summary */
+        .pss-summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px 24px;
+        }
+        .pss-summary-row-full { grid-column: 1 / -1; }
+        .pss-info-label {
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: #8898aa;
+            margin-bottom: 4px;
+        }
+        .pss-info-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0a1220;
+            line-height: 1.4;
+        }
+        .pss-info-desc {
+            font-size: 13.5px;
+            color: #3a4e62;
+            line-height: 1.7;
+            margin: 0;
+        }
+        .pss-two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        /* Application form */
+        .pss-form-label {
+            display: block;
+            font-size: 10.5px !important;
+            font-weight: 700 !important;
+            letter-spacing: .11em !important;
+            text-transform: uppercase !important;
+            color: #28384a !important;
+            font-family: 'Inter', sans-serif !important;
+            margin-bottom: 8px;
+        }
+        .pss-textarea {
+            width: 100%;
+            padding: 14px 16px !important;
+            font-size: 14px !important;
+            line-height: 1.6 !important;
+            border: 1.5px solid #dce5f0 !important;
+            border-radius: 12px !important;
+            background-color: #ffffff !important;
+            color: #0a1220 !important;
+            outline: none !important;
+            resize: vertical;
+            min-height: 160px;
+            font-family: 'Inter', sans-serif !important;
+            box-sizing: border-box !important;
+            transition: border-color .18s, box-shadow .18s;
+        }
+        .pss-textarea::placeholder { color: #a8b8cc; }
+        .pss-textarea:focus {
+            border-color: #7898c0 !important;
+            box-shadow: 0 0 0 3px rgba(20,58,128,.07) !important;
+        }
+        .pss-field-hint {
+            font-size: 12px;
+            color: #8898aa;
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+
+        /* Actions */
+        .pss-form-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .pss-btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            color: #6a7888;
+            padding: 10px 18px;
+            border: 1px solid #dde5f0;
+            border-radius: 10px;
+            background: #fff;
+            transition: background .15s, border-color .15s;
+        }
+        .pss-btn-back:hover { background: #f3f2ef; border-color: #b8c8da; }
+        .pss-btn-submit {
+            display: inline-flex !important;
+            align-items: center;
+            gap: 8px;
+            background: #0a1220;
+            color: #fff;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: background .2s, box-shadow .2s;
+            box-shadow: 0 2px 8px rgba(10,18,32,.16);
+            width: auto !important;
+            flex-shrink: 0;
+        }
+        .pss-btn-submit:hover {
+            background: #182840;
+            box-shadow: 0 4px 16px rgba(10,18,32,.24);
+        }
+
+        @media (max-width: 640px) {
+            .pss-page { padding: 24px 16px 60px; }
+            .pss-summary-grid, .pss-two-col { grid-template-columns: 1fr; }
+            .pss-summary-row-full { grid-column: 1; }
+        }
+    </style>
 </head>
 <body>
 
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="page-shell">
-    <div class="modern-card apply-modern-card">
+<div class="pss-page">
+    <div class="pss-container">
 
-        <!-- Page Header -->
-        <div class="modern-page-header">
-            <div class="modern-page-icon">
-                📝
-            </div>
-            <div>
-                <h1 class="modern-page-title">Apply for Project</h1>
-                <p class="modern-page-subtitle">
-                    Review the topic summary and submit your personal statement
-                </p>
-            </div>
+        <!-- Breadcrumb -->
+        <nav class="pss-breadcrumb">
+            <a th:href="@{/student/dashboard}">Dashboard</a>
+            <span class="pss-breadcrumb-sep">/</span>
+            <a th:href="@{/student/topics}">Topics</a>
+            <span class="pss-breadcrumb-sep">/</span>
+            <a th:href="@{/student/topics/{id}(id=${project.id})}" th:text="${project.title}">Topic</a>
+            <span class="pss-breadcrumb-sep">/</span>
+            <span>Apply</span>
+        </nav>
+
+        <div class="pss-dash-header">
+            <div class="pss-dash-eyebrow">Application</div>
+            <h1 class="pss-dash-title">Apply for Project</h1>
+            <p class="pss-dash-subtitle">Review the topic summary and submit your personal statement.</p>
         </div>
 
-        <!-- Error Message -->
-        <div th:if="${errorMessage}" class="alert alert-error">
+        <!-- Error -->
+        <div th:if="${errorMessage}" class="pss-alert pss-alert-error">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             <span th:text="${errorMessage}"></span>
         </div>
 
-        <!-- Project Summary -->
-        <div class="modern-detail-card">
-            <h3 class="modern-detail-title">Project Summary</h3>
-
-            <div class="modern-detail-grid">
-                <div class="modern-detail-item full-row">
-                    <span class="detail-label">Title</span>
-                    <span class="detail-value" th:text="${project.title}">
-                        Project Title
-                    </span>
+        <!-- Project summary -->
+        <div class="pss-card">
+            <h3 class="pss-card-title">Project Summary</h3>
+            <div class="pss-summary-grid">
+                <div class="pss-summary-row-full">
+                    <div class="pss-info-label">Title</div>
+                    <div class="pss-info-value" th:text="${project.title}"></div>
                 </div>
-
-                <div class="modern-detail-item">
-                    <span class="detail-label">Teacher</span>
-                    <span class="detail-value"
-                          th:text="${project.teacher != null ? project.teacher.name : 'N/A'}">
-                        Teacher
-                    </span>
+                <div>
+                    <div class="pss-info-label">Supervisor</div>
+                    <div class="pss-info-value" th:text="${project.teacher != null ? project.teacher.name : 'N/A'}"></div>
                 </div>
-
-                <div class="modern-detail-item">
-                    <span class="detail-label">Max Students</span>
-                    <span class="detail-value"
-                          th:text="${project.maxStudents != null ? project.maxStudents : 'N/A'}">
-                        Max Students
-                    </span>
+                <div>
+                    <div class="pss-info-label">Max Students</div>
+                    <div class="pss-info-value" th:text="${project.maxStudents != null ? project.maxStudents : 'N/A'}"></div>
                 </div>
             </div>
         </div>
 
-        <div class="detail-two-column">
-            <div class="modern-detail-card">
-                <h3 class="modern-detail-title">Description</h3>
-
-                <p class="detail-text"
-                   th:text="${project.description != null ? project.description : 'N/A'}">
-                    Description
-                </p>
+        <div class="pss-two-col">
+            <div class="pss-card" style="margin-bottom:0;">
+                <h3 class="pss-card-title">Description</h3>
+                <p class="pss-info-desc" th:text="${project.description != null ? project.description : 'N/A'}"></p>
             </div>
-
-            <div class="modern-detail-card">
-                <h3 class="modern-detail-title">Required Skills</h3>
-
-                <p class="detail-text"
-                   th:text="${project.requiredSkills != null ? project.requiredSkills : 'N/A'}">
-                    Required Skills
-                </p>
+            <div class="pss-card" style="margin-bottom:0;">
+                <h3 class="pss-card-title">Required Skills</h3>
+                <p class="pss-info-desc" th:text="${project.requiredSkills != null ? project.requiredSkills : 'N/A'}"></p>
             </div>
         </div>
 
-        <!-- Application Form -->
+        <!-- Application form -->
         <form th:action="@{/student/applications/apply/{id}(id=${project.id})}"
               method="post"
-              class="modern-form">
+              style="margin-top:16px;">
 
-            <div class="form-section-card">
-                <h3 class="form-section-title">Personal Statement</h3>
-
-                <div class="modern-form-group">
-                    <label for="personalStatement">Why are you interested in this project?</label>
-
-                    <textarea id="personalStatement"
-                              name="personalStatement"
-                              rows="7"
-                              minlength="50"
-                              class="modern-textarea"
-                              placeholder="Explain why you are interested in this project and what relevant skills or experience you have (minimum 50 characters)..."
-                              required></textarea>
-
-                    <p class="field-hint">
-                        Minimum 50 characters required. You can mention your skills, motivation and relevant experience.
-                    </p>
-                </div>
+            <div class="pss-card">
+                <h3 class="pss-card-title">Personal Statement</h3>
+                <label class="pss-form-label" for="personalStatement">
+                    Why are you interested in this project?
+                </label>
+                <textarea id="personalStatement"
+                          name="personalStatement"
+                          rows="8"
+                          minlength="50"
+                          class="pss-textarea"
+                          placeholder="Explain your interest in this project and describe any relevant skills or experience you have (minimum 50 characters)..."
+                          required></textarea>
+                <p class="pss-field-hint">Minimum 50 characters. Describe your motivation, skills, and relevant experience.</p>
             </div>
 
-            <!-- Actions -->
-            <div class="modern-form-actions">
-                <a th:href="@{/student/topics/{id}(id=${project.id})}"
-                   class="modern-btn modern-btn-outline">
-                    ← Back
+            <div class="pss-form-actions">
+                <a th:href="@{/student/topics/{id}(id=${project.id})}" class="pss-btn-back">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                    Back to Topic
                 </a>
-
-                <button type="submit"
-                        class="modern-btn modern-btn-primary">
+                <button type="submit" class="pss-btn-submit">
                     Submit Application
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 </button>
             </div>
 
@@ -123,6 +316,25 @@
 
     </div>
 </div>
+
+<script>
+    const statementInput = document.getElementById('personalStatement');
+
+    function updateStatementValidity() {
+        const length = statementInput.value.trim().length;
+        if (length === 0) {
+            statementInput.setCustomValidity('Please enter your personal statement.');
+        } else if (length < 50) {
+            statementInput.setCustomValidity('Personal statement must be at least 50 characters.');
+        } else {
+            statementInput.setCustomValidity('');
+        }
+    }
+
+    statementInput.addEventListener('input', updateStatementValidity);
+    statementInput.addEventListener('invalid', updateStatementValidity);
+    updateStatementValidity();
+</script>
 
 </body>
 </html>

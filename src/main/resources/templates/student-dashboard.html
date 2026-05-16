@@ -3,76 +3,269 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Student Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard — Project Selection System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* ── Student Dashboard ─────────────────────────────── */
+        html, body { margin: 0 !important; padding: 0 !important; background: #f3f2ef !important; }
+
+        .pss-page {
+            min-height: calc(100vh - 64px);
+            background: #f3f2ef;
+            padding: 48px 32px 80px;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        .pss-container {
+            max-width: 1060px;
+            margin: 0 auto;
+        }
+
+        /* Page header */
+        .pss-dash-header {
+            margin-bottom: 48px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid #dde5f0;
+        }
+        .pss-dash-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: .13em;
+            text-transform: uppercase;
+            color: #c8a23a;
+            margin-bottom: 14px;
+            font-family: 'Inter', sans-serif;
+        }
+        .pss-dash-eyebrow::before {
+            content: '';
+            display: block;
+            width: 24px;
+            height: 1.5px;
+            background: #c8a23a;
+            flex-shrink: 0;
+        }
+        .pss-dash-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(32px, 4vw, 48px);
+            font-weight: 700;
+            color: #0a1220;
+            margin: 0 0 10px;
+            line-height: 1.1;
+            letter-spacing: -.02em;
+        }
+        .pss-dash-title-user {
+            color: #36506e;
+        }
+        .pss-dash-subtitle {
+            font-size: 14px;
+            color: #6a7888;
+            margin: 0;
+            line-height: 1.6;
+            max-width: 52ch;
+        }
+
+        /* CTA row */
+        .pss-cta-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+        .pss-btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #0a1220;
+            color: #fff;
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 600;
+            padding: 11px 22px;
+            border-radius: 10px;
+            letter-spacing: .02em;
+            transition: background .2s, box-shadow .2s;
+            font-family: 'Inter', sans-serif;
+            box-shadow: 0 2px 8px rgba(10,18,32,.16);
+        }
+        .pss-btn-primary:hover {
+            background: #182840;
+            box-shadow: 0 4px 16px rgba(10,18,32,.24);
+        }
+        .pss-btn-primary svg { flex-shrink: 0; }
+
+        /* Action card grid */
+        .pss-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        @media (max-width: 640px) {
+            .pss-grid { grid-template-columns: 1fr; }
+        }
+
+        .pss-action-card {
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            border: 1px solid #dde5f0;
+            border-radius: 14px;
+            padding: 28px;
+            text-decoration: none;
+            color: inherit;
+            transition: border-color .2s, box-shadow .2s, transform .2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .pss-action-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #c8a23a, rgba(200,162,58,0));
+            opacity: 0;
+            transition: opacity .2s;
+        }
+        .pss-action-card:hover {
+            border-color: rgba(200,162,58,.5);
+            box-shadow: 0 8px 28px rgba(10,18,32,.1);
+            transform: translateY(-2px);
+        }
+        .pss-action-card:hover::after { opacity: 1; }
+
+        .pss-card-icon {
+            width: 40px;
+            height: 40px;
+            background: #f3f2ef;
+            border: 1px solid #dde5f0;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0a1220;
+            margin-bottom: 18px;
+            flex-shrink: 0;
+        }
+        .pss-card-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: #0a1220;
+            margin: 0 0 8px;
+            line-height: 1.2;
+        }
+        .pss-card-desc {
+            font-size: 13px;
+            color: #6a7888;
+            line-height: 1.6;
+            margin: 0;
+            flex: 1;
+        }
+        .pss-card-footer {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #9aacc0;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            transition: color .2s;
+        }
+        .pss-action-card:hover .pss-card-footer { color: #c8a23a; }
+
+        @media (max-width: 768px) {
+            .pss-page { padding: 32px 20px 60px; }
+            .pss-dash-header { margin-bottom: 32px; padding-bottom: 24px; }
+        }
+    </style>
 </head>
 <body>
 
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="page-shell">
-    <div class="modern-card dashboard-modern-card">
+<div class="pss-page">
+    <div class="pss-container">
 
-        <!-- Page Header -->
-        <div class="modern-page-header">
-            <div class="modern-page-icon">
-                🎓
-            </div>
-            <div>
-                <h1 class="modern-page-title">Student Dashboard</h1>
-                <p class="modern-page-subtitle">
-                    Welcome back. Browse available project topics and track your submitted applications.
-                </p>
-            </div>
+        <!-- Page header -->
+        <div class="pss-dash-header">
+            <div class="pss-dash-eyebrow">Student Portal</div>
+            <h1 class="pss-dash-title">
+                Welcome back,
+                <span class="pss-dash-title-user" sec:authentication="name"></span>
+            </h1>
+            <p class="pss-dash-subtitle">
+                Browse available project topics, track your applications, and manage your academic journey.
+            </p>
         </div>
 
-        <!-- Dashboard Intro -->
-        <div class="dashboard-hero-card">
-            <div>
-                <h2>Project Selection Portal</h2>
-                <p>
-                    Use this dashboard to explore available project topics, view project details,
-                    submit applications, and check your application status.
-                </p>
-            </div>
-
-            <a th:href="@{/student/topics}" class="modern-btn modern-btn-primary">
+        <!-- Primary CTA -->
+        <div class="pss-cta-row">
+            <a th:href="@{/student/topics}" class="pss-btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 Browse Topics
             </a>
+            <a th:href="@{/student/applications/my}" class="pss-btn-primary" style="background:#36506e;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                My Applications
+            </a>
         </div>
 
-        <!-- Feature Cards -->
-        <div class="dashboard-card-grid">
+        <!-- Action cards -->
+        <div class="pss-grid">
 
-            <a th:href="@{/student/topics}" class="dashboard-action-card">
-                <div class="dashboard-action-icon">📚</div>
-                <div>
-                    <h3>Browse Available Topics</h3>
-                    <p>Search and filter available project topics by keyword, category and sorting options.</p>
+            <a th:href="@{/student/topics}" class="pss-action-card">
+                <div class="pss-card-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                </div>
+                <h3 class="pss-card-title">Browse Topics</h3>
+                <p class="pss-card-desc">Search and filter available project topics by keyword, category, and supervisor preferences.</p>
+                <div class="pss-card-footer">
+                    Explore projects
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 </div>
             </a>
 
-            <a th:href="@{/student/applications/my}" class="dashboard-action-card">
-                <div class="dashboard-action-icon">📬</div>
-                <div>
-                    <h3>My Applications</h3>
-                    <p>Review submitted applications and monitor whether they are pending, accepted or rejected.</p>
+            <a th:href="@{/student/applications/my}" class="pss-action-card">
+                <div class="pss-card-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </div>
+                <h3 class="pss-card-title">My Applications</h3>
+                <p class="pss-card-desc">Review your submitted applications and track their status — pending, accepted, or rejected.</p>
+                <div class="pss-card-footer">
+                    View applications
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 </div>
             </a>
 
-            <a th:href="@{/notifications}" class="dashboard-action-card">
-                <div class="dashboard-action-icon">🔔</div>
-                <div>
-                    <h3>Notifications</h3>
-                    <p>Check system messages and updates related to your project selection process.</p>
+            <a th:href="@{/notifications}" class="pss-action-card">
+                <div class="pss-card-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                </div>
+                <h3 class="pss-card-title">Notifications</h3>
+                <p class="pss-card-desc">Stay informed with system messages and updates related to your project selection journey.</p>
+                <div class="pss-card-footer">
+                    View updates
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 </div>
             </a>
 
-            <a th:href="@{/profile}" class="dashboard-action-card">
-                <div class="dashboard-action-icon">👤</div>
-                <div>
-                    <h3>My Profile</h3>
-                    <p>View or update your personal profile information used in the system.</p>
+            <a th:href="@{/profile}" class="pss-action-card">
+                <div class="pss-card-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <h3 class="pss-card-title">My Profile</h3>
+                <p class="pss-card-desc">View and update your personal information, including contact details and academic information.</p>
+                <div class="pss-card-footer">
+                    Manage profile
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 </div>
             </a>
 

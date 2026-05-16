@@ -2,100 +2,192 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Rule Violation Report - Project Selection System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rule Violation Report — Project Selection System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        html, body { margin: 0 !important; padding: 0 !important; background: #f3f2ef !important; }
+
+        .pss-page {
+            min-height: calc(100vh - 64px);
+            background: #f3f2ef;
+            padding: 40px 32px 80px;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .pss-container { max-width: 860px; margin: 0 auto; }
+
+        .pss-dash-header { margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid #dde5f0; }
+        .pss-dash-eyebrow {
+            display: inline-flex; align-items: center; gap: 10px;
+            font-size: 10.5px; font-weight: 700; letter-spacing: .13em;
+            text-transform: uppercase; color: #c8a23a; margin-bottom: 10px;
+        }
+        .pss-dash-eyebrow::before { content: ''; display: block; width: 20px; height: 1.5px; background: #c8a23a; }
+        .pss-dash-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(24px, 3vw, 34px); font-weight: 700;
+            color: #0a1220; margin: 0 0 6px; line-height: 1.1; letter-spacing: -.02em;
+        }
+        .pss-dash-subtitle { font-size: 13px; color: #6a7888; margin: 0; }
+
+        /* Notice */
+        .pss-notice {
+            background: #fbe9e9; border: 1px solid #f3b8b8; border-radius: 10px;
+            padding: 14px 18px; font-size: 13px; color: #5a1e1e;
+            line-height: 1.6; margin-bottom: 24px;
+        }
+        .pss-notice-title {
+            font-weight: 700; font-size: 11px; letter-spacing: .09em;
+            text-transform: uppercase; color: #7a1f1f; margin-bottom: 6px;
+        }
+
+        /* Empty state */
+        .pss-empty {
+            background: #fff; border: 1px solid #dde5f0; border-radius: 12px;
+            text-align: center; padding: 64px 32px; margin-bottom: 24px;
+        }
+        .pss-empty-check {
+            width: 48px; height: 48px; background: #dcfce7; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px; color: #14532d;
+        }
+        .pss-empty-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 20px; font-weight: 700; color: #0a1220; margin-bottom: 8px;
+        }
+        .pss-empty-desc { font-size: 13.5px; color: #6a7888; }
+
+        /* Violation cards */
+        .pss-violation-list { display: flex; flex-direction: column; gap: 16px; margin-bottom: 28px; }
+
+        .pss-violation-card {
+            background: #fff; border: 1px solid #f3b8b8; border-radius: 12px; overflow: hidden;
+        }
+        .pss-violation-top {
+            display: flex; align-items: center; gap: 14px;
+            padding: 18px 20px; border-bottom: 1px solid #fde8e8; background: #fff8f8;
+        }
+        .pss-violation-icon {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: #7f1d1d; color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; font-weight: 700; flex-shrink: 0;
+        }
+        .pss-violation-name  { font-size: 14px; font-weight: 700; color: #0a1220; margin: 0 0 2px; }
+        .pss-violation-email { font-size: 12.5px; color: #8898aa; margin: 0; }
+
+        .pss-violation-body { padding: 16px 20px; }
+        .pss-violation-count {
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: 12.5px; color: #6a7888; margin-bottom: 14px;
+        }
+        .pss-violation-count strong { font-size: 18px; color: #7f1d1d; font-family: 'Playfair Display', Georgia, serif; }
+
+        .pss-project-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+        .pss-project-item {
+            display: flex; align-items: flex-start; justify-content: space-between;
+            background: #f8f9fb; border: 1px solid #f0f3f8; border-radius: 9px; padding: 10px 14px; gap: 12px;
+        }
+        .pss-project-item-title { font-size: 13px; font-weight: 600; color: #0a1220; }
+        .pss-project-item-supervisor { font-size: 12px; color: #8898aa; margin-top: 2px; }
+        .pss-badge-accepted {
+            display: inline-block; font-size: 10.5px; font-weight: 700;
+            background: #dcfce7; color: #14532d;
+            border-radius: 999px; padding: 3px 10px; letter-spacing: .04em;
+            text-transform: uppercase; white-space: nowrap; flex-shrink: 0;
+        }
+
+        .pss-back {
+            display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+            font-size: 13px; font-weight: 600; color: #6a7888; transition: color .15s;
+        }
+        .pss-back:hover { color: #0a1220; }
+
+        @media (max-width: 640px) {
+            .pss-page { padding: 24px 16px 60px; }
+            .pss-project-item { flex-direction: column; }
+        }
+    </style>
 </head>
 <body>
 
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="page-shell">
-    <div class="modern-card admin-violations-card">
+<div class="pss-page">
+    <div class="pss-container">
 
-        <!-- Page Header -->
-        <div class="modern-page-header">
-            <div class="modern-page-icon">
-                ⚠️
+        <div class="pss-dash-header">
+            <div class="pss-dash-eyebrow">Admin Portal</div>
+            <h1 class="pss-dash-title">Rule Violation Report</h1>
+            <p class="pss-dash-subtitle">Review students who hold two or more accepted project allocations.</p>
+        </div>
+
+        <div class="pss-notice">
+            <div class="pss-notice-title">One-Project Rule Check</div>
+            Students listed below hold <strong>2 or more</strong> accepted project allocations,
+            which violates the one-project rule.
+        </div>
+
+        <!-- Empty state -->
+        <div th:if="${#lists.isEmpty(violations)}" class="pss-empty">
+            <div class="pss-empty-check">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
-            <div>
-                <h1 class="modern-page-title">Rule Violation Report</h1>
-                <p class="modern-page-subtitle">
-                    Review students who hold two or more accepted project allocations
-                </p>
-            </div>
+            <h3 class="pss-empty-title">No violations found</h3>
+            <p class="pss-empty-desc">All students currently comply with the one-project rule.</p>
         </div>
 
-        <!-- Explanation -->
-        <div class="modern-detail-card violation-info-card">
-            <h3 class="modern-detail-title">One-Project Rule Check</h3>
-            <p class="detail-text">
-                Students listed below hold <strong>2 or more</strong> accepted project allocations,
-                which violates the one-project rule.
-            </p>
-        </div>
+        <!-- Violation list -->
+        <div th:if="${!#lists.isEmpty(violations)}" class="pss-violation-list">
+            <div th:each="record : ${violations}" class="pss-violation-card">
 
-        <!-- Empty State -->
-        <div th:if="${#lists.isEmpty(violations)}" class="modern-empty-state violation-empty-state">
-            <div class="modern-empty-icon">✅</div>
-            <h3>No violations found</h3>
-            <p>All students currently comply with the one-project rule.</p>
-        </div>
-
-        <!-- Violation List -->
-        <div th:if="${!#lists.isEmpty(violations)}" class="violation-list">
-            <div th:each="record : ${violations}" class="modern-violation-card">
-
-                <div class="violation-card-header">
-                    <div class="violation-student-icon">!</div>
-
+                <div class="pss-violation-top">
+                    <div class="pss-violation-icon">!</div>
                     <div>
-                        <h3 th:text="${record.student != null ? record.student.name : 'Unknown Student'}">
+                        <p class="pss-violation-name"
+                           th:text="${record.student != null ? record.student.name : 'Unknown Student'}">
                             Student Name
-                        </h3>
-
-                        <p th:text="${record.student != null ? record.student.email : 'Unknown Email'}">
+                        </p>
+                        <p class="pss-violation-email"
+                           th:text="${record.student != null ? record.student.email : 'Unknown Email'}">
                             student@example.com
                         </p>
                     </div>
                 </div>
 
-                <div class="violation-count-row">
-                    <span>
-                        Violating accepted projects:
-                    </span>
+                <div class="pss-violation-body">
+                    <div class="pss-violation-count">
+                        <span>Violating accepted projects</span>
+                        <strong th:text="${#lists.size(record.violatingApplications)}">0</strong>
+                    </div>
 
-                    <strong th:text="${#lists.size(record.violatingApplications)}">
-                        0
-                    </strong>
+                    <ul class="pss-project-list">
+                        <li th:each="app : ${record.violatingApplications}" class="pss-project-item">
+                            <div>
+                                <div class="pss-project-item-title"
+                                     th:text="${app.project != null ? app.project.title : 'Unknown Project'}">
+                                </div>
+                                <div class="pss-project-item-supervisor"
+                                     th:text="${app.project != null and app.project.teacher != null
+                                                ? 'Supervisor: ' + app.project.teacher.name
+                                                : 'Supervisor: N/A'}">
+                                </div>
+                            </div>
+                            <span class="pss-badge-accepted">Accepted</span>
+                        </li>
+                    </ul>
                 </div>
-
-                <ul class="violation-project-list">
-                    <li th:each="app : ${record.violatingApplications}">
-                        <div>
-                            <span class="project-title"
-                                  th:text="${app.project != null ? app.project.title : 'Unknown Project'}">
-                                Project Title
-                            </span>
-
-                            <span class="teacher-name"
-                                  th:text="${app.project != null and app.project.teacher != null
-                                             ? 'Supervisor: ' + app.project.teacher.name
-                                             : 'Supervisor: N/A'}">
-                                Supervisor
-                            </span>
-                        </div>
-                    </li>
-                </ul>
 
             </div>
         </div>
 
-        <!-- Bottom Actions -->
-        <div class="page-bottom-actions">
-            <a th:href="@{/admin/dashboard}" class="modern-btn modern-btn-outline">
-                ← Back to Dashboard
-            </a>
-        </div>
+        <a th:href="@{/admin/dashboard}" class="pss-back">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            Back to Dashboard
+        </a>
 
     </div>
 </div>

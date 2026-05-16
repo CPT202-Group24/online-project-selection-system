@@ -3,163 +3,220 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Project Form - Project Selection System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${projectTopic.id != null} ? 'Edit Project — PSS' : 'Create Project — PSS'">Project Form — Project Selection System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        html, body { margin: 0 !important; padding: 0 !important; background: #f3f2ef !important; }
+
+        .pss-page {
+            min-height: calc(100vh - 64px);
+            background: #f3f2ef;
+            padding: 40px 32px 80px;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .pss-container { max-width: 820px; margin: 0 auto; }
+
+        /* Header */
+        .pss-dash-header { margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid #dde5f0; }
+        .pss-dash-eyebrow {
+            display: inline-flex; align-items: center; gap: 10px;
+            font-size: 10.5px; font-weight: 700; letter-spacing: .13em;
+            text-transform: uppercase; color: #c8a23a; margin-bottom: 10px;
+        }
+        .pss-dash-eyebrow::before { content: ''; display: block; width: 20px; height: 1.5px; background: #c8a23a; }
+        .pss-dash-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(24px, 3vw, 34px); font-weight: 700;
+            color: #0a1220; margin: 0 0 6px; line-height: 1.1; letter-spacing: -.02em;
+        }
+        .pss-dash-subtitle { font-size: 13px; color: #6a7888; margin: 0; }
+
+        /* Alert */
+        .pss-alert {
+            display: flex; gap: 10px; align-items: flex-start;
+            padding: 11px 16px; border-radius: 9px; font-size: 13px;
+            line-height: 1.5; border: 1px solid transparent; margin-bottom: 16px;
+        }
+        .pss-alert-error { background: #fbe9e9; color: #7a1f1f; border-color: #f3b8b8; }
+
+        /* Form cards */
+        .pss-card {
+            background: #fff; border: 1px solid #dde5f0; border-radius: 12px;
+            padding: 24px; margin-bottom: 16px;
+        }
+        .pss-card-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 15px; font-weight: 700; color: #0a1220; margin: 0 0 20px;
+        }
+
+        /* Grid */
+        .pss-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .pss-full { grid-column: 1 / -1; }
+        .pss-form-group { display: flex; flex-direction: column; gap: 6px; }
+        .pss-form-label {
+            font-size: 10.5px; font-weight: 700; letter-spacing: .1em;
+            text-transform: uppercase; color: #28384a;
+        }
+
+        /* Inputs */
+        .pss-form-input, .pss-form-textarea, .pss-form-select {
+            padding: 10px 14px; font-size: 14px; border: 1.5px solid #dce5f0;
+            border-radius: 10px; font-family: 'Inter', sans-serif; color: #0a1220;
+            outline: none; background: #fff; transition: border-color .18s, box-shadow .18s;
+            width: 100%; box-sizing: border-box;
+        }
+        .pss-form-input:focus, .pss-form-textarea:focus, .pss-form-select:focus {
+            border-color: #7898c0; box-shadow: 0 0 0 3px rgba(20,58,128,.07);
+        }
+        .pss-form-textarea { resize: vertical; line-height: 1.6; }
+        .pss-form-select { cursor: pointer; }
+        .pss-field-hint { font-size: 12px; color: #9aacc0; line-height: 1.4; }
+        .pss-field-error { font-size: 12px; color: #c0392b; margin-top: 2px; }
+
+        /* Keyword preview */
+        .pss-keyword-row {
+            display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;
+        }
+        .pss-kw-tag {
+            display: inline-block; font-size: 11px; font-weight: 600;
+            background: rgba(200,162,58,.1); color: #7a5c10;
+            border-radius: 6px; padding: 3px 8px;
+        }
+
+        /* Actions */
+        .pss-form-actions {
+            display: flex; align-items: center; justify-content: flex-end;
+            gap: 10px; margin-top: 4px; flex-wrap: wrap;
+        }
+        .pss-btn-primary {
+            display: inline-flex !important; align-items: center; gap: 7px;
+            background: #0a1220; color: #fff; border: none; font-size: 14px; font-weight: 600;
+            padding: 11px 22px; border-radius: 10px; cursor: pointer; font-family: 'Inter', sans-serif;
+            transition: background .2s; box-shadow: 0 2px 8px rgba(10,18,32,.16);
+            width: auto !important; flex-shrink: 0;
+        }
+        .pss-btn-primary:hover { background: #182840; }
+        .pss-btn-outline {
+            display: inline-flex !important; align-items: center; gap: 7px;
+            background: #fff; color: #28384a; border: 1px solid #dde5f0; font-size: 13.5px;
+            font-weight: 600; padding: 10px 20px; border-radius: 10px; cursor: pointer;
+            font-family: 'Inter', sans-serif; text-decoration: none; transition: background .15s;
+            width: auto !important; flex-shrink: 0;
+        }
+        .pss-btn-outline:hover { background: #f3f2ef; }
+
+        @media (max-width: 640px) {
+            .pss-page { padding: 24px 16px 60px; }
+            .pss-form-grid { grid-template-columns: 1fr; }
+            .pss-full { grid-column: 1; }
+        }
+    </style>
 </head>
 <body>
 
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="page-shell">
-    <div class="modern-card form-modern-card">
+<div class="pss-page">
+    <div class="pss-container">
 
-        <!-- Page Header -->
-        <div class="modern-page-header">
-            <div class="modern-page-icon">
-                ✏️
-            </div>
-            <div>
-                <h1 class="modern-page-title"
-                    th:text="${projectTopic.id != null} ? 'Edit Project' : 'Create New Project'">
-                    Create New Project
-                </h1>
-                <p class="modern-page-subtitle">
-                    Fill in the project topic information and choose whether to publish later or save as draft
-                </p>
-            </div>
+        <div class="pss-dash-header">
+            <div class="pss-dash-eyebrow">Teacher Portal</div>
+            <h1 class="pss-dash-title"
+                th:text="${projectTopic.id != null} ? 'Edit Project' : 'Create New Project'">
+                Create New Project
+            </h1>
+            <p class="pss-dash-subtitle">Fill in the project topic information and choose whether to publish later or save as draft.</p>
         </div>
 
-        <!-- Error Message -->
-        <div th:if="${errorMessage}" class="alert alert-error">
+        <div th:if="${errorMessage}" class="pss-alert pss-alert-error">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             <span th:text="${errorMessage}"></span>
         </div>
 
-        <!-- Form -->
-        <form th:action="@{/teacher/projects}" th:object="${projectTopic}" method="post" class="modern-form">
+        <form th:action="@{/teacher/projects}" th:object="${projectTopic}" method="post">
             <input type="hidden" th:field="*{id}">
 
-            <div class="form-section-card">
-                <h3 class="form-section-title">Basic Information</h3>
-
-                <div class="modern-form-grid">
-
-                    <div class="modern-form-group full-width">
-                        <label for="title">Title</label>
-                        <input id="title"
-                               type="text"
-                               th:field="*{title}"
-                               class="modern-input"
-                               placeholder="Enter project title">
-                        <div th:if="${#fields.hasErrors('title')}"
-                             th:errors="*{title}"
-                             class="field-error">
-                        </div>
+            <!-- Basic info -->
+            <div class="pss-card">
+                <h3 class="pss-card-title">Basic Information</h3>
+                <div class="pss-form-grid">
+                    <div class="pss-form-group pss-full">
+                        <label class="pss-form-label" for="title">Title</label>
+                        <input id="title" type="text" th:field="*{title}"
+                               class="pss-form-input" placeholder="Enter project title">
+                        <div class="pss-field-error"
+                             th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
                     </div>
-
-                    <div class="modern-form-group full-width">
-                        <label for="description">Description</label>
-                        <textarea id="description"
-                                  th:field="*{description}"
-                                  rows="5"
-                                  class="modern-textarea"
+                    <div class="pss-form-group pss-full">
+                        <label class="pss-form-label" for="description">Description</label>
+                        <textarea id="description" th:field="*{description}" rows="5"
+                                  class="pss-form-textarea"
                                   placeholder="Describe the project topic, background and expected outcomes"></textarea>
                     </div>
-
-                    <div class="modern-form-group full-width">
-                        <label for="requiredSkills">Required Skills</label>
-                        <textarea id="requiredSkills"
-                                  th:field="*{requiredSkills}"
-                                  rows="4"
-                                  class="modern-textarea"
+                    <div class="pss-form-group pss-full">
+                        <label class="pss-form-label" for="requiredSkills">Required Skills</label>
+                        <textarea id="requiredSkills" th:field="*{requiredSkills}" rows="4"
+                                  class="pss-form-textarea"
                                   placeholder="Example: Java, Spring Boot, MySQL, frontend basics"></textarea>
                     </div>
-
                 </div>
             </div>
 
-            <div class="form-section-card">
-                <h3 class="form-section-title">Project Settings</h3>
-
-                <div class="modern-form-grid">
-
-                    <div class="modern-form-group">
-                        <label for="category">Category</label>
-                        <select id="category"
-                                th:field="*{category.id}"
-                                class="modern-select">
-                            <option value="">-- Select Category --</option>
+            <!-- Settings -->
+            <div class="pss-card">
+                <h3 class="pss-card-title">Project Settings</h3>
+                <div class="pss-form-grid">
+                    <div class="pss-form-group">
+                        <label class="pss-form-label" for="category">Category</label>
+                        <select id="category" th:field="*{category.id}" class="pss-form-select">
+                            <option value="">— Select Category —</option>
                             <option th:each="cat : ${categories}"
                                     th:value="${cat.id}"
                                     th:text="${cat.name}">
                             </option>
                         </select>
-
-                        <div class="field-hint">
-                            Category is required for normal save, but optional for Save as Draft.
-                        </div>
-
-                        <div th:if="${#fields.hasErrors('category')}"
-                             th:errors="*{category}"
-                             class="field-error">
-                        </div>
+                        <span class="pss-field-hint">Category is required for normal save, but optional for Save as Draft.</span>
+                        <div class="pss-field-error"
+                             th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></div>
                     </div>
-
-                    <div class="modern-form-group">
-                        <label for="maxStudents">Max Students</label>
-                        <input id="maxStudents"
-                               type="number"
-                               th:field="*{maxStudents}"
-                               class="modern-input"
-                               placeholder="Enter max students">
+                    <div class="pss-form-group">
+                        <label class="pss-form-label" for="maxStudents">Max Students</label>
+                        <input id="maxStudents" type="number" th:field="*{maxStudents}"
+                               class="pss-form-input" placeholder="Enter max students">
                     </div>
-
-                    <div class="modern-form-group full-width">
-                        <label for="keywords">Keywords</label>
-                        <input id="keywords"
-                               type="text"
-                               th:field="*{keywords}"
-                               class="modern-input"
-                               placeholder="Example: AI, Java, Spring">
-
-                        <div class="field-hint">
-                            Separate keywords with commas, for example: AI, Java, Spring
-                        </div>
-
+                    <div class="pss-form-group pss-full">
+                        <label class="pss-form-label" for="keywords">Keywords</label>
+                        <input id="keywords" type="text" th:field="*{keywords}"
+                               class="pss-form-input" placeholder="Example: AI, Java, Spring">
+                        <span class="pss-field-hint">Separate keywords with commas, for example: AI, Java, Spring</span>
                         <div th:if="${projectTopic.keywords != null and !projectTopic.keywords.isEmpty()}"
-                             class="keyword-preview-row">
+                             class="pss-keyword-row">
                             <span th:each="kw : ${#strings.arraySplit(projectTopic.keywords, ',')}"
                                   th:if="${#strings.trim(kw) != ''}"
                                   th:text="${#strings.trim(kw)}"
-                                  class="keyword-tag">
+                                  class="pss-kw-tag">
                             </span>
                         </div>
                     </div>
-
                 </div>
             </div>
 
             <!-- Actions -->
-            <div class="modern-form-actions">
-                <button type="submit"
-                        name="submitAction"
-                        value="save"
-                        class="modern-btn modern-btn-primary"
+            <div class="pss-form-actions">
+                <button type="submit" name="submitAction" value="save" class="pss-btn-primary"
                         th:text="${projectTopic.id != null} ? 'Save Changes' : 'Create Project'">
                     Create Project
                 </button>
-
-                <button type="submit"
-                        name="submitAction"
-                        value="draft"
-                        class="modern-btn modern-btn-outline">
+                <button type="submit" name="submitAction" value="draft" class="pss-btn-outline">
                     Save as Draft
                 </button>
-
-                <a th:href="@{/teacher/projects}"
-                   class="modern-btn modern-btn-outline">
-                    Cancel
-                </a>
+                <a th:href="@{/teacher/projects}" class="pss-btn-outline">Cancel</a>
             </div>
+
         </form>
 
     </div>

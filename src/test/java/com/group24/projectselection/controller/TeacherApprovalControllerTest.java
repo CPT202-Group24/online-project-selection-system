@@ -8,9 +8,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.Mockito.when;
@@ -33,21 +35,29 @@ class TeacherApprovalControllerTest {
         mockApp.setId(1L);
         mockApp.setStatus(Application.ApplicationStatus.accepted);
 
-        when(teacherApprovalService.getAcceptedApplications(100L, 10L))
+        when(teacherApprovalService.getAcceptedApplicationsByTeacherEmail(100L, "teacher@test.com"))
                 .thenReturn(List.of(mockApp));
 
         mockMvc.perform(get("/api/teacher/applications/topics/100/students")
-                        .param("teacherId", "10"))
+                        .principal(new UsernamePasswordAuthenticationToken(
+                                "teacher@test.com",
+                                null,
+                                Collections.emptyList()
+                        )))
                 .andExpect(status().isOk());
     }
 
     @Test
     void testViewAcceptedStudents_Forbidden() throws Exception {
-        when(teacherApprovalService.getAcceptedApplications(100L, 99L))
+        when(teacherApprovalService.getAcceptedApplicationsByTeacherEmail(100L, "other@test.com"))
                 .thenThrow(new ResponseStatusException(HttpStatus.FORBIDDEN));
 
         mockMvc.perform(get("/api/teacher/applications/topics/100/students")
-                        .param("teacherId", "99"))
+                        .principal(new UsernamePasswordAuthenticationToken(
+                                "other@test.com",
+                                null,
+                                Collections.emptyList()
+                        )))
                 .andExpect(status().isForbidden());
     }
 }

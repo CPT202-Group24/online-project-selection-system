@@ -2,128 +2,264 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Manual Project Assignment - Project Selection System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Project Assignment — Project Selection System</title>
     <meta name="_csrf"        th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        html, body { margin: 0 !important; padding: 0 !important; background: #f3f2ef !important; }
+
+        .pss-page {
+            min-height: calc(100vh - 64px);
+            background: #f3f2ef;
+            padding: 40px 32px 80px;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .pss-container { max-width: 1000px; margin: 0 auto; }
+
+        .pss-dash-header { margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid #dde5f0; }
+        .pss-dash-eyebrow {
+            display: inline-flex; align-items: center; gap: 10px;
+            font-size: 10.5px; font-weight: 700; letter-spacing: .13em;
+            text-transform: uppercase; color: #c8a23a; margin-bottom: 10px;
+        }
+        .pss-dash-eyebrow::before { content: ''; display: block; width: 20px; height: 1.5px; background: #c8a23a; }
+        .pss-dash-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(24px, 3vw, 34px); font-weight: 700;
+            color: #0a1220; margin: 0 0 6px; line-height: 1.1; letter-spacing: -.02em;
+        }
+        .pss-dash-subtitle { font-size: 13px; color: #6a7888; margin: 0; }
+
+        /* Info notice */
+        .pss-notice {
+            background: #e8f0fb; border: 1px solid #b6cff5; border-radius: 10px;
+            padding: 14px 18px; font-size: 13px; color: #1e3a6a;
+            line-height: 1.6; margin-bottom: 24px;
+        }
+        .pss-notice-title {
+            font-weight: 700; font-size: 11px; letter-spacing: .09em;
+            text-transform: uppercase; color: #3a5a8a; margin-bottom: 6px;
+        }
+
+        .pss-alert {
+            display: flex; gap: 10px; align-items: flex-start;
+            padding: 11px 16px; border-radius: 9px; font-size: 13px;
+            line-height: 1.5; border: 1px solid transparent; margin-bottom: 16px;
+        }
+        .pss-alert-info    { background: #e8f0fb; color: #1e3a6a; border-color: #b6cff5; }
+        .pss-alert-success { background: #e7f8ee; color: #14482a; border-color: #aedbbf; }
+        .pss-alert-error   { background: #fbe9e9; color: #7a1f1f; border-color: #f3b8b8; }
+
+        /* Two-column layout */
+        .pss-assign-cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .pss-panel {
+            background: #fff; border: 1px solid #dde5f0; border-radius: 12px; overflow: hidden;
+        }
+        .pss-panel-header {
+            display: flex; align-items: flex-start; gap: 14px;
+            padding: 18px 20px; border-bottom: 1px solid #f0f3f8;
+        }
+        .pss-step-num {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: #0a1220; color: #c8a23a;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 700; font-family: 'Playfair Display', Georgia, serif;
+            flex-shrink: 0;
+        }
+        .pss-panel-htitle { font-size: 14px; font-weight: 700; color: #0a1220; margin: 0 0 3px; }
+        .pss-panel-hdesc  { font-size: 12px; color: #8898aa; margin: 0; }
+
+        /* Student search */
+        .pss-panel-body { padding: 16px 20px; }
+        .pss-panel-search {
+            width: 100%; padding: 9px 14px 9px 36px; font-size: 13px;
+            border: 1px solid #dde5f0; border-radius: 9px; outline: none;
+            font-family: 'Inter', sans-serif; color: #0a1220; box-sizing: border-box;
+            background: #f8f9fb url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238898aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat 11px center;
+            margin-bottom: 12px; transition: border-color .15s;
+        }
+        .pss-panel-search:focus { border-color: #7898c0; background-color: #fff; }
+
+        /* Student list */
+        .pss-student-list {
+            list-style: none; margin: 0; padding: 0;
+            max-height: 320px; overflow-y: auto;
+            border: 1px solid #f0f3f8; border-radius: 9px;
+        }
+        .pss-student-list li {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 14px; cursor: pointer;
+            border-bottom: 1px solid #f8f9fb; transition: background .12s;
+        }
+        .pss-student-list li:last-child { border-bottom: none; }
+        .pss-student-list li:hover { background: #f3f2ef; }
+        .pss-student-list li.selected { background: rgba(200,162,58,.08); border-left: 2px solid #c8a23a; }
+        .pss-student-avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: #0a1220; color: #c8a23a;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700; flex-shrink: 0;
+        }
+        .pss-student-name  { font-size: 13px; font-weight: 600; color: #0a1220; }
+        .pss-student-email { font-size: 11.5px; color: #8898aa; }
+
+        /* Empty mini */
+        .pss-empty-mini {
+            text-align: center; padding: 28px 16px;
+            font-size: 13px; color: #8898aa;
+            border: 1px dashed #dde5f0; border-radius: 9px;
+        }
+
+        /* Selected student info */
+        .pss-selected-info {
+            background: #f8f9fb; border: 1px solid #dde5f0; border-radius: 9px;
+            padding: 11px 14px; font-size: 13px; color: #6a7888;
+            margin-bottom: 14px; min-height: 42px;
+        }
+        .pss-selected-info.has-selection { color: #0a1220; font-weight: 500; }
+
+        /* Project select + assign button */
+        .pss-form-label {
+            display: block; font-size: 10.5px; font-weight: 700; letter-spacing: .1em;
+            text-transform: uppercase; color: #28384a; margin-bottom: 8px;
+        }
+        .pss-select {
+            width: 100%; padding: 10px 14px; font-size: 13px;
+            border: 1px solid #dde5f0; border-radius: 9px;
+            font-family: 'Inter', sans-serif; color: #0a1220;
+            outline: none; background: #fff; margin-bottom: 14px; box-sizing: border-box;
+        }
+        .pss-select:focus { border-color: #7898c0; }
+
+        .pss-btn-assign {
+            width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+            background: #0a1220; color: #fff; border: none; font-size: 14px; font-weight: 600;
+            padding: 12px 20px; border-radius: 10px; cursor: pointer; font-family: 'Inter', sans-serif;
+            transition: background .2s; box-shadow: 0 2px 8px rgba(10,18,32,.16);
+        }
+        .pss-btn-assign:hover:not(:disabled) { background: #182840; }
+        .pss-btn-assign:disabled { opacity: .5; cursor: default; }
+
+        .pss-back {
+            display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+            font-size: 13px; font-weight: 600; color: #6a7888; transition: color .15s;
+        }
+        .pss-back:hover { color: #0a1220; }
+
+        @media (max-width: 700px) {
+            .pss-page { padding: 24px 16px 60px; }
+            .pss-assign-cols { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
 
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="page-shell">
-    <div class="modern-card admin-assignments-card">
+<div class="pss-page">
+    <div class="pss-container">
 
-        <!-- Page Header -->
-        <div class="modern-page-header">
-            <div class="modern-page-icon">
-                🧩
-            </div>
-            <div>
-                <h1 class="modern-page-title">Manual Project Assignment</h1>
-                <p class="modern-page-subtitle">
-                    Assign an available project directly to an unallocated student
-                </p>
-            </div>
+        <div class="pss-dash-header">
+            <div class="pss-dash-eyebrow">Admin Portal</div>
+            <h1 class="pss-dash-title">Manual Project Assignment</h1>
+            <p class="pss-dash-subtitle">Assign an available project directly to an unallocated student.</p>
         </div>
 
-        <!-- Notice -->
-        <div class="modern-detail-card assignment-info-card">
-            <h3 class="modern-detail-title">Assignment Rule</h3>
-            <p class="detail-text">
-                Select an active student who has not yet been allocated to any project, then choose an available project
-                with remaining capacity. This operation bypasses the normal application process.
-            </p>
+        <div class="pss-notice">
+            <div class="pss-notice-title">Assignment Rule</div>
+            Select an active student who has not yet been allocated to any project, then choose an available project
+            with remaining capacity. This operation bypasses the normal application process.
         </div>
 
-        <!-- Message Area -->
         <div id="msgBox"></div>
 
-        <!-- Assignment Panels -->
-        <div class="assignment-two-col">
+        <div class="pss-assign-cols">
 
-            <!-- Left: Student Selection -->
-            <div class="assignment-panel">
-                <div class="assignment-panel-header">
-                    <div class="assignment-step-icon">1</div>
+            <!-- Step 1: Student -->
+            <div class="pss-panel">
+                <div class="pss-panel-header">
+                    <div class="pss-step-num">1</div>
                     <div>
-                        <h3>Select Student</h3>
-                        <p>Choose an unassigned active student.</p>
+                        <p class="pss-panel-htitle">Select Student</p>
+                        <p class="pss-panel-hdesc">Choose an unassigned active student.</p>
                     </div>
                 </div>
+                <div class="pss-panel-body">
+                    <input class="pss-panel-search" type="text" id="studentSearch"
+                           placeholder="Search by name or email..." oninput="filterStudents()">
 
-                <input class="modern-input assignment-search-box"
-                       type="text"
-                       id="studentSearch"
-                       placeholder="Search by name or email..."
-                       oninput="filterStudents()">
+                    <div th:if="${#lists.isEmpty(unassignedStudents)}" class="pss-empty-mini">
+                        All active students already have a project allocation.
+                    </div>
 
-                <div th:if="${#lists.isEmpty(unassignedStudents)}" class="modern-empty-mini">
-                    All active students already have a project allocation.
+                    <ul class="pss-student-list" id="studentList"
+                        th:if="${!#lists.isEmpty(unassignedStudents)}">
+                        <li th:each="s : ${unassignedStudents}"
+                            th:id="'s-' + ${s.id}"
+                            th:attr="data-id=${s.id}, data-name=${s.name}, data-email=${s.email}"
+                            onclick="selectStudent(this)">
+                            <div class="pss-student-avatar">S</div>
+                            <div>
+                                <div class="pss-student-name" th:text="${s.name}">Name</div>
+                                <div class="pss-student-email" th:text="${s.email}">email</div>
+                            </div>
+                        </li>
+                    </ul>
                 </div>
-
-                <ul class="modern-student-list"
-                    id="studentList"
-                    th:if="${!#lists.isEmpty(unassignedStudents)}">
-                    <li th:each="s : ${unassignedStudents}"
-                        th:id="'s-' + ${s.id}"
-                        th:attr="data-id=${s.id}, data-name=${s.name}, data-email=${s.email}"
-                        onclick="selectStudent(this)">
-                        <div class="student-avatar">S</div>
-                        <div>
-                            <span class="student-name" th:text="${s.name}">Name</span>
-                            <span class="student-email" th:text="${'<' + s.email + '>'}"></span>
-                        </div>
-                    </li>
-                </ul>
             </div>
 
-            <!-- Right: Project Selection -->
-            <div class="assignment-panel">
-                <div class="assignment-panel-header">
-                    <div class="assignment-step-icon">2</div>
+            <!-- Step 2: Project + Assign -->
+            <div class="pss-panel">
+                <div class="pss-panel-header">
+                    <div class="pss-step-num">2</div>
                     <div>
-                        <h3>Select Project &amp; Assign</h3>
-                        <p>Pick a project and confirm the assignment.</p>
+                        <p class="pss-panel-htitle">Select Project &amp; Assign</p>
+                        <p class="pss-panel-hdesc">Pick a project and confirm the assignment.</p>
                     </div>
                 </div>
+                <div class="pss-panel-body">
+                    <div class="pss-selected-info" id="selectedStudentInfo">
+                        No student selected.
+                    </div>
 
-                <div class="selected-student-card" id="selectedStudentInfo">
-                    No student selected.
-                </div>
+                    <div th:if="${#lists.isEmpty(assignableProjects)}" class="pss-empty-mini">
+                        No available projects with remaining capacity.
+                    </div>
 
-                <div th:if="${#lists.isEmpty(assignableProjects)}" class="modern-empty-mini">
-                    No available projects with remaining capacity.
-                </div>
-
-                <div th:if="${!#lists.isEmpty(assignableProjects)}" class="assignment-form-area">
-                    <label for="projectSelect">Available Project</label>
-
-                    <select class="modern-select assignment-project-select" id="projectSelect">
-                        <option value="">-- Select a project --</option>
-                        <option th:each="p : ${assignableProjects}"
-                                th:value="${p.id}"
-                                th:text="${p.title + ' (Teacher: ' + (p.teacher != null ? p.teacher.name : 'N/A') + ', Max: ' + (p.maxStudents != null ? p.maxStudents : '∞') + ')'}">
-                        </option>
-                    </select>
-
-                    <button class="modern-btn modern-btn-primary assignment-submit-btn"
-                            id="assignBtn"
-                            onclick="doAssign()"
-                            disabled>
-                        Assign Project to Student
-                    </button>
+                    <div th:if="${!#lists.isEmpty(assignableProjects)}">
+                        <label class="pss-form-label" for="projectSelect">Available Project</label>
+                        <select class="pss-select" id="projectSelect">
+                            <option value="">— Select a project —</option>
+                            <option th:each="p : ${assignableProjects}"
+                                    th:value="${p.id}"
+                                    th:text="${p.title + ' (Teacher: ' + (p.teacher != null ? p.teacher.name : 'N/A') + ', Max: ' + (p.maxStudents != null ? p.maxStudents : '∞') + ')'}">
+                            </option>
+                        </select>
+                        <button class="pss-btn-assign" id="assignBtn" onclick="doAssign()" disabled>
+                            Assign Project to Student
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </button>
+                    </div>
                 </div>
             </div>
 
         </div>
 
-        <!-- Bottom Actions -->
-        <div class="page-bottom-actions">
-            <a th:href="@{/admin/dashboard}" class="modern-btn modern-btn-outline">
-                ← Back to Dashboard
-            </a>
-        </div>
+        <a th:href="@{/admin/dashboard}" class="pss-back">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            Back to Dashboard
+        </a>
 
     </div>
 </div>
@@ -137,31 +273,27 @@
 
     function showMsg(text, type) {
         const el = document.getElementById('msgBox');
-        el.innerHTML = `<div class="alert alert-${type === 'error' ? 'error' : 'info'}">${text}</div>`;
+        const cls = type === 'error' ? 'pss-alert-error' : type === 'success' ? 'pss-alert-success' : 'pss-alert-info';
+        el.innerHTML = `<div class="pss-alert ${cls}">${text}</div>`;
         if (type !== 'error') setTimeout(() => { el.innerHTML = ''; }, 5000);
     }
 
     function selectStudent(li) {
-        document.querySelectorAll('.modern-student-list li').forEach(el => el.classList.remove('selected'));
-
+        document.querySelectorAll('.pss-student-list li').forEach(el => el.classList.remove('selected'));
         li.classList.add('selected');
-
         selectedStudentId   = li.getAttribute('data-id');
         selectedStudentName = li.getAttribute('data-name');
-
-        document.getElementById('selectedStudentInfo').textContent =
-            `Selected: ${selectedStudentName} <${li.getAttribute('data-email')}>`;
-
+        const infoEl = document.getElementById('selectedStudentInfo');
+        infoEl.textContent = `Selected: ${selectedStudentName} <${li.getAttribute('data-email')}>`;
+        infoEl.classList.add('has-selection');
         updateAssignBtn();
     }
 
     function updateAssignBtn() {
         const btn = document.getElementById('assignBtn');
         if (!btn) return;
-
         const projectSelected = document.getElementById('projectSelect') &&
             document.getElementById('projectSelect').value;
-
         btn.disabled = !(selectedStudentId && projectSelected);
     }
 
@@ -170,25 +302,16 @@
 
     function filterStudents() {
         const kw = document.getElementById('studentSearch').value.trim().toLowerCase();
-
-        document.querySelectorAll('.modern-student-list li').forEach(li => {
+        document.querySelectorAll('.pss-student-list li').forEach(li => {
             const txt = (li.getAttribute('data-name') + ' ' + li.getAttribute('data-email')).toLowerCase();
             li.style.display = txt.includes(kw) ? '' : 'none';
         });
     }
 
     async function doAssign() {
-        if (!selectedStudentId) {
-            showMsg('Please select a student first.', 'error');
-            return;
-        }
-
+        if (!selectedStudentId) { showMsg('Please select a student first.', 'error'); return; }
         const projectId = document.getElementById('projectSelect').value;
-
-        if (!projectId) {
-            showMsg('Please select a project first.', 'error');
-            return;
-        }
+        if (!projectId) { showMsg('Please select a project first.', 'error'); return; }
 
         const projectText = document.getElementById('projectSelect')
             .options[document.getElementById('projectSelect').selectedIndex].text;
@@ -203,26 +326,19 @@
             const res = await fetch('/api/admin/assignments', {
                 method: 'POST',
                 headers: { [csrfHeader]: csrfToken, 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    studentId: Number(selectedStudentId),
-                    projectId: Number(projectId)
-                })
+                body: JSON.stringify({ studentId: Number(selectedStudentId), projectId: Number(projectId) })
             });
-
             const data = await res.json();
-
             if (res.ok) {
-                showMsg(`&#10003; ${data.message}`, 'info');
-
+                showMsg(`&#10003; ${data.message}`, 'success');
                 const li = document.getElementById('s-' + selectedStudentId);
                 if (li) li.remove();
-
                 selectedStudentId   = null;
                 selectedStudentName = '';
-
-                document.getElementById('selectedStudentInfo').textContent = 'No student selected.';
+                const infoEl = document.getElementById('selectedStudentInfo');
+                infoEl.textContent = 'No student selected.';
+                infoEl.classList.remove('has-selection');
                 document.getElementById('projectSelect').value = '';
-
                 btn.textContent = 'Assign Project to Student';
                 updateAssignBtn();
             } else {

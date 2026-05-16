@@ -2,50 +2,164 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Project Management (Admin) - Project Selection System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Management — Project Selection System</title>
     <meta name="_csrf"        th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        html, body { margin: 0 !important; padding: 0 !important; background: #f3f2ef !important; }
+
+        .pss-page {
+            min-height: calc(100vh - 64px);
+            background: #f3f2ef;
+            padding: 40px 32px 80px;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .pss-container { max-width: 1060px; margin: 0 auto; }
+
+        .pss-dash-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 28px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #dde5f0;
+            flex-wrap: wrap;
+        }
+        .pss-dash-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: .13em;
+            text-transform: uppercase;
+            color: #c8a23a;
+            margin-bottom: 10px;
+        }
+        .pss-dash-eyebrow::before { content: ''; display: block; width: 20px; height: 1.5px; background: #c8a23a; }
+        .pss-dash-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(24px, 3vw, 34px);
+            font-weight: 700;
+            color: #0a1220;
+            margin: 0 0 6px;
+            line-height: 1.1;
+            letter-spacing: -.02em;
+        }
+        .pss-dash-subtitle { font-size: 13px; color: #6a7888; margin: 0; }
+
+        .pss-alert {
+            display: flex; gap: 10px; align-items: flex-start;
+            padding: 11px 16px; border-radius: 9px; font-size: 13px;
+            line-height: 1.5; border: 1px solid transparent; margin-bottom: 16px;
+        }
+        .pss-alert-info    { background: #e8f0fb; color: #1e3a6a; border-color: #b6cff5; }
+        .pss-alert-success { background: #e7f8ee; color: #14482a; border-color: #aedbbf; }
+        .pss-alert-error   { background: #fbe9e9; color: #7a1f1f; border-color: #f3b8b8; }
+
+        .pss-toolbar {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 12px; background: #fff; border: 1px solid #dde5f0;
+            border-radius: 12px; padding: 14px 18px; margin-bottom: 16px; flex-wrap: wrap;
+        }
+        .pss-result-label { font-size: 12.5px; color: #8898aa; font-weight: 500; }
+        .pss-search-input {
+            width: 260px; padding: 9px 14px 9px 36px; font-size: 13px;
+            border: 1px solid #dde5f0; border-radius: 9px; outline: none;
+            font-family: 'Inter', sans-serif; color: #0a1220;
+            background: #f8f9fb url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238898aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat 11px center;
+            transition: border-color .15s;
+        }
+        .pss-search-input:focus { border-color: #7898c0; background-color: #fff; }
+
+        .pss-table-wrap {
+            background: #fff; border: 1px solid #dde5f0;
+            border-radius: 12px; overflow: hidden; margin-bottom: 24px;
+        }
+        .pss-table { width: 100%; border-collapse: collapse; font-size: 13px; font-family: 'Inter', sans-serif; }
+        .pss-table thead tr { background: #0a1220; }
+        .pss-table thead th {
+            padding: 13px 14px; text-align: left; font-size: 10.5px; font-weight: 700;
+            letter-spacing: .09em; text-transform: uppercase; color: rgba(255,255,255,.65);
+            white-space: nowrap; border: none;
+        }
+        .pss-table tbody tr { border-bottom: 1px solid #f0f3f8; transition: background .12s; }
+        .pss-table tbody tr:last-child { border-bottom: none; }
+        .pss-table tbody tr:hover { background: #f8f9fb; }
+        .pss-table tbody td { padding: 13px 14px; color: #28384a; vertical-align: middle; }
+        .pss-id { font-size: 12px; color: #9aacc0; font-weight: 600; }
+        .pss-title-cell { font-weight: 600; color: #0a1220; }
+        .pss-muted-cell { font-size: 12.5px; color: #6a7888; }
+        .pss-td-center { text-align: center; padding: 40px 16px !important; color: #8898aa; font-size: 13px; }
+
+        .pss-status-badge {
+            display: inline-block; font-size: 10.5px; font-weight: 700;
+            border-radius: 999px; padding: 3px 10px; letter-spacing: .05em; text-transform: uppercase;
+        }
+        .pss-status-available { background: #dcfce7; color: #14532d; }
+        .pss-status-archived  { background: #f0f3f8; color: #6a7888; }
+        .pss-status-requested { background: rgba(200,162,58,.12); color: #7a5c10; }
+        .pss-status-full      { background: #fee2e2; color: #7f1d1d; }
+        .pss-status-default   { background: #f0f3f8; color: #6a7888; }
+
+        .pss-btn-sm {
+            display: inline-flex; align-items: center; font-size: 12px; font-weight: 600;
+            padding: 6px 12px; border-radius: 7px; border: none; cursor: pointer;
+            font-family: 'Inter', sans-serif; white-space: nowrap; transition: background .15s;
+        }
+        .pss-btn-archive { background: #7f1d1d; color: #fff; }
+        .pss-btn-archive:hover { background: #991b1b; }
+        .pss-btn-restore { background: #14532d; color: #fff; }
+        .pss-btn-restore:hover { background: #166534; }
+        .pss-btn-delete { background: #0a1220; color: #fff; margin-left: 6px; }
+        .pss-btn-delete:hover { background: #28384a; }
+
+        .pss-back {
+            display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+            font-size: 13px; font-weight: 600; color: #6a7888; transition: color .15s;
+        }
+        .pss-back:hover { color: #0a1220; }
+
+        @media (max-width: 768px) {
+            .pss-page { padding: 24px 16px 60px; }
+            .pss-table-wrap { overflow-x: auto; }
+        }
+    </style>
 </head>
 <body>
 
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="page-shell">
-    <div class="modern-card admin-projects-card">
+<div class="pss-page">
+    <div class="pss-container">
 
-        <!-- Page Header -->
-        <div class="modern-page-header">
-            <div class="modern-page-icon">
-                📁
-            </div>
+        <div class="pss-dash-header">
             <div>
-                <h1 class="modern-page-title">Project Management</h1>
-                <p class="modern-page-subtitle">
-                    Force archive or restore project topics when administrative intervention is required
-                </p>
+                <div class="pss-dash-eyebrow">Admin Portal</div>
+                <h1 class="pss-dash-title">Project Management</h1>
+                <p class="pss-dash-subtitle">Archive, restore, or permanently delete project topics when administrative intervention is required.</p>
             </div>
         </div>
 
-        <!-- Toolbar -->
-        <div class="modern-list-toolbar admin-project-toolbar">
-            <p class="result-summary notification-summary">
-                Admin project list
-            </p>
+        <div id="msgBox"></div>
 
+        <div class="pss-toolbar">
+            <span class="pss-result-label">Admin project list</span>
             <input id="searchInput"
                    type="text"
-                   class="modern-input admin-project-search"
+                   class="pss-search-input"
                    placeholder="Search by title or teacher..."
                    oninput="renderTable()">
         </div>
 
-        <!-- Message Area -->
-        <div id="msgBox"></div>
-
-        <!-- Table -->
-        <div class="modern-table-wrapper">
-            <table class="modern-table project-table admin-project-table">
+        <div class="pss-table-wrap">
+            <table class="pss-table">
                 <thead>
                 <tr>
                     <th>ID</th>
@@ -57,23 +171,16 @@
                     <th>Actions</th>
                 </tr>
                 </thead>
-
                 <tbody id="projectTbody">
-                <tr>
-                    <td colspan="7" class="muted table-loading-cell">
-                        Loading...
-                    </td>
-                </tr>
+                <tr><td colspan="7" class="pss-td-center">Loading...</td></tr>
                 </tbody>
             </table>
         </div>
 
-        <!-- Bottom Actions -->
-        <div class="page-bottom-actions">
-            <a th:href="@{/admin/dashboard}" class="modern-btn modern-btn-outline">
-                ← Back to Dashboard
-            </a>
-        </div>
+        <a th:href="@{/admin/dashboard}" class="pss-back">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            Back to Dashboard
+        </a>
 
     </div>
 </div>
@@ -81,101 +188,78 @@
 <script>
     const csrfToken  = document.querySelector('meta[name="_csrf"]').getAttribute('content');
     const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
-
     let projects = [];
 
     function showMsg(text, type) {
         const el = document.getElementById('msgBox');
-        el.innerHTML = `<div class="alert alert-${type === 'error' ? 'error' : 'info'}">${text}</div>`;
+        const cls = type === 'error' ? 'pss-alert-error' : type === 'success' ? 'pss-alert-success' : 'pss-alert-info';
+        el.innerHTML = `<div class="pss-alert ${cls}">${text}</div>`;
         setTimeout(() => { el.innerHTML = ''; }, 4000);
     }
 
     function esc(s) {
         return String(s == null ? '' : s)
-            .replace(/&/g,'&amp;')
-            .replace(/</g,'&lt;')
-            .replace(/>/g,'&gt;')
-            .replace(/"/g,'&quot;');
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function statusClass(s) {
+        const m = { available: 'pss-status-available', archived: 'pss-status-archived', requested: 'pss-status-requested', full: 'pss-status-full' };
+        return m[s] || 'pss-status-default';
     }
 
     function renderTable() {
         const kw = document.getElementById('searchInput').value.trim().toLowerCase();
-
         const filtered = projects.filter(p =>
             ((p.title || '') + ' ' + (p.teacherName || '')).toLowerCase().includes(kw)
         );
-
         const tbody = document.getElementById('projectTbody');
-
         if (!filtered.length) {
-            tbody.innerHTML = '<tr><td colspan="7" class="muted table-loading-cell">No projects found.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="pss-td-center">No projects found.</td></tr>';
             return;
         }
-
         tbody.innerHTML = filtered.map(p => `
             <tr id="row-${p.id}">
-                <td>${p.id}</td>
-                <td><strong>${esc(p.title)}</strong></td>
+                <td class="pss-id">${p.id}</td>
+                <td class="pss-title-cell">${esc(p.title)}</td>
                 <td>${esc(p.teacherName)}</td>
-                <td>${esc(p.category)}</td>
-                <td>${esc(p.maxStudents)}</td>
+                <td class="pss-muted-cell">${esc(p.category)}</td>
+                <td class="pss-muted-cell">${esc(p.maxStudents)}</td>
+                <td><span class="pss-status-badge ${statusClass(p.status)}">${esc(p.status)}</span></td>
                 <td>
-                    <span class="status-badge status-${esc(p.status)}">
-                        ${esc(p.status)}
-                    </span>
+                    ${p.status !== 'archived'
+                        ? `<button class="pss-btn-sm pss-btn-archive" onclick="doArchive(${p.id})">Archive</button>`
+                        : `<button class="pss-btn-sm pss-btn-restore" onclick="doRestore(${p.id})">Restore</button>`
+                    }
+                    <button class="pss-btn-sm pss-btn-delete" onclick="doDelete(${p.id})">Delete</button>
                 </td>
-                <td>
-                    <div class="admin-project-actions">
-                        ${p.status !== 'archived'
-            ? `<button class="modern-btn table-action-btn admin-warning-btn"
-                                       onclick="doArchive(${p.id})">
-                                   Archive
-                               </button>`
-            : `<button class="modern-btn table-action-btn modern-btn-primary"
-                                       onclick="doRestore(${p.id})">
-                                   Restore
-                               </button>`
-        }
-                    </div>
-                </td>
-            </tr>
-        `).join('');
+            </tr>`).join('');
     }
 
     async function loadProjects() {
         const tbody = document.getElementById('projectTbody');
-
         try {
             const res = await fetch('/api/admin/projects');
-
-            if (!res.ok) {
-                throw new Error('Server error: ' + res.status);
-            }
-
+            if (!res.ok) throw new Error('Server error: ' + res.status);
             projects = await res.json();
             renderTable();
         } catch (e) {
-            tbody.innerHTML = '<tr><td colspan="7" class="muted table-loading-cell">Failed to load projects. Please refresh.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="pss-td-center">Failed to load projects. Please refresh.</td></tr>';
         }
     }
 
     async function doArchive(id) {
         const p = projects.find(x => x.id === id);
         if (!p) return;
-
         if (!confirm(`Force-archive project "${p.title}"? It will no longer appear in student search.`)) return;
-
         try {
             const res = await fetch(`/api/admin/projects/${id}/archive`, {
                 method: 'POST',
                 headers: { [csrfHeader]: csrfToken }
             });
-
             const data = await res.json();
-
             if (res.ok) {
                 p.status = data.status;
-                showMsg(`Project "${esc(p.title)}" archived successfully.`, 'info');
+                showMsg(`Project "${esc(p.title)}" archived successfully.`, 'success');
                 renderTable();
             } else {
                 showMsg(data.error || 'Failed to archive project.', 'error');
@@ -188,23 +272,42 @@
     async function doRestore(id) {
         const p = projects.find(x => x.id === id);
         if (!p) return;
-
         if (!confirm(`Restore project "${p.title}" to its previous status?`)) return;
-
         try {
             const res = await fetch(`/api/admin/projects/${id}/restore`, {
                 method: 'POST',
                 headers: { [csrfHeader]: csrfToken }
             });
-
             const data = await res.json();
-
             if (res.ok) {
                 p.status = data.status;
-                showMsg(`Project "${esc(p.title)}" restored to status: ${data.status}.`, 'info');
+                showMsg(`Project "${esc(p.title)}" restored to status: ${data.status}.`, 'success');
                 renderTable();
             } else {
                 showMsg(data.error || 'Failed to restore project.', 'error');
+            }
+        } catch (e) {
+            showMsg('Network error. Please try again.', 'error');
+        }
+    }
+
+    async function doDelete(id) {
+        const p = projects.find(x => x.id === id);
+        if (!p) return;
+        if (!confirm(`Permanently delete project "${p.title}"?\n\nThis cannot be undone. Related applications and conflict logs will also be deleted.`)) return;
+        try {
+            const res = await fetch(`/api/admin/projects/${id}/delete`, {
+                method: 'POST',
+                headers: { [csrfHeader]: csrfToken }
+            });
+            let data = {};
+            try { data = await res.json(); } catch (e) {}
+            if (res.ok) {
+                projects = projects.filter(x => x.id !== id);
+                showMsg(`Project "${esc(p.title)}" deleted permanently.`, 'success');
+                renderTable();
+            } else {
+                showMsg(data.error || 'Failed to delete project.', 'error');
             }
         } catch (e) {
             showMsg('Network error. Please try again.', 'error');

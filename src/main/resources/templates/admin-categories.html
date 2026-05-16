@@ -3,117 +3,248 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Category Management - Project Selection System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Management — Project Selection System</title>
     <meta name="_csrf"        th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        html, body { margin: 0 !important; padding: 0 !important; background: #f3f2ef !important; }
+
+        .pss-page {
+            min-height: calc(100vh - 64px);
+            background: #f3f2ef;
+            padding: 40px 32px 80px;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .pss-container { max-width: 900px; margin: 0 auto; }
+
+        .pss-dash-header { margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid #dde5f0; }
+        .pss-dash-eyebrow {
+            display: inline-flex; align-items: center; gap: 10px;
+            font-size: 10.5px; font-weight: 700; letter-spacing: .13em;
+            text-transform: uppercase; color: #c8a23a; margin-bottom: 10px;
+        }
+        .pss-dash-eyebrow::before { content: ''; display: block; width: 20px; height: 1.5px; background: #c8a23a; }
+        .pss-dash-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(24px, 3vw, 34px); font-weight: 700;
+            color: #0a1220; margin: 0 0 6px; line-height: 1.1; letter-spacing: -.02em;
+        }
+        .pss-dash-subtitle { font-size: 13px; color: #6a7888; margin: 0; }
+
+        .pss-alert {
+            display: flex; gap: 10px; align-items: flex-start;
+            padding: 11px 16px; border-radius: 9px; font-size: 13px;
+            line-height: 1.5; border: 1px solid transparent; margin-bottom: 16px;
+        }
+        .pss-alert-info    { background: #e8f0fb; color: #1e3a6a; border-color: #b6cff5; }
+        .pss-alert-success { background: #e7f8ee; color: #14482a; border-color: #aedbbf; }
+        .pss-alert-error   { background: #fbe9e9; color: #7a1f1f; border-color: #f3b8b8; }
+
+        /* Table section */
+        .pss-section {
+            background: #fff; border: 1px solid #dde5f0;
+            border-radius: 12px; overflow: hidden; margin-bottom: 20px;
+        }
+        .pss-section-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 20px; border-bottom: 1px solid #f0f3f8;
+        }
+        .pss-section-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 15px; font-weight: 700; color: #0a1220; margin: 0;
+        }
+
+        .pss-table { width: 100%; border-collapse: collapse; font-size: 13px; font-family: 'Inter', sans-serif; }
+        .pss-table thead tr { background: #0a1220; }
+        .pss-table thead th {
+            padding: 12px 16px; text-align: left; font-size: 10.5px; font-weight: 700;
+            letter-spacing: .09em; text-transform: uppercase; color: rgba(255,255,255,.65);
+            white-space: nowrap; border: none;
+        }
+        .pss-table tbody tr { border-bottom: 1px solid #f0f3f8; transition: background .12s; }
+        .pss-table tbody tr:last-child { border-bottom: none; }
+        .pss-table tbody tr:hover { background: #f8f9fb; }
+        .pss-table tbody td { padding: 12px 16px; color: #28384a; vertical-align: middle; }
+        .pss-id { font-size: 12px; color: #9aacc0; font-weight: 600; }
+        .pss-name-cell { font-weight: 600; color: #0a1220; }
+        .pss-desc-cell { font-size: 12.5px; color: #6a7888; }
+        .pss-td-center { text-align: center; padding: 36px 16px !important; color: #8898aa; font-size: 13px; }
+
+        .pss-cat-status {
+            display: inline-block; font-size: 10.5px; font-weight: 700;
+            border-radius: 999px; padding: 3px 10px;
+            letter-spacing: .05em; text-transform: uppercase;
+        }
+        .pss-cat-active   { background: #dcfce7; color: #14532d; }
+        .pss-cat-inactive { background: #f0f3f8; color: #6a7888; }
+
+        .pss-action-cell { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .pss-btn-sm {
+            display: inline-flex; align-items: center; font-size: 12px; font-weight: 600;
+            padding: 5px 11px; border-radius: 7px; border: none; cursor: pointer;
+            font-family: 'Inter', sans-serif; white-space: nowrap; transition: background .15s;
+        }
+        .pss-btn-edit    { background: #f0f3f8; color: #28384a; border: 1px solid #dde5f0; }
+        .pss-btn-edit:hover    { background: #e4eaf4; }
+        .pss-btn-deactivate { background: #7f1d1d; color: #fff; }
+        .pss-btn-deactivate:hover { background: #991b1b; }
+        .pss-btn-activate   { background: #14532d; color: #fff; }
+        .pss-btn-activate:hover   { background: #166534; }
+
+        /* Edit row */
+        .pss-edit-row td { background: #f8f9fb; }
+        .pss-edit-row-inner {
+            display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; padding: 4px 0;
+        }
+        .pss-edit-group { display: flex; flex-direction: column; gap: 5px; }
+        .pss-edit-label {
+            font-size: 10.5px; font-weight: 700; letter-spacing: .08em;
+            text-transform: uppercase; color: #8898aa;
+        }
+        .pss-edit-input {
+            padding: 8px 12px; font-size: 13px; border: 1px solid #dde5f0;
+            border-radius: 8px; font-family: 'Inter', sans-serif; color: #0a1220;
+            outline: none; min-width: 180px; background: #fff;
+        }
+        .pss-edit-input:focus { border-color: #7898c0; }
+        .pss-btn-save   { background: #0a1220; color: #fff; padding: 8px 14px; }
+        .pss-btn-save:hover   { background: #182840; }
+        .pss-btn-cancel { background: #fff; color: #6a7888; border: 1px solid #dde5f0; padding: 7px 13px; }
+        .pss-btn-cancel:hover { background: #f3f2ef; }
+
+        /* Pagination */
+        .pss-pagination {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px; border-top: 1px solid #f0f3f8; font-size: 12.5px; color: #8898aa;
+        }
+        .pss-page-btn {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 12.5px; font-weight: 600; padding: 7px 14px;
+            border-radius: 8px; border: 1px solid #dde5f0; background: #fff;
+            color: #28384a; cursor: pointer; transition: background .15s; font-family: 'Inter', sans-serif;
+        }
+        .pss-page-btn:hover:not(:disabled) { background: #f3f2ef; }
+        .pss-page-btn:disabled { opacity: .4; cursor: default; }
+
+        /* Add form */
+        .pss-add-card {
+            background: #fff; border: 1px solid #dde5f0;
+            border-radius: 12px; padding: 22px 24px; margin-bottom: 20px;
+        }
+        .pss-add-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 15px; font-weight: 700; color: #0a1220; margin: 0 0 18px;
+        }
+        .pss-add-row { display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap; }
+        .pss-form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 160px; }
+        .pss-form-label {
+            font-size: 10.5px; font-weight: 700; letter-spacing: .1em;
+            text-transform: uppercase; color: #28384a;
+        }
+        .pss-form-input {
+            padding: 10px 14px; font-size: 13.5px; border: 1px solid #dde5f0;
+            border-radius: 9px; font-family: 'Inter', sans-serif; color: #0a1220;
+            outline: none; background: #fff;
+        }
+        .pss-form-input:focus { border-color: #7898c0; box-shadow: 0 0 0 3px rgba(20,58,128,.06); }
+        .pss-btn-add {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: #0a1220; color: #fff; border: none; font-size: 13.5px;
+            font-weight: 600; padding: 10px 20px; border-radius: 9px; cursor: pointer;
+            font-family: 'Inter', sans-serif; transition: background .2s; white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .pss-btn-add:hover { background: #182840; }
+
+        .pss-back {
+            display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+            font-size: 13px; font-weight: 600; color: #6a7888; transition: color .15s;
+        }
+        .pss-back:hover { color: #0a1220; }
+
+        @media (max-width: 640px) {
+            .pss-page { padding: 24px 16px 60px; }
+            .pss-add-row { flex-direction: column; }
+        }
+    </style>
 </head>
 <body>
 
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="page-shell">
-    <div class="modern-card admin-categories-card">
+<div class="pss-page">
+    <div class="pss-container">
 
-        <!-- Page Header -->
-        <div class="modern-page-header">
-            <div class="modern-page-icon">
-                🏷️
-            </div>
-            <div>
-                <h1 class="modern-page-title">Category Management</h1>
-                <p class="modern-page-subtitle">
-                    Create, edit, activate or deactivate project topic categories
-                </p>
-            </div>
+        <div class="pss-dash-header">
+            <div class="pss-dash-eyebrow">Admin Portal</div>
+            <h1 class="pss-dash-title">Category Management</h1>
+            <p class="pss-dash-subtitle">Create, edit, activate or deactivate project topic categories.</p>
         </div>
 
-        <!-- Message Area -->
         <div id="msg"></div>
 
-        <!-- Category Table -->
-        <div class="modern-detail-card">
-            <div class="section-title-row">
-                <h3 class="modern-detail-title">Category List</h3>
+        <!-- Category table -->
+        <div class="pss-section">
+            <div class="pss-section-header">
+                <h3 class="pss-section-title">Category List</h3>
             </div>
-
-            <div class="modern-table-wrapper">
-                <table id="category-table" class="modern-table project-table admin-category-table">
-                    <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>Description</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                    </thead>
-
-                    <tbody id="category-tbody">
-                    <tr>
-                        <td colspan="5" class="muted table-loading-cell">
-                            Loading...
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="modern-pagination admin-category-pagination">
-                <button id="prev-page"
-                        type="button"
-                        class="modern-btn modern-btn-outline table-action-btn"
-                        onclick="changePage(-1)">
+            <table class="pss-table" id="category-table">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody id="category-tbody">
+                <tr><td colspan="5" class="pss-td-center">Loading...</td></tr>
+                </tbody>
+            </table>
+            <div class="pss-pagination">
+                <button id="prev-page" type="button" class="pss-page-btn" onclick="changePage(-1)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
                     Previous
                 </button>
-
                 <span id="page-info">Page 1 / 1</span>
-
-                <button id="next-page"
-                        type="button"
-                        class="modern-btn modern-btn-outline table-action-btn"
-                        onclick="changePage(1)">
+                <button id="next-page" type="button" class="pss-page-btn" onclick="changePage(1)">
                     Next
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                 </button>
             </div>
         </div>
 
-        <!-- Add Category Form -->
-        <form id="add-form" onsubmit="handleAdd(event)" class="modern-form">
-            <div class="form-section-card">
-                <h3 class="form-section-title">Add New Category</h3>
-
-                <div class="admin-category-form-row">
-                    <div class="modern-form-group">
-                        <label for="cat-name">Name <span class="required-mark">*</span></label>
-                        <input type="text"
-                               id="cat-name"
-                               class="modern-input"
-                               placeholder="e.g. Engineering"
-                               required>
+        <!-- Add form -->
+        <div class="pss-add-card">
+            <h3 class="pss-add-title">Add New Category</h3>
+            <form id="add-form" onsubmit="handleAdd(event)">
+                <div class="pss-add-row">
+                    <div class="pss-form-group">
+                        <label class="pss-form-label" for="cat-name">Name <span style="color:#e05252">*</span></label>
+                        <input type="text" id="cat-name" class="pss-form-input" placeholder="e.g. Engineering" required>
                     </div>
-
-                    <div class="modern-form-group">
-                        <label for="cat-desc">Description</label>
-                        <input type="text"
-                               id="cat-desc"
-                               class="modern-input"
-                               placeholder="Optional description">
+                    <div class="pss-form-group">
+                        <label class="pss-form-label" for="cat-desc">Description</label>
+                        <input type="text" id="cat-desc" class="pss-form-input" placeholder="Optional description">
                     </div>
-
-                    <button type="submit" class="modern-btn modern-btn-primary">
+                    <button type="submit" class="pss-btn-add">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                         Add Category
                     </button>
                 </div>
-            </div>
-        </form>
-
-        <!-- Bottom Actions -->
-        <div class="page-bottom-actions">
-            <a th:href="@{/admin/dashboard}" class="modern-btn modern-btn-outline">
-                ← Back to Dashboard
-            </a>
+            </form>
         </div>
+
+        <a th:href="@{/admin/dashboard}" class="pss-back">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            Back to Dashboard
+        </a>
 
     </div>
 </div>
@@ -129,7 +260,8 @@
 
     function showMsg(text, type) {
         const el = document.getElementById('msg');
-        el.innerHTML = `<div class="alert alert-${type}">${text}</div>`;
+        const cls = type === 'error' ? 'pss-alert-error' : type === 'success' ? 'pss-alert-success' : 'pss-alert-info';
+        el.innerHTML = `<div class="pss-alert ${cls}">${text}</div>`;
         setTimeout(() => { el.innerHTML = ''; }, 4000);
     }
 
@@ -143,15 +275,9 @@
         try {
             const res  = await fetch(`/api/admin/categories?page=${page}&size=${pageSize}`, { headers: h(false) });
             const data = await res.json();
-
             currentPage = data.page || 0;
             totalPages  = Math.max(data.totalPages || 1, 1);
-
-            if (currentPage >= totalPages) {
-                loadCategories(totalPages - 1);
-                return;
-            }
-
+            if (currentPage >= totalPages) { loadCategories(totalPages - 1); return; }
             renderTable(data.items || []);
             renderPagination(data.totalItems || 0);
         } catch (e) {
@@ -161,72 +287,40 @@
 
     function renderTable(list) {
         const tbody = document.getElementById('category-tbody');
-
         if (!list || list.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="muted table-loading-cell">No categories yet. Add one below.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" class="pss-td-center">No categories yet. Add one below.</td></tr>';
             return;
         }
-
         tbody.innerHTML = list.map((c, i) => `
             <tr id="row-${c.id}">
-                <td>${currentPage * pageSize + i + 1}</td>
-                <td><strong>${esc(c.name)}</strong></td>
-                <td>${esc(c.description || '—')}</td>
+                <td class="pss-id">${currentPage * pageSize + i + 1}</td>
+                <td class="pss-name-cell">${esc(c.name)}</td>
+                <td class="pss-desc-cell">${esc(c.description || '—')}</td>
+                <td><span class="pss-cat-status ${c.isActive ? 'pss-cat-active' : 'pss-cat-inactive'}">${c.isActive ? 'Active' : 'Inactive'}</span></td>
                 <td>
-                    <span class="category-status-badge ${c.isActive ? 'category-active' : 'category-inactive'}">
-                        ${c.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                </td>
-                <td>
-                    <div class="admin-category-actions">
-                        <button class="modern-btn modern-btn-dark table-action-btn"
-                                onclick="showEditRow(${c.id}, '${esc(c.name)}', '${esc(c.description || '')}')">
-                            Edit
-                        </button>
-
+                    <div class="pss-action-cell">
+                        <button class="pss-btn-sm pss-btn-edit"
+                                onclick="showEditRow(${c.id}, '${esc(c.name)}', '${esc(c.description || '')}')">Edit</button>
                         ${c.isActive
-            ? `<button class="modern-btn table-action-btn admin-warning-btn"
-                                       onclick="handleDeactivate(${c.id}, '${esc(c.name)}')">
-                                   Deactivate
-                               </button>`
-            : `<button class="modern-btn table-action-btn modern-btn-primary"
-                                       onclick="handleActivate(${c.id}, '${esc(c.name)}')">
-                                   Activate
-                               </button>`
-        }
+                            ? `<button class="pss-btn-sm pss-btn-deactivate" onclick="handleDeactivate(${c.id}, '${esc(c.name)}')">Deactivate</button>`
+                            : `<button class="pss-btn-sm pss-btn-activate"   onclick="handleActivate(${c.id}, '${esc(c.name)}')">Activate</button>`
+                        }
                     </div>
                 </td>
             </tr>
-
-            <tr class="edit-row" id="edit-row-${c.id}" style="display:none;">
-                <td colspan="5">
-                    <div class="admin-category-edit-row">
-                        <div class="modern-form-group">
-                            <label>Name *</label>
-                            <input type="text"
-                                   id="edit-name-${c.id}"
-                                   value="${esc(c.name)}"
-                                   class="modern-input"
-                                   required>
+            <tr class="pss-edit-row" id="edit-row-${c.id}" style="display:none;">
+                <td colspan="5" style="padding:14px 16px;">
+                    <div class="pss-edit-row-inner">
+                        <div class="pss-edit-group">
+                            <span class="pss-edit-label">Name *</span>
+                            <input type="text" id="edit-name-${c.id}" value="${esc(c.name)}" class="pss-edit-input" required>
                         </div>
-
-                        <div class="modern-form-group admin-category-edit-desc">
-                            <label>Description</label>
-                            <input type="text"
-                                   id="edit-desc-${c.id}"
-                                   value="${esc(c.description || '')}"
-                                   class="modern-input">
+                        <div class="pss-edit-group" style="flex:2">
+                            <span class="pss-edit-label">Description</span>
+                            <input type="text" id="edit-desc-${c.id}" value="${esc(c.description || '')}" class="pss-edit-input">
                         </div>
-
-                        <button class="modern-btn modern-btn-primary table-action-btn"
-                                onclick="submitEdit(${c.id})">
-                            Save
-                        </button>
-
-                        <button class="modern-btn modern-btn-outline table-action-btn"
-                                onclick="hideEditRow(${c.id})">
-                            Cancel
-                        </button>
+                        <button class="pss-btn-sm pss-btn-save" onclick="submitEdit(${c.id})">Save</button>
+                        <button class="pss-btn-sm pss-btn-cancel" onclick="hideEditRow(${c.id})">Cancel</button>
                     </div>
                 </td>
             </tr>
@@ -236,7 +330,6 @@
     function renderPagination(totalItems) {
         document.getElementById('page-info').textContent =
             `Page ${currentPage + 1} / ${totalPages} (${totalItems} items)`;
-
         document.getElementById('prev-page').disabled = currentPage <= 0;
         document.getElementById('next-page').disabled = currentPage >= totalPages - 1;
     }
@@ -262,21 +355,13 @@
     async function submitEdit(id) {
         const name = document.getElementById(`edit-name-${id}`).value.trim();
         const desc = document.getElementById(`edit-desc-${id}`).value.trim();
-
-        if (!name) {
-            showMsg('Category name is required.', 'error');
-            return;
-        }
-
+        if (!name) { showMsg('Category name is required.', 'error'); return; }
         try {
             const res = await fetch(`/api/admin/categories/${id}`, {
-                method: 'PUT',
-                headers: h(true),
-                body: JSON.stringify({ name, description: desc })
+                method: 'PUT', headers: h(true), body: JSON.stringify({ name, description: desc })
             });
-
             if (res.ok) {
-                showMsg('Category updated successfully.', 'info');
+                showMsg('Category updated successfully.', 'success');
                 loadCategories(currentPage);
             } else {
                 const data = await res.json();
@@ -289,15 +374,10 @@
 
     async function handleDeactivate(id, name) {
         if (!confirm(`Deactivate category "${name}"? It will no longer appear in teacher/student menus, but existing projects will keep the category name.`)) return;
-
         try {
-            const res = await fetch(`/api/admin/categories/${id}/deactivate`, {
-                method: 'PUT',
-                headers: h(false)
-            });
-
+            const res = await fetch(`/api/admin/categories/${id}/deactivate`, { method: 'PUT', headers: h(false) });
             if (res.ok) {
-                showMsg(`Category "${esc(name)}" deactivated.`, 'info');
+                showMsg(`Category "${esc(name)}" deactivated.`, 'success');
                 loadCategories(currentPage);
             } else {
                 showMsg('Failed to deactivate category.', 'error');
@@ -309,15 +389,10 @@
 
     async function handleActivate(id, name) {
         if (!confirm(`Re-activate category "${name}"?`)) return;
-
         try {
-            const res = await fetch(`/api/admin/categories/${id}/activate`, {
-                method: 'PUT',
-                headers: h(false)
-            });
-
+            const res = await fetch(`/api/admin/categories/${id}/activate`, { method: 'PUT', headers: h(false) });
             if (res.ok) {
-                showMsg(`Category "${esc(name)}" activated.`, 'info');
+                showMsg(`Category "${esc(name)}" activated.`, 'success');
                 loadCategories(currentPage);
             } else {
                 showMsg('Failed to activate category.', 'error');
@@ -329,25 +404,16 @@
 
     async function handleAdd(e) {
         e.preventDefault();
-
         const name = document.getElementById('cat-name').value.trim();
         const desc = document.getElementById('cat-desc').value.trim();
-
-        if (!name) {
-            showMsg('Category name is required.', 'error');
-            return;
-        }
-
+        if (!name) { showMsg('Category name is required.', 'error'); return; }
         try {
             const res = await fetch('/api/admin/categories', {
-                method: 'POST',
-                headers: h(true),
-                body: JSON.stringify({ name, description: desc })
+                method: 'POST', headers: h(true), body: JSON.stringify({ name, description: desc })
             });
-
             if (res.status === 201) {
                 document.getElementById('add-form').reset();
-                showMsg(`Category "${esc(name)}" created successfully.`, 'info');
+                showMsg(`Category "${esc(name)}" created successfully.`, 'success');
                 loadCategories(0);
             } else {
                 const data = await res.json();
@@ -360,11 +426,8 @@
 
     function esc(str) {
         return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
     loadCategories();

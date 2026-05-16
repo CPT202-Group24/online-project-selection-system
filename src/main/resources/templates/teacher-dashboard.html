@@ -1,554 +1,539 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Teacher Dashboard - Project Selection System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard — Project Selection System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
-
     <style>
-        .teacher-dashboard-shell {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+        html, body { margin: 0 !important; padding: 0 !important; background: #f3f2ef !important; }
 
-        .teacher-top-bar {
+        .pss-page {
+            min-height: calc(100vh - 64px);
+            background: #f3f2ef;
+            padding: 48px 32px 80px;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .pss-container { max-width: 1100px; margin: 0 auto; }
+
+        /* Header */
+        .pss-dash-header {
             display: flex;
-            justify-content: space-between;
             align-items: flex-start;
-            gap: 20px;
-            margin-bottom: 28px;
-        }
-
-        .teacher-title-area {
-            display: flex;
-            gap: 18px;
-            align-items: center;
-        }
-
-        .teacher-page-icon {
-            width: 72px;
-            height: 72px;
-            border-radius: 22px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #eef4ff;
-            font-size: 2rem;
-        }
-
-        .teacher-title-area h1 {
-            margin: 0;
-            color: #082b5f;
-            font-size: 2.2rem;
-            font-weight: 800;
-        }
-
-        .teacher-title-area p {
-            margin: 8px 0 0;
-            color: #64748b;
-            font-size: 1rem;
-        }
-
-        .teacher-main-actions {
-            display: flex;
-            gap: 12px;
+            justify-content: space-between;
+            gap: 24px;
+            margin-bottom: 40px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid #dde5f0;
             flex-wrap: wrap;
         }
-
-        .teacher-btn {
+        .pss-dash-eyebrow {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 12px 18px;
-            border-radius: 14px;
-            text-decoration: none;
+            gap: 10px;
+            font-size: 10.5px;
             font-weight: 700;
+            letter-spacing: .13em;
+            text-transform: uppercase;
+            color: #c8a23a;
+            margin-bottom: 12px;
+        }
+        .pss-dash-eyebrow::before {
+            content: '';
+            display: block;
+            width: 24px; height: 1.5px;
+            background: #c8a23a;
+        }
+        .pss-dash-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(28px, 3.5vw, 42px);
+            font-weight: 700;
+            color: #0a1220;
+            margin: 0 0 8px;
+            line-height: 1.1;
+            letter-spacing: -.02em;
+        }
+        .pss-dash-subtitle {
+            font-size: 13.5px;
+            color: #6a7888;
+            margin: 0;
+            line-height: 1.6;
+        }
+        .pss-header-actions {
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            padding-top: 4px;
+        }
+
+        /* Buttons */
+        .pss-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 10px 18px;
+            border-radius: 10px;
             border: none;
             cursor: pointer;
-            transition: 0.2s ease;
-            white-space: nowrap;
-            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            transition: background .2s, box-shadow .2s, transform .15s;
+            letter-spacing: .01em;
         }
-
-        .teacher-btn-primary {
-            background: #2563eb;
-            color: #ffffff;
+        .pss-btn-primary {
+            background: #0a1220;
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(10,18,32,.16);
         }
-
-        .teacher-btn-primary:hover {
-            background: #1d4ed8;
-            transform: translateY(-1px);
+        .pss-btn-primary:hover {
+            background: #182840;
+            box-shadow: 0 4px 16px rgba(10,18,32,.24);
         }
-
-        .teacher-btn-outline {
-            background: #ffffff;
-            color: #1e40af;
-            border: 1px solid #bfdbfe;
+        .pss-btn-outline {
+            background: #fff;
+            color: #0a1220;
+            border: 1px solid #dde5f0 !important;
         }
-
-        .teacher-btn-outline:hover {
-            background: #eff6ff;
-            transform: translateY(-1px);
+        .pss-btn-outline:hover {
+            background: #f3f2ef;
+            border-color: #b8c8da !important;
         }
+        .pss-btn-accept {
+            background: #14532d;
+            color: #fff;
+            font-size: 12px;
+            padding: 7px 14px;
+            width: auto !important;
+        }
+        .pss-btn-accept:hover { background: #166534; }
+        .pss-btn-reject {
+            background: #7f1d1d;
+            color: #fff;
+            font-size: 12px;
+            padding: 7px 14px;
+            width: auto !important;
+        }
+        .pss-btn-reject:hover { background: #991b1b; }
 
-        .teacher-alert-success {
-            background: #dcfce7;
-            color: #166534;
+        /* Alerts */
+        .pss-alert {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
             padding: 12px 16px;
-            border-radius: 12px;
-            margin-bottom: 18px;
-            font-weight: 600;
-        }
-
-        .teacher-alert-error {
-            background: #fee2e2;
-            color: #991b1b;
-            padding: 12px 16px;
-            border-radius: 12px;
-            margin-bottom: 18px;
-            font-weight: 600;
-        }
-
-        .teacher-process-card {
-            background: linear-gradient(135deg, #eff6ff, #f8fbff);
-            border: 1px solid #dbeafe;
-            border-radius: 22px;
-            padding: 24px;
+            font-size: 13px;
+            line-height: 1.5;
+            border-radius: 10px;
+            font-family: 'Inter', sans-serif;
             margin-bottom: 24px;
+            border: 1px solid transparent;
         }
+        .pss-alert-success { background: #e7f8ee; color: #14482a; border-color: #aedbbf; }
+        .pss-alert-error   { background: #fbe9e9; color: #7a1f1f; border-color: #f3b8b8; }
 
-        .teacher-process-card h2 {
-            margin: 0 0 18px;
-            color: #082b5f;
-            font-size: 1.4rem;
+        /* Workflow steps */
+        .pss-workflow {
+            background: #fff;
+            border: 1px solid #dde5f0;
+            border-radius: 14px;
+            padding: 24px 28px;
+            margin-bottom: 28px;
         }
-
-        .teacher-process-grid {
+        .pss-workflow-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: #0a1220;
+            margin: 0 0 20px;
+        }
+        .pss-workflow-steps {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 14px;
+            gap: 16px;
         }
-
-        .teacher-process-step {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 18px;
-            padding: 18px;
-            min-height: 110px;
+        .pss-step {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
-
-        .teacher-step-number {
-            width: 32px;
-            height: 32px;
+        .pss-step-num {
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
-            background: #2563eb;
-            color: #ffffff;
+            background: #0a1220;
+            color: #c8a23a;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 800;
-            margin-bottom: 10px;
-        }
-
-        .teacher-process-step h3 {
-            margin: 0 0 6px;
-            color: #0f172a;
-            font-size: 1rem;
-        }
-
-        .teacher-process-step p {
-            margin: 0;
-            color: #64748b;
-            font-size: 0.9rem;
-            line-height: 1.5;
-        }
-
-        .teacher-content-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 24px;
-        }
-
-        .teacher-section-card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 22px;
-            padding: 24px;
-            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
-        }
-
-        .teacher-section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 18px;
-        }
-
-        .teacher-section-header h2 {
-            margin: 0;
-            color: #082b5f;
-            font-size: 1.35rem;
-            font-weight: 800;
-        }
-
-        .teacher-badge {
-            background: #eff6ff;
-            color: #1d4ed8;
-            border-radius: 999px;
-            padding: 6px 12px;
-            font-weight: 800;
-            font-size: 0.85rem;
-        }
-
-        .teacher-empty-state {
-            border: 1px dashed #cbd5e1;
-            border-radius: 18px;
-            padding: 34px;
-            text-align: center;
-            color: #64748b;
-            background: #f8fafc;
-        }
-
-        .teacher-empty-state strong {
-            display: block;
-            color: #0f172a;
-            font-size: 1.1rem;
-            margin-bottom: 8px;
-        }
-
-        .teacher-application-list {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .teacher-application-item {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 18px;
-            border: 1px solid #e2e8f0;
-            border-radius: 18px;
-            padding: 18px;
-            background: #f8fafc;
-        }
-
-        .teacher-application-main h3 {
-            margin: 0 0 8px;
-            color: #0f172a;
-            font-size: 1.05rem;
-        }
-
-        .teacher-application-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            color: #64748b;
-            font-size: 0.9rem;
-            margin-bottom: 10px;
-        }
-
-        .teacher-statement {
-            margin: 10px 0 0;
-            color: #475569;
-            line-height: 1.55;
-            font-size: 0.92rem;
-        }
-
-        .teacher-application-actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .teacher-approve-btn {
-            background: #16a34a;
-            color: #ffffff;
-        }
-
-        .teacher-approve-btn:hover {
-            background: #15803d;
-        }
-
-        .teacher-reject-btn {
-            background: #ef4444;
-            color: #ffffff;
-        }
-
-        .teacher-reject-btn:hover {
-            background: #dc2626;
-        }
-
-        .teacher-view-all {
-            margin-top: 18px;
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .teacher-side-list {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .teacher-side-link {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 16px;
-            border-radius: 18px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            text-decoration: none;
-            color: inherit;
-            transition: 0.2s ease;
-        }
-
-        .teacher-side-link:hover {
-            background: #eff6ff;
-            transform: translateY(-1px);
-        }
-
-        .teacher-side-icon {
-            width: 46px;
-            height: 46px;
-            border-radius: 14px;
-            background: #e0ecff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.35rem;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
             flex-shrink: 0;
         }
-
-        .teacher-side-link h3 {
+        .pss-step h4 {
+            font-size: 13px;
+            font-weight: 700;
+            color: #0a1220;
             margin: 0 0 4px;
-            color: #0f172a;
-            font-size: 1rem;
+        }
+        .pss-step p {
+            font-size: 12px;
+            color: #6a7888;
+            margin: 0;
+            line-height: 1.55;
         }
 
-        .teacher-side-link p {
+        /* Main content grid */
+        .pss-content-grid {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 24px;
+            align-items: start;
+        }
+
+        /* Section card */
+        .pss-section-card {
+            background: #fff;
+            border: 1px solid #dde5f0;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+        .pss-section-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 20px 24px;
+            border-bottom: 1px solid #dde5f0;
+        }
+        .pss-section-head h2 {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: #0a1220;
             margin: 0;
-            color: #64748b;
-            font-size: 0.9rem;
+        }
+        .pss-badge {
+            background: rgba(200,162,58,.12);
+            color: #9a7a28;
+            border: 1px solid rgba(200,162,58,.3);
+            border-radius: 999px;
+            padding: 4px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            white-space: nowrap;
+        }
+        .pss-section-body { padding: 20px 24px; }
+
+        /* Empty state */
+        .pss-empty {
+            text-align: center;
+            padding: 36px 20px;
+            border: 1px dashed #c8d4e0;
+            border-radius: 10px;
+            background: #f8f9fb;
+        }
+        .pss-empty-title {
+            font-weight: 600;
+            color: #28384a;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+        .pss-empty-desc {
+            font-size: 13px;
+            color: #8898aa;
+        }
+
+        /* Application items */
+        .pss-app-list { display: flex; flex-direction: column; gap: 14px; }
+        .pss-app-item {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 16px;
+            border: 1px solid #dde5f0;
+            border-radius: 10px;
+            padding: 16px 18px;
+            background: #fafbfc;
+        }
+        .pss-app-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0a1220;
+            margin: 0 0 8px;
+        }
+        .pss-app-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            font-size: 12px;
+            color: #6a7888;
+            margin-bottom: 8px;
+        }
+        .pss-app-meta strong { color: #28384a; }
+        .pss-app-submitted { font-size: 11.5px; color: #9aacc0; margin-top: 5px; }
+        .pss-app-statement {
+            font-size: 12.5px;
+            color: #5a6878;
+            margin: 0;
+            line-height: 1.6;
+            word-break: break-all;
+            overflow-wrap: break-word;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+        }
+        .pss-app-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .inline-action-form { display: inline; margin: 0; }
+
+        .pss-view-all {
+            display: flex;
+            justify-content: flex-end;
+            padding-top: 16px;
+            border-top: 1px solid #dde5f0;
+            margin-top: 16px;
+        }
+
+        /* Sidebar shortcuts */
+        .pss-shortcuts { display: flex; flex-direction: column; gap: 2px; padding: 8px; }
+        .pss-shortcut {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: inherit;
+            transition: background .15s;
+        }
+        .pss-shortcut:hover { background: #f3f2ef; }
+        .pss-shortcut-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 9px;
+            background: #f3f2ef;
+            border: 1px solid #dde5f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #36506e;
+            flex-shrink: 0;
+        }
+        .pss-shortcut h4 {
+            font-size: 13px;
+            font-weight: 700;
+            color: #0a1220;
+            margin: 0 0 3px;
+        }
+        .pss-shortcut p {
+            font-size: 11.5px;
+            color: #8898aa;
+            margin: 0;
             line-height: 1.4;
         }
 
-        .inline-action-form {
-            display: inline;
+        @media (max-width: 960px) {
+            .pss-content-grid { grid-template-columns: 1fr; }
+            .pss-workflow-steps { grid-template-columns: repeat(2, 1fr); }
         }
-
-        @media (max-width: 900px) {
-            .teacher-top-bar {
-                flex-direction: column;
-            }
-
-            .teacher-process-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .teacher-content-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .teacher-application-item {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .teacher-process-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .teacher-main-actions {
-                width: 100%;
-            }
-
-            .teacher-btn {
-                width: 100%;
-            }
+        @media (max-width: 640px) {
+            .pss-page { padding: 28px 16px 60px; }
+            .pss-dash-header { flex-direction: column; }
+            .pss-workflow-steps { grid-template-columns: 1fr; }
+            .pss-app-item { grid-template-columns: 1fr; }
         }
     </style>
 </head>
-
 <body>
 
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="page-shell">
-    <div class="modern-card teacher-dashboard-shell">
+<div class="pss-page">
+    <div class="pss-container">
 
-        <div class="teacher-top-bar">
-            <div class="teacher-title-area">
-                <div class="teacher-page-icon">👩‍🏫</div>
-                <div>
-                    <h1>Teacher Dashboard</h1>
-                    <p>Review recent applications and manage your project topics.</p>
-                </div>
+        <!-- Header -->
+        <div class="pss-dash-header">
+            <div>
+                <div class="pss-dash-eyebrow">Teacher Portal</div>
+                <h1 class="pss-dash-title">Teacher Dashboard</h1>
+                <p class="pss-dash-subtitle">Review applications and manage your project topics.</p>
             </div>
-
-            <div class="teacher-main-actions">
-                <a th:href="@{/teacher/projects/new}" class="teacher-btn teacher-btn-primary">
-                    ➕ Create New Project
+            <div class="pss-header-actions">
+                <a th:href="@{/teacher/projects/new}" class="pss-btn pss-btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    New Project
                 </a>
-                <a th:href="@{/teacher/projects}" class="teacher-btn teacher-btn-outline">
-                    📁 Manage Projects
+                <a th:href="@{/teacher/projects}" class="pss-btn pss-btn-outline">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                    My Projects
                 </a>
             </div>
         </div>
 
-        <div th:if="${successMessage}" class="teacher-alert-success" th:text="${successMessage}"></div>
-        <div th:if="${errorMessage}" class="teacher-alert-error" th:text="${errorMessage}"></div>
+        <!-- Alerts -->
+        <div th:if="${successMessage}" class="pss-alert pss-alert-success">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><polyline points="20 6 9 17 4 12"/></svg>
+            <span th:text="${successMessage}"></span>
+        </div>
+        <div th:if="${errorMessage}" class="pss-alert pss-alert-error">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span th:text="${errorMessage}"></span>
+        </div>
 
-        <div class="teacher-process-card">
-            <h2>Project Workflow</h2>
-
-            <div class="teacher-process-grid">
-                <div class="teacher-process-step">
-                    <div class="teacher-step-number">1</div>
-                    <h3>Create</h3>
-                    <p>Create a project topic and save it as a draft.</p>
+        <!-- Workflow -->
+        <div class="pss-workflow">
+            <h2 class="pss-workflow-title">Project Workflow</h2>
+            <div class="pss-workflow-steps">
+                <div class="pss-step">
+                    <div class="pss-step-num">1</div>
+                    <div>
+                        <h4>Create</h4>
+                        <p>Create a project topic and save it as a draft.</p>
+                    </div>
                 </div>
-
-                <div class="teacher-process-step">
-                    <div class="teacher-step-number">2</div>
-                    <h3>Publish</h3>
-                    <p>Publish the topic so students can apply.</p>
+                <div class="pss-step">
+                    <div class="pss-step-num">2</div>
+                    <div>
+                        <h4>Publish</h4>
+                        <p>Publish the topic so students can discover and apply.</p>
+                    </div>
                 </div>
-
-                <div class="teacher-process-step">
-                    <div class="teacher-step-number">3</div>
-                    <h3>Review</h3>
-                    <p>Check recent applications here or open the full approval page.</p>
+                <div class="pss-step">
+                    <div class="pss-step-num">3</div>
+                    <div>
+                        <h4>Review</h4>
+                        <p>Evaluate applications and approve or reject candidates.</p>
+                    </div>
                 </div>
-
-                <div class="teacher-process-step">
-                    <div class="teacher-step-number">4</div>
-                    <h3>Manage</h3>
-                    <p>Close or archive projects after selection.</p>
+                <div class="pss-step">
+                    <div class="pss-step-num">4</div>
+                    <div>
+                        <h4>Manage</h4>
+                        <p>Close or archive projects once selection is complete.</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="teacher-content-grid">
+        <!-- Main content -->
+        <div class="pss-content-grid">
 
-            <div class="teacher-section-card">
-                <div class="teacher-section-header">
-                    <h2>🔔 Recent Pending Applications</h2>
-                    <span class="teacher-badge"
-                          th:text="${pendingTotal == null ? 0 : pendingTotal} + ' Pending'">
-                        0 Pending
+            <!-- Pending applications -->
+            <div class="pss-section-card">
+                <div class="pss-section-head">
+                    <h2>Pending Applications</h2>
+                    <span class="pss-badge"
+                          th:text="${pendingTotal == null ? 0 : pendingTotal} + ' pending'">
+                        0 pending
                     </span>
                 </div>
+                <div class="pss-section-body">
 
-                <div th:if="${#lists.isEmpty(pendingApplicationsPreview)}" class="teacher-empty-state">
-                    <strong>No pending applications</strong>
-                    <span>When students apply for your projects, the latest applications will appear here.</span>
-                </div>
-
-                <div th:if="${!#lists.isEmpty(pendingApplicationsPreview)}" class="teacher-application-list">
-
-                    <div th:each="app : ${pendingApplicationsPreview}" class="teacher-application-item">
-
-                        <div class="teacher-application-main">
-                            <h3 th:text="${app.project != null ? app.project.title : 'Project Title'}">
-                                Project Title
-                            </h3>
-
-                            <div class="teacher-application-meta">
-                                <span>
-                                    👤
-                                    <strong th:text="${app.student != null ? app.student.name : 'Student Name'}">
-                                        Student Name
-                                    </strong>
-                                </span>
-
-                                <span th:if="${app.student != null && app.student.email != null}"
-                                      th:text="'📧 ' + ${app.student.email}">
-                                    student@email.com
-                                </span>
-
-                                <span th:text="'📌 ' + ${app.status}">
-                                    pending
-                                </span>
-                            </div>
-
-                            <p class="teacher-statement"
-                               th:if="${app.personalStatement != null && !#strings.isEmpty(app.personalStatement)}"
-                               th:text="${#strings.abbreviate(app.personalStatement, 160)}">
-                                Personal statement preview
-                            </p>
-                        </div>
-
-                        <div class="teacher-application-actions">
-                            <form th:action="@{/teacher/approvals/{id}/accept(id=${app.id}, redirect='/teacher/dashboard')}"
-                                  method="post"
-                                  class="inline-action-form">
-                                <button type="submit" class="teacher-btn teacher-approve-btn">
-                                    Accept
-                                </button>
-                            </form>
-
-                            <form th:action="@{/teacher/approvals/{id}/reject(id=${app.id}, redirect='/teacher/dashboard')}"
-                                  method="post"
-                                  class="inline-action-form"
-                                  onsubmit="return confirm('Are you sure you want to reject this application?');">
-                                <button type="submit" class="teacher-btn teacher-reject-btn">
-                                    Reject
-                                </button>
-                            </form>
-                        </div>
-
+                    <div th:if="${#lists.isEmpty(pendingApplicationsPreview)}" class="pss-empty">
+                        <div class="pss-empty-title">No pending applications</div>
+                        <div class="pss-empty-desc">When students apply to your projects, they will appear here.</div>
                     </div>
 
-                </div>
+                    <div th:if="${!#lists.isEmpty(pendingApplicationsPreview)}" class="pss-app-list">
+                        <div th:each="app : ${pendingApplicationsPreview}" class="pss-app-item">
+                            <div>
+                                <h3 class="pss-app-title" th:text="${app.project != null ? app.project.title : 'Project Title'}">Project Title</h3>
+                                <div class="pss-app-meta">
+                                    <span>
+                                        <strong th:text="${app.student != null ? app.student.name : 'Student'}">Student</strong>
+                                    </span>
+                                    <span th:if="${app.student != null && app.student.email != null}"
+                                          th:text="${app.student.email}">student@email.com</span>
+                                </div>
+                                <div class="pss-app-submitted"
+                                     th:if="${app.createdAt != null}"
+                                     th:text="'Submitted ' + ${#temporals.format(app.createdAt, 'yyyy-MM-dd HH:mm')}">
+                                </div>
+                                <p class="pss-app-statement"
+                                   th:if="${app.personalStatement != null && !#strings.isEmpty(app.personalStatement)}"
+                                   th:text="${#strings.abbreviate(app.personalStatement, 160)}"></p>
+                            </div>
+                            <div class="pss-app-actions">
+                                <form th:action="@{/teacher/approvals/{id}/accept(id=${app.id}, redirect='/teacher/dashboard')}"
+                                      method="post" class="inline-action-form">
+                                    <button type="submit" class="pss-btn pss-btn-accept">Accept</button>
+                                </form>
+                                <form th:action="@{/teacher/approvals/{id}/reject(id=${app.id}, redirect='/teacher/dashboard')}"
+                                      method="post" class="inline-action-form"
+                                      onsubmit="return confirm('Reject this application?');">
+                                    <button type="submit" class="pss-btn pss-btn-reject">Reject</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
 
-                <div class="teacher-view-all">
-                    <a th:href="@{/teacher/approvals}" class="teacher-btn teacher-btn-outline">
-                        View All Applications →
-                    </a>
+                    <div class="pss-view-all">
+                        <a th:href="@{/teacher/approvals}" class="pss-btn pss-btn-outline">
+                            All Applications
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </a>
+                    </div>
                 </div>
             </div>
 
-            <div class="teacher-section-card">
-                <div class="teacher-section-header">
-                    <h2>Project Status Shortcuts</h2>
+            <!-- Sidebar shortcuts -->
+            <div class="pss-section-card">
+                <div class="pss-section-head">
+                    <h2>Project Status</h2>
                 </div>
+                <div class="pss-shortcuts">
 
-                <div class="teacher-side-list">
-
-                    <a th:href="@{/teacher/projects(status='unpublished')}" class="teacher-side-link">
-                        <div class="teacher-side-icon">📝</div>
+                    <a th:href="@{/teacher/projects(status='unpublished')}" class="pss-shortcut">
+                        <div class="pss-shortcut-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        </div>
                         <div>
-                            <h3>Draft Projects</h3>
-                            <p>View projects that are not published yet.</p>
+                            <h4>Drafts</h4>
+                            <p>Projects not yet published</p>
                         </div>
                     </a>
 
-                    <a th:href="@{/teacher/projects(status='available')}" class="teacher-side-link">
-                        <div class="teacher-side-icon">✅</div>
+                    <a th:href="@{/teacher/projects(status='available')}" class="pss-shortcut">
+                        <div class="pss-shortcut-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
                         <div>
-                            <h3>Published Projects</h3>
-                            <p>View projects currently open to students.</p>
+                            <h4>Published</h4>
+                            <p>Open to student applications</p>
                         </div>
                     </a>
 
-                    <a th:href="@{/teacher/projects(status='requested')}" class="teacher-side-link">
-                        <div class="teacher-side-icon">📥</div>
+                    <a th:href="@{/teacher/projects(status='closed')}" class="pss-shortcut">
+                        <div class="pss-shortcut-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.71 3.53 2 2 0 0 1 3.69 1.14h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.1 6.1l2.1-2.1a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                        </div>
                         <div>
-                            <h3>Projects With Requests</h3>
-                            <p>View projects that already have student applications.</p>
+                            <h4>Closed</h4>
+                            <p>Have been closed or over more max limit</p>
                         </div>
                     </a>
 
-                    <a th:href="@{/teacher/projects(status='agreed')}" class="teacher-side-link">
-                        <div class="teacher-side-icon">🤝</div>
+                    <a th:href="@{/teacher/projects(status='archived')}" class="pss-shortcut">
+                        <div class="pss-shortcut-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        </div>
                         <div>
-                            <h3>Agreed Projects</h3>
-                            <p>View projects with accepted students.</p>
+                            <h4>Archived</h4>
+                            <p>Already archived and saved</p>
                         </div>
                     </a>
 

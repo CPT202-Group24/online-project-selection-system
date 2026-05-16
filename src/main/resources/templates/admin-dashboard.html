@@ -3,100 +3,304 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard - Project Selection System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard — Project Selection System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        html, body { margin: 0 !important; padding: 0 !important; background: #f3f2ef !important; }
+
+        .pss-page {
+            min-height: calc(100vh - 64px);
+            background: #f3f2ef;
+            padding: 48px 32px 80px;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .pss-container { max-width: 1100px; margin: 0 auto; }
+
+        /* Header */
+        .pss-dash-header {
+            margin-bottom: 40px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid #dde5f0;
+        }
+        .pss-dash-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: .13em;
+            text-transform: uppercase;
+            color: #c8a23a;
+            margin-bottom: 12px;
+        }
+        .pss-dash-eyebrow::before {
+            content: '';
+            display: block;
+            width: 24px; height: 1.5px;
+            background: #c8a23a;
+        }
+        .pss-dash-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(28px, 3.5vw, 42px);
+            font-weight: 700;
+            color: #0a1220;
+            margin: 0 0 8px;
+            line-height: 1.1;
+            letter-spacing: -.02em;
+        }
+        .pss-dash-subtitle {
+            font-size: 13.5px;
+            color: #6a7888;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* Stats row */
+        .pss-stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+        .pss-stat-card {
+            background: #fff;
+            border: 1px solid #dde5f0;
+            border-radius: 12px;
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .pss-stat-label {
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: #8898aa;
+        }
+        .pss-stat-value {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 40px;
+            font-weight: 700;
+            color: #0a1220;
+            line-height: 1;
+            letter-spacing: -.03em;
+        }
+        .pss-stat-value.pss-loading {
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            color: #9aacc0;
+            letter-spacing: 0;
+        }
+
+        /* Module grid */
+        .pss-module-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        .pss-module-card {
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            border: 1px solid #dde5f0;
+            border-radius: 12px;
+            padding: 22px;
+            text-decoration: none;
+            color: inherit;
+            transition: border-color .2s, box-shadow .2s, transform .2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .pss-module-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #c8a23a, rgba(200,162,58,0));
+            opacity: 0;
+            transition: opacity .2s;
+        }
+        .pss-module-card:hover {
+            border-color: rgba(200,162,58,.5);
+            box-shadow: 0 6px 24px rgba(10,18,32,.1);
+            transform: translateY(-2px);
+        }
+        .pss-module-card:hover::after { opacity: 1; }
+
+        .pss-module-icon {
+            width: 36px; height: 36px;
+            background: #f3f2ef;
+            border: 1px solid #dde5f0;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #36506e;
+            margin-bottom: 14px;
+            flex-shrink: 0;
+        }
+        .pss-module-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: #0a1220;
+            margin: 0 0 6px;
+            line-height: 1.2;
+        }
+        .pss-module-desc {
+            font-size: 12.5px;
+            color: #6a7888;
+            line-height: 1.6;
+            margin: 0;
+            flex: 1;
+        }
+        .pss-module-arrow {
+            margin-top: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: #9aacc0;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            transition: color .2s;
+        }
+        .pss-module-card:hover .pss-module-arrow { color: #c8a23a; }
+
+        @media (max-width: 900px) {
+            .pss-module-grid { grid-template-columns: repeat(2, 1fr); }
+            .pss-stats-row { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 600px) {
+            .pss-page { padding: 28px 16px 60px; }
+            .pss-module-grid { grid-template-columns: 1fr; }
+            .pss-stats-row { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
 
 <div th:replace="~{fragments/nav :: sharedNav}"></div>
 
-<div class="page-shell">
-    <div class="modern-card dashboard-modern-card">
+<div class="pss-page">
+    <div class="pss-container">
 
-        <!-- Page Header -->
-        <div class="modern-page-header">
-            <div class="modern-page-icon">
-                🛠️
+        <!-- Header -->
+        <div class="pss-dash-header">
+            <div class="pss-dash-eyebrow">Administration</div>
+            <h1 class="pss-dash-title">Admin Dashboard</h1>
+            <p class="pss-dash-subtitle">
+                Welcome, <span sec:authentication="name"></span>. Manage users, projects, categories and system logs.
+            </p>
+        </div>
+
+        <!-- Stats -->
+        <div class="pss-stats-row" id="pss-stats-row">
+            <div class="pss-stat-card">
+                <div class="pss-stat-label">Users</div>
+                <div class="pss-stat-value pss-loading" id="stat-users">...</div>
             </div>
-            <div>
-                <h1 class="modern-page-title">Admin Dashboard</h1>
-                <p class="modern-page-subtitle">
-                    Welcome, <span sec:authentication="name"></span>. Manage users, categories, projects, reports and logs.
-                </p>
+            <div class="pss-stat-card">
+                <div class="pss-stat-label">Topics</div>
+                <div class="pss-stat-value pss-loading" id="stat-topics">...</div>
+            </div>
+            <div class="pss-stat-card">
+                <div class="pss-stat-label">Applications</div>
+                <div class="pss-stat-value pss-loading" id="stat-apps">...</div>
             </div>
         </div>
 
-        <!-- Statistics -->
-        <div class="admin-stats-card">
-            <div>
-                <h2>System Statistics</h2>
-                <p>Quick overview of users, project topics and applications in the system.</p>
-            </div>
+        <!-- Module grid -->
+        <div class="pss-module-grid">
 
-            <div id="stats-content" class="admin-stats-grid">
-                <div class="admin-stat-item">
-                    <span class="admin-stat-value">...</span>
-                    <span class="admin-stat-label">Loading</span>
+            <a th:href="@{/admin/users}" class="pss-module-card">
+                <div class="pss-module-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 </div>
-            </div>
-        </div>
-
-        <!-- Admin Modules -->
-        <div class="dashboard-card-grid admin-card-grid">
-
-            <a th:href="@{/admin/categories}" class="dashboard-action-card">
-                <div class="dashboard-action-icon">🏷️</div>
-                <div>
-                    <h3>Category Management</h3>
-                    <p>Create, update or disable project topic categories.</p>
+                <h3 class="pss-module-title">User Accounts</h3>
+                <p class="pss-module-desc">Manage student, teacher and administrator accounts across the system.</p>
+                <div class="pss-module-arrow">
+                    Manage
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 </div>
             </a>
 
-            <a th:href="@{/admin/users}" class="dashboard-action-card">
-                <div class="dashboard-action-icon">👥</div>
-                <div>
-                    <h3>User Account Management</h3>
-                    <p>Manage student, teacher and admin accounts.</p>
+            <a th:href="@{/admin/categories}" class="pss-module-card">
+                <div class="pss-module-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                </div>
+                <h3 class="pss-module-title">Categories</h3>
+                <p class="pss-module-desc">Create, update, or disable project topic categories used across the platform.</p>
+                <div class="pss-module-arrow">
+                    Manage
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 </div>
             </a>
 
-            <a th:href="@{/admin/projects}" class="dashboard-action-card">
-                <div class="dashboard-action-icon">📁</div>
-                <div>
-                    <h3>Project Management</h3>
-                    <p>Force archive or restore project topics when required.</p>
+            <a th:href="@{/admin/projects}" class="pss-module-card">
+                <div class="pss-module-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <h3 class="pss-module-title">Projects</h3>
+                <p class="pss-module-desc">Force archive or restore project topics when administrator intervention is required.</p>
+                <div class="pss-module-arrow">
+                    Manage
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 </div>
             </a>
 
-            <a th:href="@{/admin/violations}" class="dashboard-action-card">
-                <div class="dashboard-action-icon">⚠️</div>
-                <div>
-                    <h3>Rule Violation Report</h3>
-                    <p>Review project selection or allocation rule violations.</p>
+            <a th:href="@{/admin/assignments}" class="pss-module-card">
+                <div class="pss-module-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
+                </div>
+                <h3 class="pss-module-title">Manual Assignment</h3>
+                <p class="pss-module-desc">Manually assign students to project topics when automated allocation is insufficient.</p>
+                <div class="pss-module-arrow">
+                    Assign
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 </div>
             </a>
 
-            <a th:href="@{/admin/assignments}" class="dashboard-action-card">
-                <div class="dashboard-action-icon">🧩</div>
-                <div>
-                    <h3>Manual Project Assignment</h3>
-                    <p>Manually assign students to project topics when needed.</p>
+            <a th:href="@{/admin/violations}" class="pss-module-card">
+                <div class="pss-module-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+                <h3 class="pss-module-title">Rule Violations</h3>
+                <p class="pss-module-desc">Review project selection and allocation rule violations flagged by the system.</p>
+                <div class="pss-module-arrow">
+                    Review
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 </div>
             </a>
 
-            <a th:href="@{/admin/audit}" class="dashboard-action-card">
-                <div class="dashboard-action-icon">🧾</div>
-                <div>
-                    <h3>Audit Log</h3>
-                    <p>Check important administrative operations and system logs.</p>
+            <a th:href="@{/admin/audit}" class="pss-module-card">
+                <div class="pss-module-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                </div>
+                <h3 class="pss-module-title">Audit Log</h3>
+                <p class="pss-module-desc">Track important administrative operations and system event history.</p>
+                <div class="pss-module-arrow">
+                    View logs
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 </div>
             </a>
 
-            <a th:href="@{/admin/conflicts}" class="dashboard-action-card">
-                <div class="dashboard-action-icon">🔀</div>
-                <div>
-                    <h3>Allocation Conflict Logs</h3>
-                    <p>Inspect conflicts generated during the allocation process.</p>
+            <a th:href="@{/admin/conflicts}" class="pss-module-card">
+                <div class="pss-module-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                </div>
+                <h3 class="pss-module-title">Conflict Logs</h3>
+                <p class="pss-module-desc">Inspect allocation conflicts generated during the automated project assignment process.</p>
+                <div class="pss-module-arrow">
+                    Inspect
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 </div>
             </a>
 
@@ -106,34 +310,25 @@
 </div>
 
 <script>
-    (function () {
-        fetch('/api/admin/stats', { credentials: 'same-origin' })
-            .then(function (res) {
-                if (!res.ok) throw new Error('stats failed');
-                return res.json();
-            })
-            .then(function (data) {
-                var el = document.getElementById('stats-content');
-                el.className = 'admin-stats-grid';
-                el.innerHTML =
-                    '<div class="admin-stat-item">' +
-                    '<span class="admin-stat-value">' + data.userCount + '</span>' +
-                    '<span class="admin-stat-label">Users</span>' +
-                    '</div>' +
-                    '<div class="admin-stat-item">' +
-                    '<span class="admin-stat-value">' + data.topicCount + '</span>' +
-                    '<span class="admin-stat-label">Topics</span>' +
-                    '</div>' +
-                    '<div class="admin-stat-item">' +
-                    '<span class="admin-stat-value">' + data.applicationCount + '</span>' +
-                    '<span class="admin-stat-label">Applications</span>' +
-                    '</div>';
-            })
-            .catch(function () {
-                document.getElementById('stats-content').innerHTML =
-                    '<div class="admin-stat-error">Unable to load statistics. Please refresh or sign in as admin.</div>';
+(function () {
+    fetch('/api/admin/stats', { credentials: 'same-origin' })
+        .then(function (res) { if (!res.ok) throw 0; return res.json(); })
+        .then(function (data) {
+            function set(id, val) {
+                var el = document.getElementById(id);
+                if (el) { el.textContent = val; el.classList.remove('pss-loading'); }
+            }
+            set('stat-users',  data.userCount);
+            set('stat-topics', data.topicCount);
+            set('stat-apps',   data.applicationCount);
+        })
+        .catch(function () {
+            ['stat-users','stat-topics','stat-apps'].forEach(function(id){
+                var el = document.getElementById(id);
+                if (el) { el.textContent = '—'; el.classList.remove('pss-loading'); }
             });
-    })();
+        });
+})();
 </script>
 
 </body>
